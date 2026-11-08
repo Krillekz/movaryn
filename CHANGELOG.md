@@ -1,10 +1,12 @@
 # Update log
 
-## Unreleased
+## 1.0.4 — Crop follows the subject
 
 - Cropping now follows the image content instead of taking a fixed centre slice: brightness-gradient
   profiles find where the subject sits, rows keep a small margin above the subject and trim surplus
   from the bottom, and the subject is centred horizontally.
+- Wide and portrait concept art no longer loses the top of a head or hat, and an off-centre figure
+  stays in frame. Flat frames still fall back to a centred crop.
 
 ## 1.0.3 — Aspect-accurate concept art
 
