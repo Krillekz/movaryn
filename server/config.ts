@@ -46,7 +46,9 @@ const aiModel = text(process.env.AI_MODEL) || 'gpt-4.1-mini';
 
 const imageBaseUrl = stripSlash(text(process.env.IMAGE_BASE_URL)) || aiBaseUrl;
 const imageApiKey = text(process.env.IMAGE_API_KEY) || aiApiKey;
-const imageModel = text(process.env.IMAGE_MODEL) || 'gpt-image-1';
+// No default: falling back to gpt-image-1 marked images as configured on hosts
+// that only serve chat completions, so the app offered a button that could only fail.
+const imageModel = text(process.env.IMAGE_MODEL);
 
 const imageSize = text(process.env.IMAGE_SIZE);
 
@@ -112,6 +114,7 @@ export function setupChecklist(): string[] {
   if (!validHttpUrl(aiBaseUrl)) missing.push('AI_BASE_URL');
   if (!aiModel) missing.push('AI_MODEL');
   if (!imageApiKey) missing.push('IMAGE_API_KEY (or AI_API_KEY)');
+  if (!imageModel) missing.push('IMAGE_MODEL');
   return missing;
 }
 

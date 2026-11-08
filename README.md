@@ -86,7 +86,7 @@ All values are read by the API server (`server/config.ts`) and never exposed to 
 | `AI_TIMEOUT_MS` | `180000` | Upstream chat timeout. |
 | `IMAGE_BASE_URL` | falls back to `AI_BASE_URL` | Image API base URL. |
 | `IMAGE_API_KEY` | falls back to `AI_API_KEY` | Image key. |
-| `IMAGE_MODEL` | `gpt-image-1` | Must be an image model. |
+| `IMAGE_MODEL` | — | Image model. Images stay disabled until this is set, so a chat-only provider cannot offer a button that fails. |
 | `IMAGE_QUALITY` | — | `low`, `medium`, `high`, `auto`; sent only when set. |
 | `IMAGE_SIZE` | — | Force one size (e.g. `1024x1024`); otherwise aspect ratio decides. |
 | `IMAGE_REFERENCE` | `true` | Allow uploaded references via `/images/edits`. |
