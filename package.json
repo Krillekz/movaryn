@@ -18,7 +18,7 @@
     "electron:dev": "concurrently -k -n web,desktop -c cyan,magenta \"npm:dev:web\" \"electron . --dev\"",
     "electron:start": "npm run build && electron .",
     "icon": "node scripts/make-icon.mjs",
-    "package:win": "npm run build && npm run icon && electron-builder --win",
+    "package:win": "npm run build && npm run icon && electron-builder --win --publish never",
     "package:dir": "npm run build && npm run icon && electron-builder --dir",
     "mock:provider": "node scripts/mock-provider.mjs"
   },
