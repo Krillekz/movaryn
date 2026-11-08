@@ -315,7 +315,15 @@ export async function generateConceptImage(
   const conversationId = target?.conversationId ?? state.activeId ?? state.newConversation();
   const prompt = resolveImagePrompt(spec);
   const label = describeImageBrief(spec);
-  const imageModel = state.settings.imageModel.trim() || state.provider?.image.model || '';
+  const configuredImageModel = state.provider?.image.model.trim() ?? '';
+  const preferredImageModel = state.settings.imageModel.trim();
+  // Workers AI ids live in the @cf/ namespace. A model left in the settings field
+  // from an OpenAI-style setup used to be sent anyway and Cloudflare answered
+  // with "No route for that URI", so the configured provider model wins there.
+  const imageModel =
+    /^@cf\//i.test(configuredImageModel) && !/^@cf\//i.test(preferredImageModel)
+      ? configuredImageModel
+      : preferredImageModel || configuredImageModel;
   const messageId = target?.messageId ?? uid('msg');
   const now = Date.now();
 

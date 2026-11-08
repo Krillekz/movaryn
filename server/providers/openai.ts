@@ -292,11 +292,22 @@ async function decodeReference(
   return { buffer, mime, filename };
 }
 
+function requireImageKey(): void {
+  if (!config.image.apiKey) {
+    throw new AppError(
+      'The image provider is not configured. Add IMAGE_API_KEY and IMAGE_MODEL to .env, then restart the server.',
+      503,
+      'not_configured',
+    );
+  }
+}
+
 async function requestImageEdit(
   input: ImageRequest,
   reference: NonNullable<ImageRequest['reference']>,
   model: string,
 ): Promise<{ images: GeneratedImage[]; model: string }> {
+  requireImageKey();
   const { buffer, mime, filename } = await decodeReference(reference);
   const size = resolveImageSize(input.aspect, model);
   const form = new FormData();
@@ -378,6 +389,7 @@ async function requestImageGeneration(
   input: ImageRequest,
   model: string,
 ): Promise<{ images: GeneratedImage[]; model: string }> {
+  requireImageKey();
   let response: Response;
   try {
     response = await fetch(`${config.image.baseUrl}/images/generations`, {

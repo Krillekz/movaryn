@@ -5,6 +5,8 @@ import { cropJpegToAspect } from './crop';
 
 /** FLUX.1 [schnell] accepts prompt and steps only; it always returns a square image. */
 const FLUX_MODEL = /flux-1-schnell/i;
+/** Every Workers AI model id lives in the @cf/ namespace. */
+const WORKERS_AI_MODEL = /^@cf\//i;
 
 function dimensions(aspect: AspectRatio): { width: number; height: number } {
   if (config.image.size) {
@@ -23,7 +25,7 @@ function dimensions(aspect: AspectRatio): { width: number; height: number } {
   }
 }
 
-function cloudflareError(status: number, body: string): AppError {
+function cloudflareError(status: number, body: string, model: string): AppError {
   let message = body;
   try {
     const json = JSON.parse(body) as { errors?: { message?: string }[] };
@@ -49,6 +51,13 @@ function cloudflareError(status: number, body: string): AppError {
       'rate_limited',
     );
   }
+  if (status === 404 || /no route for that uri/i.test(message)) {
+    return new AppError(
+      `Cloudflare does not serve the model "${model}". Check IMAGE_MODEL — Workers AI image models use ids such as @cf/black-forest-labs/flux-1-schnell.`,
+      502,
+      'provider_not_found',
+    );
+  }
   return new AppError(
     `Cloudflare Workers AI error (${status}): ${redact(message).slice(0, 500) || 'no details returned'}`,
     502,
@@ -62,7 +71,19 @@ function cloudflareError(status: number, body: string): AppError {
  * so both shapes are accepted.
  */
 export async function generateCloudflareImage(input: ImageRequest): Promise<ImageResponse> {
-  const model = (input.model || config.image.model).trim();
+  if (!config.image.apiKey || !config.image.accountId) {
+    throw new AppError(
+      'The image provider is not configured. Add IMAGE_API_KEY (a Cloudflare API token with Workers AI access) and IMAGE_ACCOUNT_ID, then restart the server.',
+      503,
+      'not_configured',
+    );
+  }
+
+  const requested = (input.model || '').trim();
+  // A model left over from an OpenAI-style setup (for example gpt-image-1) is
+  // not a Workers AI id. Sending it produced a bare "No route for that URI",
+  // so the configured Workers AI model wins instead.
+  const model = WORKERS_AI_MODEL.test(requested) ? requested : config.image.model;
   const body: Record<string, unknown> = { prompt: input.prompt.slice(0, 2048) };
   if (FLUX_MODEL.test(model)) {
     // Four steps is the documented default and keeps the neuron cost low.
@@ -96,7 +117,7 @@ export async function generateCloudflareImage(input: ImageRequest): Promise<Imag
     } catch {
       text = '';
     }
-    throw cloudflareError(response.status, text);
+    throw cloudflareError(response.status, text, model);
   }
 
   const contentType = (response.headers.get('content-type') ?? '').toLowerCase();
@@ -104,7 +125,7 @@ export async function generateCloudflareImage(input: ImageRequest): Promise<Imag
 
   if (contentType.includes('application/json')) {
     const json = (await response.json().catch(() => null)) as any;
-    if (json?.success === false) throw cloudflareError(502, JSON.stringify(json));
+    if (json?.success === false) throw cloudflareError(502, JSON.stringify(json), model);
     const raw = json?.result?.image ?? json?.result?.images?.[0] ?? json?.image ?? null;
     if (typeof raw !== 'string' || !raw) {
       throw new AppError(

@@ -63,7 +63,7 @@ export function mapProviderResponse(status: number, body: string): AppError {
 
   if (status === 401 || status === 403) {
     return new AppError(
-      `The provider rejected the credentials (${status}). Check AI_API_KEY / IMAGE_API_KEY, and that the key has access to this model.${suffix}`,
+      `The provider rejected the credentials (${status}). Check AI_API_KEY / IMAGE_API_KEY, and that the key has access to this model. A "missing authentication header" reply means the running server has no usable key — set it, then restart the server.${suffix}`,
       401,
       'provider_auth',
     );

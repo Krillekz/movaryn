@@ -61,10 +61,12 @@ const isCloudflare = imageProvider === 'cloudflare';
 const imageBaseUrl =
   stripSlash(text(process.env.IMAGE_BASE_URL)) ||
   (isCloudflare ? 'https://api.cloudflare.com/client/v4' : aiBaseUrl);
-const imageApiKey =
-  text(process.env.IMAGE_API_KEY) ||
-  (isCloudflare ? text(process.env.CLOUDFLARE_API_TOKEN) : '') ||
-  aiApiKey;
+// Cloudflare must never borrow AI_API_KEY: a chat key from another provider is
+// rejected upstream with a confusing 401 ("Missing Authentication header")
+// instead of the honest "not configured" the app should show.
+const imageApiKey = isCloudflare
+  ? text(process.env.IMAGE_API_KEY) || text(process.env.CLOUDFLARE_API_TOKEN)
+  : text(process.env.IMAGE_API_KEY) || aiApiKey;
 // No default for OpenAI-shaped hosts: falling back to gpt-image-1 marked images
 // as configured on hosts that only serve chat completions, so the app offered a
 // button that could only fail. Cloudflare has a documented free image model.
