@@ -44,11 +44,32 @@ const aiBaseUrl = stripSlash(text(process.env.AI_BASE_URL)) || 'https://api.open
 const aiApiKey = text(process.env.AI_API_KEY);
 const aiModel = text(process.env.AI_MODEL) || 'gpt-4.1-mini';
 
-const imageBaseUrl = stripSlash(text(process.env.IMAGE_BASE_URL)) || aiBaseUrl;
-const imageApiKey = text(process.env.IMAGE_API_KEY) || aiApiKey;
-// No default: falling back to gpt-image-1 marked images as configured on hosts
-// that only serve chat completions, so the app offered a button that could only fail.
-const imageModel = text(process.env.IMAGE_MODEL);
+/** Cloudflare Workers AI is not OpenAI-shaped, so it gets its own call path. */
+export type ImageProvider = 'openai' | 'cloudflare';
+
+const imageAccountId =
+  text(process.env.IMAGE_ACCOUNT_ID) || text(process.env.CLOUDFLARE_ACCOUNT_ID);
+const requestedImageProvider = text(process.env.IMAGE_PROVIDER).toLowerCase();
+const imageProvider: ImageProvider =
+  requestedImageProvider === 'cloudflare' || requestedImageProvider === 'openai'
+    ? requestedImageProvider
+    : imageAccountId
+      ? 'cloudflare'
+      : 'openai';
+const isCloudflare = imageProvider === 'cloudflare';
+
+const imageBaseUrl =
+  stripSlash(text(process.env.IMAGE_BASE_URL)) ||
+  (isCloudflare ? 'https://api.cloudflare.com/client/v4' : aiBaseUrl);
+const imageApiKey =
+  text(process.env.IMAGE_API_KEY) ||
+  (isCloudflare ? text(process.env.CLOUDFLARE_API_TOKEN) : '') ||
+  aiApiKey;
+// No default for OpenAI-shaped hosts: falling back to gpt-image-1 marked images
+// as configured on hosts that only serve chat completions, so the app offered a
+// button that could only fail. Cloudflare has a documented free image model.
+const imageModel =
+  text(process.env.IMAGE_MODEL) || (isCloudflare ? '@cf/black-forest-labs/flux-1-schnell' : '');
 
 const imageSize = text(process.env.IMAGE_SIZE);
 
@@ -96,15 +117,21 @@ export const config = {
     configured: aiApiKey.length > 0 && aiModel.length > 0 && validHttpUrl(aiBaseUrl),
   },
   image: {
+    provider: imageProvider,
+    accountId: imageAccountId,
     baseUrl: imageBaseUrl,
     apiKey: imageApiKey,
     model: imageModel,
     quality: (text(process.env.IMAGE_QUALITY) as string).toLowerCase(),
     size: /^\d{3,4}x\d{3,4}$/.test(imageSize) ? imageSize : '',
-    reference: bool(process.env.IMAGE_REFERENCE, true),
+    // Workers AI image models here cannot condition on an uploaded reference.
+    reference: isCloudflare ? false : bool(process.env.IMAGE_REFERENCE, true),
     timeoutMs: integer(process.env.IMAGE_TIMEOUT_MS, 240_000, 10_000, 900_000),
     configured:
-      imageApiKey.length > 0 && imageModel.length > 0 && validHttpUrl(imageBaseUrl),
+      imageApiKey.length > 0 &&
+      imageModel.length > 0 &&
+      validHttpUrl(imageBaseUrl) &&
+      (!isCloudflare || imageAccountId.length > 0),
   },
   allowedOrigins: text(process.env.ALLOWED_ORIGINS)
     .split(',')
@@ -131,8 +158,14 @@ export function setupChecklist(): string[] {
   if (!aiApiKey) missing.push('AI_API_KEY');
   if (!validHttpUrl(aiBaseUrl)) missing.push('AI_BASE_URL');
   if (!aiModel) missing.push('AI_MODEL');
-  if (!imageApiKey) missing.push('IMAGE_API_KEY (or AI_API_KEY)');
-  if (!imageModel) missing.push('IMAGE_MODEL');
+  if (!imageApiKey) {
+    missing.push(isCloudflare ? 'IMAGE_API_KEY (or CLOUDFLARE_API_TOKEN)' : 'IMAGE_API_KEY (or AI_API_KEY)');
+  }
+  if (isCloudflare) {
+    if (!imageAccountId) missing.push('IMAGE_ACCOUNT_ID (or CLOUDFLARE_ACCOUNT_ID)');
+  } else if (!imageModel) {
+    missing.push('IMAGE_MODEL');
+  }
   return missing;
 }
 
@@ -147,7 +180,9 @@ export function requireChatConfigured(): void {
 export function requireImageConfigured(): void {
   if (!config.image.configured) {
     throw new Error(
-      'The image provider is not configured. Add IMAGE_API_KEY and IMAGE_MODEL to .env, then restart the server.',
+      isCloudflare
+        ? 'The image provider is not configured. Add IMAGE_API_KEY (a Cloudflare API token with Workers AI access) and IMAGE_ACCOUNT_ID to .env, then restart the server.'
+        : 'The image provider is not configured. Add IMAGE_API_KEY and IMAGE_MODEL to .env, then restart the server.',
     );
   }
 }

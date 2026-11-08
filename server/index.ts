@@ -9,13 +9,8 @@ import type {
 import { buildSystemPrompt, SUMMARY_INSTRUCTION, SUMMARIZER_SYSTEM_PROMPT } from '../shared/systemPrompt';
 import { config, endpointHost, setupChecklist } from './config';
 import { AppError, toErrorPayload } from './errors';
-import {
-  complete,
-  generateImage,
-  streamCompletion,
-  type ContentPart,
-  type ProviderMessage,
-} from './providers/openai';
+import { complete, streamCompletion, type ContentPart, type ProviderMessage } from './providers/openai';
+import { generateImage } from './providers/images';
 import {
   validateChatRequest,
   validateImageRequest,
@@ -94,7 +89,9 @@ function requireChat(): void {
 function requireImage(): void {
   if (!config.image.configured) {
     throw new AppError(
-      'The image provider is not configured. Add IMAGE_API_KEY and IMAGE_MODEL to .env, then restart the server.',
+      config.image.provider === 'cloudflare'
+        ? 'The image provider is not configured. Add IMAGE_API_KEY (a Cloudflare API token with Workers AI access) and IMAGE_ACCOUNT_ID to .env, then restart the server.'
+        : 'The image provider is not configured. Add IMAGE_API_KEY and IMAGE_MODEL to .env, then restart the server.',
       503,
       'not_configured',
     );

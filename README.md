@@ -64,6 +64,14 @@ IMAGE_API_KEY=your-key
 IMAGE_MODEL=gpt-image-1
 ```
 
+Or use Cloudflare's free daily image allowance instead of an OpenAI-shaped image host:
+
+```env
+IMAGE_PROVIDER=cloudflare
+IMAGE_ACCOUNT_ID=your-cloudflare-account-id
+IMAGE_API_KEY=your-api-token-with-workers-ai-access
+```
+
 Any OpenAI-compatible endpoint works: OpenAI, an Azure gateway, OpenRouter, Together, the Freebuff API,
 or a local server (Ollama, LM Studio, vLLM). Streaming, image input and image generation are optional and
 can be switched off per provider.
@@ -86,7 +94,9 @@ All values are read by the API server (`server/config.ts`) and never exposed to 
 | `AI_TIMEOUT_MS` | `180000` | Upstream chat timeout. |
 | `IMAGE_BASE_URL` | falls back to `AI_BASE_URL` | Image API base URL. |
 | `IMAGE_API_KEY` | falls back to `AI_API_KEY` | Image key. |
-| `IMAGE_MODEL` | — | Image model. Images stay disabled until this is set, so a chat-only provider cannot offer a button that fails. |
+| `IMAGE_PROVIDER` | auto | `openai` (any `/images/generations` host) or `cloudflare` (Workers AI). Falls back to `cloudflare` when `IMAGE_ACCOUNT_ID` is set. |
+| `IMAGE_ACCOUNT_ID` | — | Cloudflare account ID. Required for `cloudflare`; `CLOUDFLARE_ACCOUNT_ID` also works. |
+| `IMAGE_MODEL` | — (`cloudflare`: `@cf/black-forest-labs/flux-1-schnell`) | Image model. On OpenAI-shaped hosts, images stay disabled until this is set, so a chat-only provider cannot offer a button that fails. |
 | `IMAGE_QUALITY` | — | `low`, `medium`, `high`, `auto`; sent only when set. |
 | `IMAGE_SIZE` | — | Force one size (e.g. `1024x1024`); otherwise aspect ratio decides. |
 | `IMAGE_REFERENCE` | `true` | Allow uploaded references via `/images/edits`. |
@@ -106,6 +116,11 @@ Movaryn reports the failure instead of pretending it worked.
 - **OpenRouter / Together** — chat works; image endpoints vary. If the provider exposes only
   `/images/generations`, set `IMAGE_REFERENCE=false` and reference images will be described instead of
   conditioned.
+- **Cloudflare Workers AI** — the free plan includes 10,000 neurons per day (roughly 50–200 FLUX.1
+  schnell images, resetting at 00:00 UTC) with no card. Set `IMAGE_PROVIDER=cloudflare`,
+  `IMAGE_ACCOUNT_ID`, and `IMAGE_API_KEY` to an API token with Workers AI access. FLUX.1 schnell
+  always returns a square image and cannot condition on a reference, so Movaryn reports reference
+  conditioning as disabled rather than pretending.
 - **Ollama / LM Studio** — chat works with a local base URL. They generally do not provide an
   OpenAI-compatible image endpoint, so image generation will correctly report "not configured".
 

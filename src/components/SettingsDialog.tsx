@@ -34,7 +34,12 @@ const ENV_SAMPLE = `AI_BASE_URL=https://api.openai.com/v1
 AI_API_KEY=your-key
 AI_MODEL=gpt-4.1-mini
 IMAGE_API_KEY=your-key
-IMAGE_MODEL=gpt-image-1`;
+IMAGE_MODEL=gpt-image-1
+
+# or a free daily image allowance:
+# IMAGE_PROVIDER=cloudflare
+# IMAGE_ACCOUNT_ID=your-account-id
+# IMAGE_API_KEY=your-workers-ai-token`;
 
 export function SettingsDialog() {
   const open = useApp((state) => state.ui.settingsOpen);

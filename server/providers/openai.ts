@@ -342,7 +342,7 @@ async function requestImageEdit(
  * supports it, the reference conditions the result; otherwise the written
  * brief is used and the response says so.
  */
-export async function generateImage(input: ImageRequest): Promise<ImageResponse> {
+export async function generateOpenAIImage(input: ImageRequest): Promise<ImageResponse> {
   const model = (input.model || config.image.model).trim();
   const reference = input.reference ?? null;
 
