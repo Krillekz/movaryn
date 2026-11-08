@@ -1,5 +1,11 @@
 # Update log
 
+## Unreleased
+
+- Cropping now follows the image content instead of taking a fixed centre slice: brightness-gradient
+  profiles find where the subject sits, rows keep a small margin above the subject and trim surplus
+  from the bottom, and the subject is centred horizontally.
+
 ## 1.0.3 — Aspect-accurate concept art
 
 - Cloudflare images are center-cropped to the aspect ratio chosen in the brief, so a portrait or wide

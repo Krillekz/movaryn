@@ -119,7 +119,7 @@ Movaryn reports the failure instead of pretending it worked.
 - **Cloudflare Workers AI** — the free plan includes 10,000 neurons per day (roughly 50–200 FLUX.1
   schnell images, resetting at 00:00 UTC) with no card. Set `IMAGE_PROVIDER=cloudflare`,
   `IMAGE_ACCOUNT_ID`, and `IMAGE_API_KEY` to an API token with Workers AI access. FLUX.1 schnell
-  always returns a square image, so Movaryn center-crops it to the aspect ratio chosen in the brief,
+  always returns a square image, so Movaryn crops around the subject to the aspect ratio chosen in the brief,
   and it cannot condition on a reference, so reference conditioning is reported as disabled rather
   than pretended.
 - **Ollama / LM Studio** — chat works with a local base URL. They generally do not provide an
