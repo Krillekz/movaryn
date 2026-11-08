@@ -16,6 +16,10 @@ concurrency:
 
 jobs:
   build:
+    # Pages cannot run the API, so the static build is only worth publishing once
+    # a hosted API URL exists. Until the variable is set this job is skipped
+    # rather than failing because Pages has not been enabled yet.
+    if: vars.VITE_API_BASE_URL != ''
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
