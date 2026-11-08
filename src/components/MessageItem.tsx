@@ -14,7 +14,16 @@ import { parseMoveset } from '../../shared/moveset';
 import { describeImageBrief, resolveImagePrompt } from '../../shared/imagePrompt';
 import { useApp } from '../store/useApp';
 import { editAndResend, generateConceptImage, regenerate } from '../lib/chatEngine';
-import { copyText, aspectRatioCss, cx, downloadUrl, formatTime, truncate } from '../lib/utils';
+import {
+  copyText,
+  aspectRatioCss,
+  cx,
+  downloadUrl,
+  extensionFromDataUrl,
+  formatTime,
+  slugify,
+  truncate,
+} from '../lib/utils';
 import { LogoMark } from './Logo';
 import { Markdown } from './Markdown';
 import { MovesetView } from './MovesetView';
@@ -465,7 +474,7 @@ function ImageMessageBody({
 
   return (
     <div className="flex flex-col gap-2">
-      {message.images.map((image) => (
+      {message.images.map((image, index) => (
         <div
           key={image.id}
           className="group/img relative w-full max-w-xl overflow-hidden rounded-xl border border-line bg-panel"
@@ -488,7 +497,7 @@ function ImageMessageBody({
             }
           />
           <div className="absolute right-2 top-2 flex gap-1 opacity-100 transition-opacity md:opacity-0 md:group-hover/img:opacity-100">
-            <ImageDownloadButton image={image} />
+            <ImageDownloadButton image={image} index={index} />
             {image.url ? (
               <a
                 href={image.url}
@@ -524,7 +533,7 @@ function ImageMessageBody({
   );
 }
 
-function ImageDownloadButton({ image }: { image: GeneratedImage }) {
+function ImageDownloadButton({ image, index }: { image: GeneratedImage; index: number }) {
   return (
     <button
       type="button"
@@ -534,8 +543,12 @@ function ImageDownloadButton({ image }: { image: GeneratedImage }) {
       onClick={() => {
         const src = image.dataUrl ?? image.url;
         if (!src) return;
-        if (src.startsWith('data:')) downloadUrl(`movaryn-${Date.now()}.png`, src);
-        else window.open(src, '_blank', 'noreferrer,noopener');
+        if (src.startsWith('data:')) {
+          const name = slugify(image.prompt || 'concept-art', 40);
+          downloadUrl(`movaryn-${name}-${index + 1}.${extensionFromDataUrl(src)}`, src);
+        } else {
+          window.open(src, '_blank', 'noreferrer,noopener');
+        }
       }}
     >
       <Download size={14} />

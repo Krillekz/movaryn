@@ -1,9 +1,13 @@
-import { useRef } from 'react';
+import { useRef, useState } from 'react';
 import {
   ClipboardCopy,
+  Download,
+  FileText,
   FolderPlus,
   Loader2,
   Plus,
+  Search,
+  Table,
   Trash2,
   Upload,
   X,
@@ -11,9 +15,22 @@ import {
 import type { GeneratedImage, ImageAttachment, Project } from '../../shared/types';
 import { useApp } from '../store/useApp';
 import { readImageFile } from '../lib/image';
-import { copyText, downloadJson } from '../lib/utils';
+import {
+  copyText,
+  cx,
+  downloadText,
+  extensionFromDataUrl,
+  slugify,
+} from '../lib/utils';
+import {
+  projectFileName,
+  projectToCsv,
+  projectToJson,
+  projectToMarkdown,
+} from '../lib/movesetExport';
 import { Modal } from './ui/Modal';
 import { CopyButton } from './ui/CopyButton';
+import { Dropdown, DropdownItem } from './ui/Dropdown';
 
 export function ProjectDrawer() {
   const projectId = useApp((state) => state.ui.projectId);
@@ -31,6 +48,8 @@ export function ProjectDrawer() {
   const requestConfirm = useApp((state) => state.requestConfirm);
   const pushToast = useApp((state) => state.pushToast);
   const fileRef = useRef<HTMLInputElement>(null);
+  const [moveQuery, setMoveQuery] = useState('');
+  const [purposeFilter, setPurposeFilter] = useState<string | null>(null);
 
   const chats = projectId
     ? order
@@ -44,6 +63,41 @@ export function ProjectDrawer() {
 
   const setField = (key: keyof Project, value: string) => {
     updateProject(project.id, { [key]: value } as Partial<Project>);
+  };
+
+  const purposes = Array.from(
+    new Set(
+      project.moves
+        .map((move) => move.purpose?.trim())
+        .filter((value): value is string => Boolean(value)),
+    ),
+  );
+  const movesWithoutPurpose = project.moves.filter((move) => !move.purpose?.trim()).length;
+  const query = moveQuery.trim().toLowerCase();
+  const filteredMoves = project.moves.filter((move) => {
+    if (purposeFilter && move.purpose?.trim() !== purposeFilter) return false;
+    if (!query) return true;
+    return `${move.name} ${move.purpose ?? ''} ${move.description}`.toLowerCase().includes(query);
+  });
+
+  const exportProject = (format: 'markdown' | 'csv' | 'json') => {
+    if (format === 'markdown') {
+      downloadText(projectFileName(project, 'md'), projectToMarkdown(project), 'text/markdown');
+    } else if (format === 'csv') {
+      downloadText(projectFileName(project, 'csv'), projectToCsv(project), 'text/csv');
+    } else {
+      downloadText(
+        projectFileName(project, 'json'),
+        JSON.stringify(projectToJson(project), null, 2),
+        'application/json',
+      );
+    }
+    pushToast(
+      `Exported ${project.moves.length} move${project.moves.length === 1 ? '' : 's'} as ${
+        format === 'markdown' ? 'Markdown' : format.toUpperCase()
+      }.`,
+      'success',
+    );
   };
 
   const brief = [
@@ -98,21 +152,39 @@ export function ProjectDrawer() {
             >
               <ClipboardCopy size={15} />
             </button>
-            <button
-              type="button"
-              className="icon-btn"
-              title="Export project"
-              aria-label="Export project"
-              onClick={() => {
-                downloadJson(`movaryn-project-${Date.now()}.json`, {
-                  exportedAt: new Date().toISOString(),
-                  project,
-                });
-                pushToast('Project exported.', 'success');
-              }}
-            >
-              <Upload size={15} className="rotate-180" />
-            </button>
+            <Dropdown label="Export moveset" align="left" trigger={<Upload size={15} className="rotate-180" />}>
+              {(closeExport) => (
+                <>
+                  <DropdownItem
+                    onClick={() => {
+                      closeExport();
+                      exportProject('markdown');
+                    }}
+                  >
+                    <FileText size={13} />
+                    Markdown sheet
+                  </DropdownItem>
+                  <DropdownItem
+                    onClick={() => {
+                      closeExport();
+                      exportProject('csv');
+                    }}
+                  >
+                    <Table size={13} />
+                    CSV for spreadsheets
+                  </DropdownItem>
+                  <DropdownItem
+                    onClick={() => {
+                      closeExport();
+                      exportProject('json');
+                    }}
+                  >
+                    <FileText size={13} />
+                    JSON backup
+                  </DropdownItem>
+                </>
+              )}
+            </Dropdown>
             <button
               type="button"
               className="icon-btn hover:text-danger"
@@ -218,10 +290,17 @@ export function ProjectDrawer() {
         </div>
 
         <section>
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between gap-2">
             <h3 className="text-[11px] font-semibold uppercase tracking-[0.14em] text-ink-faint">
               Saved moves ({project.moves.length})
             </h3>
+            {project.moves.length > 0 ? (
+              <span className="text-[10.5px] text-ink-faint">
+                {movesWithoutPurpose === 0
+                  ? 'Every move has a purpose'
+                  : `${movesWithoutPurpose} without a purpose`}
+              </span>
+            ) : null}
           </div>
           {project.moves.length === 0 ? (
             <p className="mt-2 rounded-lg border border-dashed border-line px-3 py-3 text-[11.5px] text-ink-faint">
@@ -229,7 +308,51 @@ export function ProjectDrawer() {
             </p>
           ) : (
             <div className="mt-2 flex flex-col gap-2">
-              {project.moves.map((move) => (
+              <div className="relative">
+                <Search
+                  size={13}
+                  className="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-ink-faint"
+                />
+                <input
+                  value={moveQuery}
+                  onChange={(event) => setMoveQuery(event.target.value)}
+                  placeholder="Filter saved moves"
+                  aria-label="Filter saved moves"
+                  className="field h-8 pl-7 text-[12px]"
+                />
+              </div>
+              {purposes.length > 1 ? (
+                <div className="flex flex-wrap gap-1">
+                  <button
+                    type="button"
+                    className={cx('chip h-6', !purposeFilter && 'border-accent/50 text-accent')}
+                    onClick={() => setPurposeFilter(null)}
+                  >
+                    All
+                  </button>
+                  {purposes.map((purpose) => (
+                    <button
+                      key={purpose}
+                      type="button"
+                      className={cx(
+                        'chip h-6',
+                        purposeFilter === purpose && 'border-accent/50 text-accent',
+                      )}
+                      onClick={() =>
+                        setPurposeFilter(purposeFilter === purpose ? null : purpose)
+                      }
+                    >
+                      {purpose}
+                    </button>
+                  ))}
+                </div>
+              ) : null}
+              {filteredMoves.length === 0 ? (
+                <p className="rounded-lg border border-dashed border-line px-3 py-3 text-[11.5px] text-ink-faint">
+                  No saved moves match that filter.
+                </p>
+              ) : null}
+              {filteredMoves.map((move) => (
                 <div key={move.id} className="rounded-lg border border-line bg-panel px-3 py-2.5">
                   <div className="flex items-start justify-between gap-2">
                     <div className="min-w-0">
@@ -275,7 +398,7 @@ export function ProjectDrawer() {
             </p>
           ) : (
             <div className="mt-2 grid grid-cols-2 gap-2">
-              {project.images.map((image: GeneratedImage) => (
+              {project.images.map((image: GeneratedImage, index) => (
                 <div key={image.id} className="group relative overflow-hidden rounded-lg border border-line">
                   <img
                     src={image.dataUrl ?? image.url}
@@ -283,6 +406,17 @@ export function ProjectDrawer() {
                     className="h-36 w-full object-cover"
                     loading="lazy"
                   />
+                  <a
+                    href={image.dataUrl ?? image.url}
+                    download={`movaryn-${slugify(project.name, 32)}-art-${index + 1}.${extensionFromDataUrl(
+                      image.dataUrl ?? image.url ?? '',
+                    )}`}
+                    className="absolute left-1.5 top-1.5 flex h-6 w-6 items-center justify-center rounded-md bg-panel/90 text-ink-muted opacity-0 backdrop-blur transition-opacity group-hover:opacity-100 hover:text-ink"
+                    aria-label="Download concept art"
+                    title="Download concept art"
+                  >
+                    <Download size={12} />
+                  </a>
                   <button
                     type="button"
                     className="absolute right-1.5 top-1.5 flex h-6 w-6 items-center justify-center rounded-md bg-panel/90 text-ink-muted opacity-0 backdrop-blur transition-opacity group-hover:opacity-100 hover:text-danger"

@@ -85,14 +85,42 @@ export async function copyText(text: string): Promise<boolean> {
   }
 }
 
-export function downloadJson(filename: string, data: unknown): void {
-  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+export function downloadText(filename: string, text: string, mime = 'text/plain'): void {
+  const blob = new Blob([text], { type: `${mime};charset=utf-8` });
   const url = URL.createObjectURL(blob);
   const link = document.createElement('a');
   link.href = url;
   link.download = filename;
   link.click();
   setTimeout(() => URL.revokeObjectURL(url), 4_000);
+}
+
+export function downloadJson(filename: string, data: unknown): void {
+  downloadText(filename, JSON.stringify(data, null, 2), 'application/json');
+}
+
+/** A filesystem-safe fragment, used for export and image file names. */
+export function slugify(value: string, max = 48): string {
+  return (
+    value
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '')
+      .slice(0, max)
+      .replace(/-+$/g, '') || 'movaryn'
+  );
+}
+
+/** Real image extension, so a JPEG is not saved as a .png. */
+export function extensionFromDataUrl(src: string, fallback = 'png'): string {
+  const match = /^data:image\/([a-z0-9.+-]+)/i.exec(src);
+  const subtype = (match?.[1] ?? '').toLowerCase();
+  if (subtype === 'jpeg' || subtype === 'jpg') return 'jpg';
+  if (subtype === 'svg+xml') return 'svg';
+  if (/^[a-z0-9]{2,5}$/.test(subtype)) return subtype;
+  const path = src.split('?')[0].split('#')[0];
+  const extension = /\.([a-z0-9]{2,5})$/i.exec(path)?.[1];
+  return extension ? extension.toLowerCase() : fallback;
 }
 
 export function aspectRatioCss(aspect: string): string {

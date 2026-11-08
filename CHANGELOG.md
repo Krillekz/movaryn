@@ -1,5 +1,13 @@
 # Update log
 
+## 1.1.0 — Movesets that leave the app
+
+- Export a project's moveset as a Markdown design sheet, a CSV table for spreadsheets or engine import,
+  or a JSON backup that keeps the brief fields. Available from the project workspace.
+- Filter saved moves by text or by purpose, and see at a glance how many moves still lack a purpose.
+- Concept art downloads now use the real file type and a readable name instead of a timestamped `.png`,
+  and saved project art can be downloaded from the workspace.
+
 ## 1.0.5 — Image generation stops failing on stale settings
 
 - An image model left in settings from an OpenAI-style setup (such as `gpt-image-1`) no longer overrides
