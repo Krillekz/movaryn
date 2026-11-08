@@ -1,0 +1,496 @@
+PROJECT NAME: MOVARYN
+Tagline: Better ideas. Better movesets. Built for creators.
+
+MASTER BUILD PROMPT FOR FREEBUFF AI
+Create a complete, polished web application named MOVARYN. Movaryn is an AI-powered creative assistant designed specifically to help people invent, refine, and visualize custom character movesets for games such as Jujutsu Shenanigans (JJS), The Strongest Battlegrounds, and other arena/battleground games.
+
+IMPORTANT: Do not build a generic chatbot with a game-themed skin. The entire product must be designed around understanding game mechanics, generating genuinely usable moveset concepts, respecting creator constraints, and producing useful character concept artwork. The quality of the ideas is the main feature.
+
+============================================================
+1. PRODUCT GOAL
+============================================================
+
+Movaryn should feel like a focused creative workshop where a user can describe a character, fighting style, weapon, theme, or rough idea and receive thoughtful, original, practical suggestions.
+
+The app must:
+- Have an AI chatbot that can hold long conversations and remember the context of the current project.
+- Generate movesets that follow the user's exact requirements.
+- Help brainstorm, rename, improve, simplify, balance, and expand moves.
+- Generate character concept images when requested.
+- Keep the visual design clean, modern, fast, and easy to use.
+- Work as a normal website and be suitable for being packaged inside Electron as a desktop application.
+- Be publishable as a website through GitHub Pages or another GitHub-hosted deployment.
+- Be structured so that AI providers and image-generation providers can be changed without rebuilding the whole application.
+
+Do not claim that responses or image generation are literally unlimited if the selected AI provider has usage, context, or rate limits. Instead, do not impose arbitrary message caps in the application. Support long conversations through conversation history, context management, and summarization when needed. Clearly handle provider limits and errors.
+
+============================================================
+2. THE MOVARYN DESIGN IDENTITY
+============================================================
+
+Name: Movaryn
+Tagline: Better ideas. Better movesets. Built for creators.
+
+Create a recognizable but restrained visual identity. The site should feel like a modern creative tool, not a flashy gaming dashboard.
+
+Visual direction:
+- Dark interface as the default.
+- Deep charcoal or near-black background.
+- Subtle dark panels with clear separation.
+- One restrained accent color, such as muted violet, electric blue, or teal.
+- Clean typography with strong readability.
+- Smooth but subtle transitions.
+- Rounded corners used consistently.
+- Clear spacing and alignment.
+- No excessive gradients, glowing borders, animated backgrounds, or random decorations.
+- Avoid clutter and unnecessary dashboard widgets.
+- Make the interface feel professional and thoughtfully designed.
+
+Create a simple Movaryn wordmark and a small recognizable symbol that can work as an app icon. Do not use copyrighted game logos or copy another product's branding.
+
+The UI must be responsive for desktop and usable on smaller screens. Desktop is the primary target.
+
+============================================================
+3. MAIN APPLICATION LAYOUT
+============================================================
+
+Build a familiar AI-chat layout, but tailor every part to moveset creation.
+
+LEFT SIDEBAR:
+- Movaryn logo and name at the top.
+- New Chat button.
+- Conversation history.
+- Search conversations.
+- Optional folders or project grouping.
+- Settings button at the bottom.
+- Ability to rename and delete conversations.
+- Sidebar can collapse to give the chat more room.
+
+MAIN CHAT AREA:
+- A clean conversation view.
+- User messages and AI responses displayed clearly.
+- Large readable response width.
+- Streaming response text when supported by the AI provider.
+- Code-free, readable formatting for movesets.
+- Copy buttons for individual moves and complete movesets.
+- Regenerate response button.
+- Edit-and-resend user message option.
+- Helpful error and loading states.
+- Do not make the chat area feel cramped.
+
+CHAT INPUT:
+- Large multi-line input field.
+- Send button.
+- Image-generation action.
+- Image upload action for references.
+- Optional attachment indicator.
+- Enter sends; Shift+Enter adds a new line.
+- Input grows naturally as the user types.
+- Keep the input visible at the bottom of the chat.
+- Include a short placeholder such as: "Describe a character, fighting style, or moveset idea..."
+
+WELCOME SCREEN:
+When there is no active conversation, show:
+- Movaryn logo and a short explanation.
+- A welcoming prompt: "What are we creating?"
+- A few useful starter cards, such as:
+  1. Create a 4-move JJS moveset.
+  2. Design a boss character.
+  3. Improve an existing move.
+  4. Create a character concept image.
+  5. Make a balanced ultimate moveset.
+- Clicking a starter card should place a useful prompt into the chat or start the relevant workflow.
+
+Do not fill the welcome screen with dozens of categories. Keep it simple.
+
+============================================================
+4. THE MOVARYN AI CHATBOT
+============================================================
+
+This is the most important part of the product.
+
+The AI must behave like a knowledgeable moveset designer and creative collaborator, not a generic idea generator. It should understand the difference between a move that sounds cool and a move that can realistically be built in the target game.
+
+The chatbot must:
+- Read the entire available conversation context before suggesting changes.
+- Remember the character concept, game, move count, naming rules, restrictions, and preferences throughout the current project.
+- Never repeatedly ask for information the user has already provided.
+- Follow exact counts and formatting requirements.
+- Avoid reusing move names that have already appeared in the current project unless the user asks for them.
+- Avoid suggesting mechanics the user explicitly prohibited.
+- Avoid inventing game-specific mechanics and presenting them as confirmed features.
+- Distinguish between confirmed in-game mechanics, plausible concepts, and speculative ideas.
+- Be honest when it does not know whether a particular mechanic or Skill Builder feature exists.
+- Prefer simple, buildable ideas when the user asks for something easy to make.
+- Offer more ambitious concepts only when requested.
+- Give genuinely different options instead of repeating the same idea with slightly different names.
+- Explain the move's actual action, not just its visual effect.
+- Make suggestions specific enough that a creator can build or adapt them.
+
+The AI should be able to help with:
+- Complete character movesets.
+- Base moves and ultimate moves.
+- Specials and passives.
+- M1 chains and attack sequences.
+- Grabs, launchers, slams, extenders, combo starters, and finishers.
+- Boss movesets and NPC movesets.
+- Skill Builder combinations.
+- Move names and ultimate names.
+- Character names, titles, themes, and lore.
+- Cooldowns, damage suggestions, startup, range, and balance notes when requested.
+- Reworking a move that is too complicated.
+- Creating alternate versions of a move.
+- Turning a rough user idea into a clear, buildable sequence.
+- Creating image prompts and character concept art.
+
+============================================================
+5. MOVESet QUALITY RULES
+============================================================
+
+Treat these rules as essential system behavior for the AI.
+
+A. FOLLOW THE REQUEST EXACTLY
+If the user asks for exactly four base moves, provide exactly four base moves. Do not add an ultimate, passive, special, M1 chain, or bonus move unless requested.
+
+If the user says:
+- "No counters" — do not include counters.
+- "No domain" — do not include a domain.
+- "No particles" — do not rely on particles.
+- "No meshes" — do not require custom meshes.
+- "Easy to make" — use simple actions and effects.
+- "One-word names" — every move name must be one word.
+- "Two-word names" — every move name must be two words.
+- "Use this exact format" — follow the format exactly.
+
+Treat restrictions as requirements, not suggestions.
+
+B. MAKE MOVES BUILDABLE
+Every move should have a clear action sequence. Avoid vague descriptions like "unleashes a powerful attack" or "uses cursed energy to devastate the opponent."
+
+A useful move description should explain:
+- How the character starts the move.
+- What the attack physically does.
+- What happens when it connects.
+- How the move ends.
+- Whether it launches, knocks back, slams, stuns, or extends a combo, if relevant.
+
+Keep descriptions concise but specific.
+
+C. USE REAL GAME MECHANICS CAREFULLY
+For games with known move editors or Skill Builders, use mechanics that are actually available whenever that information is known. Never invent a named in-game move and claim it exists.
+
+When uncertain, label the idea as:
+- Confirmed mechanic: known to exist in the game.
+- Likely buildable: appears feasible using common available tools.
+- Custom/speculative: may require features that are not available.
+
+If the user provides a list of available moves, use that list as the source of truth. Do not add unrelated moves.
+
+D. AVOID GENERIC MOVES
+Do not make every character's kit consist of:
+- A basic dash punch.
+- A generic ground slam.
+- A random projectile.
+- A generic counter.
+- A large explosion as the ultimate.
+
+Moves should reflect the character's identity, weapon, personality, and fighting style. Give each move a distinct purpose.
+
+E. BALANCE AND VARIETY
+When asked for a full kit, aim for useful variety:
+- A combo starter.
+- A combo extender.
+- A ranged or approach option, if appropriate.
+- A heavier attack or finisher.
+Do not force these categories if they do not fit the character or the user's requirements.
+
+F. NAMES MUST BE ORIGINAL
+Avoid obvious names that already exist in the target game or names that are generic and repetitive. Do not keep recycling words such as "Devastation", "Oblivion", "Wrath", "Destruction", "Phantom", or "Eclipse" for every character.
+
+Names should match the requested style. If the user dislikes a name, do not keep offering variations of the same name.
+
+G. COLLABORATE INSTEAD OF DUMPING IDEAS
+When a user says a suggestion is bad, identify what likely made it unsuitable and try a meaningfully different direction. Do not defend weak suggestions. Do not repeat rejected concepts.
+
+============================================================
+6. OPTIONAL MOVESet RESPONSE FORMAT
+============================================================
+
+Use a clear format when the user asks for a complete moveset. Adapt it to their request rather than forcing every section.
+
+Example:
+
+CHARACTER: [Name]
+THEME: [Short theme]
+GAME: [Target game]
+
+BASE MOVES
+1. [Move Name]
+   Description: [Specific action sequence]
+   Purpose: [Combo starter / extender / finisher / utility]
+
+2. [Move Name]
+   Description: [Specific action sequence]
+   Purpose: [Purpose]
+
+Continue only to the requested number.
+
+ULTIMATE: [Only if requested]
+SPECIAL: [Only if requested]
+PASSIVES: [Only if requested]
+
+BUILD DIFFICULTY:
+- Easy / Medium / Advanced
+- Briefly explain any required custom assets or effects.
+
+Do not force this template when the user asks for a quick list, a single move, names only, or a different format.
+
+============================================================
+7. IMAGE GENERATION SYSTEM
+============================================================
+
+Image generation is a major feature. Users should be able to request character concept art, poses, outfits, weapons, arena concepts, and visual references.
+
+Do not create images by simply sending a vague one-line prompt to an image model. Build a dedicated image-generation workflow that prepares detailed prompts from the user's description and any uploaded references.
+
+IMAGE WORKFLOW:
+1. Understand exactly what the user wants pictured.
+2. Identify the subject, appearance, clothing, pose, camera angle, setting, lighting, composition, and art style.
+3. Preserve important details from uploaded reference images.
+4. Avoid adding details the user did not request if they conflict with the reference.
+5. Generate a detailed image prompt.
+6. Send that prompt to the configured image-generation provider.
+7. Display the resulting image inside the conversation.
+8. Allow the user to regenerate, revise, or request a variation.
+
+IMAGE QUALITY REQUIREMENTS:
+- Aim for intentional, polished character concept art rather than random AI-looking imagery.
+- Use consistent anatomy, believable poses, coherent clothing, readable silhouettes, and deliberate composition.
+- Avoid malformed hands, extra fingers, duplicated limbs, distorted faces, inconsistent weapons, and broken anatomy.
+- Avoid unnecessary visual clutter and random background objects.
+- Do not add text, logos, watermarks, UI, or signatures unless explicitly requested.
+- Do not change a character's defining features between variations.
+- Avoid the generic glossy AI-art look when the user requests a manga, anime, game concept, or hand-drawn style.
+- Respect the requested art style instead of applying one default style to every image.
+- Use uploaded images as visual references when the provider supports image conditioning.
+- If the provider supports image-to-image, reference images, inpainting, or seed control, expose those capabilities where practical.
+- Never claim that an image is guaranteed to be perfect. Provide useful revision controls and preserve the user's feedback.
+
+IMAGE CONTROLS:
+- Generate image.
+- Regenerate image.
+- Change pose.
+- Change background.
+- Change camera angle.
+- Keep character, change style.
+- Keep style, change pose.
+- Use uploaded image as reference.
+- Edit prompt before generation.
+
+IMPORTANT: Do not generate an image automatically after every moveset response. Only generate one when the user asks for an image or explicitly enables that behavior. A moveset and its image should be separate outputs so users can revise either one independently.
+
+============================================================
+8. IMAGE PROMPT BUILDER
+============================================================
+
+Create an internal prompt-building layer that converts casual requests into structured image instructions.
+
+It should consider:
+- Character identity and defining features.
+- Hair, face, outfit, accessories, and body proportions.
+- Weapon shape and how it is held.
+- Pose and body orientation.
+- Camera framing: full body, waist-up, close-up, etc.
+- Environment and background.
+- Lighting and atmosphere.
+- Art style and rendering technique.
+- Color palette.
+- Composition and negative space.
+- Reference-image consistency.
+- Things that must not appear.
+
+The prompt builder must preserve the user's intent. It should not add a dramatic battlefield, glowing effects, extra weapons, or complicated scenery when the user asked for a simple character portrait.
+
+Provide an optional "Show image prompt" control so advanced users can inspect and edit the prompt before generating.
+
+============================================================
+9. PROJECTS AND CHARACTER WORKSPACES
+============================================================
+
+Add a lightweight project feature for users who work on multiple characters.
+
+A project can contain:
+- Character name.
+- Target game.
+- Character description.
+- Moveset.
+- Move names and descriptions.
+- Ultimate and special information, if applicable.
+- Uploaded reference images.
+- Generated concept images.
+- User constraints and notes.
+
+Allow users to save a conversation as a project and return to it later. Do not make the project system more complicated than the chat itself.
+
+============================================================
+10. SETTINGS AND AI PROVIDER CONFIGURATION
+============================================================
+
+Create a settings page with:
+- AI provider selection, if multiple providers are supported.
+- Model selection, if supported.
+- Image provider selection, if supported.
+- API key configuration through a secure backend or secure local development configuration.
+- Theme setting.
+- Conversation history controls.
+- Image quality or aspect-ratio options when supported.
+- Clear information about provider limits and privacy.
+
+SECURITY REQUIREMENTS:
+- Never hard-code private API keys in frontend source code.
+- Never expose secret keys in browser JavaScript, Electron renderer code, GitHub repositories, or public build files.
+- Do not commit .env files containing real credentials.
+- Use environment variables on a backend/serverless function for hosted deployments.
+- For Electron, use a secure main-process or backend bridge; do not expose secrets to the renderer.
+- Use context isolation and disable unsafe Node integration in the Electron renderer.
+- Validate inputs and handle API errors safely.
+- Provide a .env.example containing placeholder values only.
+
+If GitHub Pages is used for the public website, remember that GitHub Pages is static hosting and cannot securely store private provider keys. Build a separate backend or serverless API for AI and image requests. The Electron desktop app should use the same secure API architecture where possible.
+
+============================================================
+11. TECHNOLOGY AND PROJECT STRUCTURE
+============================================================
+
+Choose a modern, maintainable frontend stack suitable for a responsive website and Electron wrapper. React with TypeScript and Vite is a good option unless there is a strong technical reason to choose another stack.
+
+Suggested architecture:
+- Frontend: React + TypeScript.
+- Build tool: Vite.
+- Styling: Tailwind CSS or clean modular CSS.
+- Desktop: Electron.
+- Backend: a small API service or serverless functions for AI and image-provider requests.
+- Persistence: local storage or IndexedDB for local preferences and drafts; a suitable database or backend storage if accounts and cross-device syncing are implemented.
+- Deployment: GitHub Pages for the static frontend where appropriate, plus a separately deployed backend for protected API calls.
+
+Keep the code organized into reusable components. Separate:
+- Chat interface.
+- Conversation state.
+- AI service layer.
+- Image service layer.
+- Prompt-building logic.
+- Project storage.
+- Settings.
+- Electron-specific code.
+- Backend API routes.
+
+Do not put the entire application into one enormous component.
+
+Provide:
+- A working development script.
+- A production build script.
+- An Electron launch script.
+- Clear setup instructions.
+- A .env.example file.
+- A .gitignore.
+- A README with installation, configuration, development, build, deployment, and security instructions.
+
+============================================================
+12. RELIABILITY AND USER EXPERIENCE
+============================================================
+
+The application should:
+- Show a clear loading state while generating responses or images.
+- Stream text when supported.
+- Allow cancellation when supported.
+- Recover gracefully from network errors.
+- Show understandable error messages.
+- Avoid losing a draft if a request fails.
+- Preserve conversations after refresh.
+- Handle long conversation histories without freezing the interface.
+- Support copying text and move descriptions.
+- Make generated images easy to view.
+- Avoid fake buttons or controls that do nothing.
+- Avoid placeholder functionality being presented as complete.
+- Include empty states and helpful onboarding.
+- Use accessible contrast, keyboard navigation, and readable text sizes.
+
+If a feature cannot be implemented without an API key or external service, clearly label it as requiring configuration. Do not simulate a working AI response with hard-coded example text.
+
+============================================================
+13. PRIVACY AND USER DATA
+============================================================
+
+Explain what is stored locally and what is sent to external AI or image providers. Do not silently upload reference images or conversation content to unrelated services. Give users a way to delete conversations and projects. Avoid collecting unnecessary personal information.
+
+============================================================
+14. ACCEPTANCE TESTS
+============================================================
+
+Before considering the product complete, verify these scenarios:
+
+TEST 1 — EXACT MOVE COUNT
+User: "Make a JJS character with exactly four base moves. No ultimate, no special."
+Expected: Exactly four base moves and no extra sections.
+
+TEST 2 — SIMPLE BUILD
+User: "Make the moves easy to build. No custom meshes or particles."
+Expected: Simple, practical sequences that do not depend on meshes or particles.
+
+TEST 3 — SPECIFIC NAMING FORMAT
+User: "Give me four moves with one-word names, formatted as {\"Name\"}."
+Expected: Four names in the exact requested format.
+
+TEST 4 — REJECTED IDEA
+User: "I don't like that move. Make something completely different."
+Expected: A genuinely different mechanic or sequence, not a renamed copy.
+
+TEST 5 — CONTEXT RETENTION
+User first describes a red-cloaked scythe boss, then later asks to rename move three.
+Expected: The AI understands which character and move are being discussed without asking the user to repeat everything.
+
+TEST 6 — IMAGE REFERENCE
+User uploads a character image and asks for a full-body concept image with the same outfit.
+Expected: The image workflow preserves defining character details and does not invent a completely different outfit.
+
+TEST 7 — HONEST GAME KNOWLEDGE
+User asks for a move using a feature the AI cannot verify exists.
+Expected: The AI clearly explains the uncertainty and offers a feasible alternative.
+
+TEST 8 — LONG CHAT
+User continues a project through many messages.
+Expected: The app preserves important project context and does not arbitrarily stop the conversation because of a small application-imposed message limit.
+
+TEST 9 — SECURITY
+Inspect the production frontend bundle and GitHub repository.
+Expected: No private API keys or credentials are exposed.
+
+TEST 10 — ELECTRON AND WEB
+Expected: The web version runs in a browser, and the Electron wrapper launches the same application without compromising security.
+
+============================================================
+15. FINAL BUILD INSTRUCTIONS
+============================================================
+
+Build the actual working application, not just a mockup or a static landing page.
+
+Prioritize the following order:
+1. Clean and functional chat interface.
+2. Reliable AI-provider integration.
+3. Strong moveset-specific instruction and context handling.
+4. Conversation persistence.
+5. Image-generation provider integration and prompt builder.
+6. Project workspaces.
+7. Electron compatibility.
+8. GitHub deployment setup.
+9. Polish, accessibility, and error handling.
+
+Do not sacrifice core functionality for decorative UI. Do not fill the app with fake sample features. Do not use generic placeholder responses in place of AI integration.
+
+If credentials or external provider access are unavailable during development, build the integration interfaces and configuration flow, explain exactly what credentials are needed, and make the rest of the application functional. Do not pretend generation works until it has been connected and tested.
+
+The finished result should feel like a dedicated creative tool for people who build custom characters and movesets: focused, reliable, flexible, and genuinely helpful.
+
+For extra you can make a update log/patch notes for the website.
+
+END OF MASTER BUILD PROMPT

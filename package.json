@@ -1,0 +1,87 @@
+{
+  "name": "movaryn",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Movaryn — an AI moveset workshop for arena and battleground game creators.",
+  "author": "Krillekz",
+  "license": "UNLICENSED",
+  "main": "electron/main.cjs",
+  "scripts": {
+    "dev": "concurrently -k -n api,web -c magenta,cyan \"npm:dev:api\" \"npm:dev:web\"",
+    "dev:web": "vite",
+    "dev:api": "tsx watch server/index.ts",
+    "typecheck": "tsc -p tsconfig.json --noEmit && tsc -p tsconfig.server.json --noEmit",
+    "build": "npm run typecheck && vite build && npm run build:api",
+    "build:api": "tsc -p tsconfig.server.json",
+    "start": "node server-dist/server/index.js",
+    "preview": "vite preview",
+    "electron:dev": "concurrently -k -n web,desktop -c cyan,magenta \"npm:dev:web\" \"electron . --dev\"",
+    "electron:start": "npm run build && electron .",
+    "icon": "node scripts/make-icon.mjs",
+    "package:win": "npm run build && npm run icon && electron-builder --win",
+    "package:dir": "npm run build && npm run icon && electron-builder --dir",
+    "mock:provider": "node scripts/mock-provider.mjs"
+  },
+  "engines": {
+    "node": ">=20.19"
+  },
+  "dependencies": {
+    "dotenv": "^18.0.9",
+    "express": "^5.3.0",
+    "lucide-react": "^1.70.0",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
+    "react-markdown": "^10.1.0",
+    "remark-gfm": "^4.0.1",
+    "zustand": "^5.1.0"
+  },
+  "devDependencies": {
+    "@tailwindcss/vite": "^4.3.5",
+    "@types/express": "^5.0.6",
+    "@types/node": "^26.6.6",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "@vitejs/plugin-react": "^6.2.1",
+    "concurrently": "^10.0.7",
+    "electron": "^45.2.3",
+    "electron-builder": "^26.18.0",
+    "sharp": "^0.35.5",
+    "tailwindcss": "^4.3.5",
+    "tsx": "^4.23.15",
+    "typescript": "^7.0.2",
+    "vite": "^8.3.6"
+  },
+  "build": {
+    "appId": "studio.movaryn.app",
+    "productName": "Movaryn",
+    "copyright": "Copyright © 2026 Movaryn",
+    "asar": false,
+    "directories": {
+      "output": "release",
+      "buildResources": "build"
+    },
+    "files": [
+      "dist/**/*",
+      "server-dist/**/*",
+      "electron/**/*",
+      "package.json"
+    ],
+    "win": {
+      "icon": "build/icon.png",
+      "target": [
+        { "target": "nsis", "arch": ["x64"] },
+        { "target": "portable", "arch": ["x64"] }
+      ]
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true,
+      "shortcutName": "Movaryn",
+      "artifactName": "Movaryn-Setup-${version}.${ext}"
+    },
+    "portable": {
+      "artifactName": "Movaryn-Portable-${version}.${ext}"
+    }
+  }
+}
