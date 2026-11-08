@@ -1,5 +1,13 @@
 # Update log
 
+## 1.0.1 — Provider honesty
+
+- Image generation now requires `IMAGE_MODEL`. A chat-only provider (such as OpenRouter's free tier)
+  reports concept art as unconfigured instead of offering a button that can only fail.
+- The system prompt no longer lets a named Skill Builder node be marked `[Confirmed]`. Unverifiable
+  features must be labelled `[Custom]` with a buildable alternative alongside them.
+- Rename and tweak requests return only the changed move instead of re-emitting the whole kit.
+
 ## 1.0.0 — Initial release
 
 **The workshop**
