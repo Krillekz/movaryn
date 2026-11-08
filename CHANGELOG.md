@@ -1,5 +1,15 @@
 # Update log
 
+## 1.0.2 — Free image generation
+
+- Cloudflare Workers AI is now an image backend. Set `IMAGE_PROVIDER=cloudflare` with
+  `IMAGE_ACCOUNT_ID` and an API token, or just set the account id and it is detected. The free plan's
+  daily allowance makes concept art usable without paying an image provider.
+- Existing OpenAI-compatible `/images/generations` hosts keep working unchanged.
+- FLUX.1 schnell returns square images and cannot take a reference image, so the app reports that
+  instead of pretending the reference was used.
+- Failed quota and token errors now explain what to fix rather than surfacing a generic provider error.
+
 ## 1.0.1 — Provider honesty
 
 - Image generation now requires `IMAGE_MODEL`. A chat-only provider (such as OpenRouter's free tier)
