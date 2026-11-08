@@ -1,5 +1,13 @@
 # Update log
 
+## 1.0.5 — Image generation stops failing on stale settings
+
+- An image model left in settings from an OpenAI-style setup (such as `gpt-image-1`) no longer overrides
+  the configured Cloudflare model, which made Workers AI answer `No route for that URI`.
+- Cloudflare no longer borrows `AI_API_KEY` when its own token is missing, which turned a missing
+  `IMAGE_API_KEY` into a confusing 401 from another service.
+- A wrong `IMAGE_MODEL` now names the model and the expected Workers AI form instead of a bare route error.
+
 ## 1.0.4 — Crop follows the subject
 
 - Cropping now follows the image content instead of taking a fixed centre slice: brightness-gradient
