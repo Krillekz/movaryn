@@ -1,5 +1,12 @@
 # Update log
 
+## 1.0.3 — Aspect-accurate concept art
+
+- Cloudflare images are center-cropped to the aspect ratio chosen in the brief, so a portrait or wide
+  brief no longer shows a square inside a taller frame. JPEG output only; other formats pass through.
+- Cropping uses a pure-JS codec, so the packaged app carries no native image dependency.
+- If an image cannot be decoded, it is returned unchanged rather than failing the request.
+
 ## 1.0.2 — Free image generation
 
 - Cloudflare Workers AI is now an image backend. Set `IMAGE_PROVIDER=cloudflare` with
