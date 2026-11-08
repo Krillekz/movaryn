@@ -64,8 +64,26 @@ function resolvePort(): number {
   return 8787;
 }
 
+/** Package version, so the About panel and health check match the shipped build. */
+function readPackageVersion(): string {
+  const candidates = [
+    path.join(__dirname, '..', '..', 'package.json'),
+    path.join(__dirname, '..', 'package.json'),
+    path.join(process.cwd(), 'package.json'),
+  ];
+  for (const file of candidates) {
+    try {
+      const pkg = JSON.parse(fs.readFileSync(file, 'utf8')) as { name?: string; version?: string };
+      if (pkg.name === 'movaryn' && pkg.version) return pkg.version;
+    } catch {
+      // try the next location
+    }
+  }
+  return '0.0.0';
+}
+
 export const config = {
-  version: '1.0.0',
+  version: readPackageVersion(),
   host: text(process.env.HOST) || '127.0.0.1',
   port: resolvePort(),
   ai: {
