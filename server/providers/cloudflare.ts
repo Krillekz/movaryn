@@ -1,6 +1,7 @@
 import type { AspectRatio, GeneratedImage, ImageRequest, ImageResponse } from '../../shared/types';
 import { config } from '../config';
 import { AppError, mapFetchError, redact } from '../errors';
+import { cropJpegToAspect } from './crop';
 
 /** FLUX.1 [schnell] accepts prompt and steps only; it always returns a square image. */
 const FLUX_MODEL = /flux-1-schnell/i;
@@ -53,11 +54,6 @@ function cloudflareError(status: number, body: string): AppError {
     502,
     'provider_error',
   );
-}
-
-function asDataUrl(base64: string): string {
-  const cleaned = base64.replace(/^data:image\/[a-z0-9.+-]+;base64,/i, '');
-  return `data:image/jpeg;base64,${cleaned}`;
 }
 
 /**
@@ -117,8 +113,16 @@ export async function generateCloudflareImage(input: ImageRequest): Promise<Imag
         'no_image',
       );
     }
+    const cleaned = raw.replace(/^data:image\/[a-z0-9.+-]+;base64,/i, '');
+    // FLUX always answers 1024x1024, so give the caller the shape it asked for.
+    const bytes = cropJpegToAspect(Buffer.from(cleaned, 'base64'), input.aspect);
     images = [
-      { id: `img-${Date.now()}-0`, dataUrl: asDataUrl(raw), aspect: input.aspect, prompt: input.prompt },
+      {
+        id: `img-${Date.now()}-0`,
+        dataUrl: `data:image/jpeg;base64,${bytes.toString('base64')}`,
+        aspect: input.aspect,
+        prompt: input.prompt,
+      },
     ];
   } else {
     const bytes = Buffer.from(await response.arrayBuffer());
@@ -126,10 +130,11 @@ export async function generateCloudflareImage(input: ImageRequest): Promise<Imag
       throw new AppError('Cloudflare returned an empty image.', 502, 'no_image');
     }
     const mime = contentType.startsWith('image/') ? contentType.split(';')[0] : 'image/jpeg';
+    const cropped = mime === 'image/jpeg' ? cropJpegToAspect(bytes, input.aspect) : bytes;
     images = [
       {
         id: `img-${Date.now()}-0`,
-        dataUrl: `data:${mime};base64,${bytes.toString('base64')}`,
+        dataUrl: `data:${mime};base64,${cropped.toString('base64')}`,
         aspect: input.aspect,
         prompt: input.prompt,
       },
