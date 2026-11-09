@@ -38,6 +38,7 @@ export function CharacterCardDialog({
   const provider = useApp((state) => state.provider);
   const pushToast = useApp((state) => state.pushToast);
   const addProjectImages = useApp((state) => state.addProjectImages);
+  const updateProject = useApp((state) => state.updateProject);
 
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [card, setCard] = useState<string | null>(null);
@@ -121,7 +122,7 @@ export function CharacterCardDialog({
     setRendering(true);
     setError(null);
     setTab('generate');
-    setPromptDraft(null);
+    setPromptDraft(project?.prompts?.card ?? null);
     setCopied(false);
     renderCharacterCard({ name, game, theme, moves, art: selected?.src })
       .then((dataUrl) => {
@@ -152,6 +153,13 @@ export function CharacterCardDialog({
       setSelectedId(null);
       pushToast('Character art generated in this chat and placed on the card.', 'success');
     }
+  };
+
+  const rememberPrompt = (text: string) => {
+    if (!project) return;
+    updateProject(project.id, {
+      prompts: { ...project.prompts, card: text.trim() ? text : undefined },
+    });
   };
 
   const copyPrompt = async () => {
@@ -274,7 +282,7 @@ export function CharacterCardDialog({
                 aria-selected={tab === item.id}
                 onClick={() => {
                   setTab(item.id);
-                  setPromptDraft(null);
+                  setPromptDraft(project?.prompts?.card ?? null);
                   setCopied(false);
                 }}
                 className={cx(
@@ -336,13 +344,17 @@ export function CharacterCardDialog({
             </div>
             <textarea
               value={promptValue}
-              onChange={(event) => setPromptDraft(event.target.value)}
+              onChange={(event) => {
+                setPromptDraft(event.target.value);
+                rememberPrompt(event.target.value);
+              }}
               rows={8}
               className="field scroll-thin mt-2 resize-y font-mono text-[11.5px] leading-relaxed"
               aria-label="Prompt for another generator"
             />
             <p className="mt-1.5 text-[10.5px] leading-relaxed text-ink-faint">
-              {promptValue.length} characters · editable · describes the character art only. The
+              {promptValue.length} characters · editable ·
+              {project ? ' saved with this project ·' : ''} describes the character art only. The
               card&apos;s name and moves are drawn on this device, so nothing else is needed.
             </p>
           </div>

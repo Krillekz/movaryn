@@ -111,6 +111,11 @@ export interface Project {
   moves: SavedMove[];
   references: ImageAttachment[];
   images: GeneratedImage[];
+  /** Last prompts edited in the prompt-only tabs, so they come back with the project. */
+  prompts?: {
+    art?: string;
+    card?: string;
+  };
   createdAt: number;
   updatedAt: number;
 }

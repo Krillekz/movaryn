@@ -45,11 +45,13 @@ export function ImageBriefDialog() {
   const provider = useApp((state) => state.provider);
   const close = useApp((state) => state.closeImageBrief);
   const updateSettings = useApp((state) => state.updateSettings);
+  const updateProject = useApp((state) => state.updateProject);
   const openSettings = useApp((state) => state.openSettings);
   const pushToast = useApp((state) => state.pushToast);
 
   const project = useApp((state) => {
-    const conversation = state.activeId ? state.conversations[state.activeId] : null;
+    const conversationId = brief.conversationId ?? state.activeId;
+    const conversation = conversationId ? state.conversations[conversationId] : null;
     return conversation?.projectId ? state.projects[conversation.projectId] : null;
   });
 
@@ -57,6 +59,7 @@ export function ImageBriefDialog() {
   const [showPrompt, setShowPrompt] = useState(false);
   const [override, setOverride] = useState('');
   const [overrideDirty, setOverrideDirty] = useState(false);
+  const [externalDraft, setExternalDraft] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [reading, setReading] = useState(false);
@@ -69,6 +72,7 @@ export function ImageBriefDialog() {
     setShowPrompt(false);
     setOverride('');
     setOverrideDirty(false);
+    setExternalDraft(project?.prompts?.art ?? null);
     setError(null);
     setBusy(false);
     setTab('generate');
@@ -85,7 +89,14 @@ export function ImageBriefDialog() {
     () => (overrideDirty ? override : `${generated} Aspect ratio: ${spec.aspect}.`).trim(),
     [overrideDirty, override, generated, spec.aspect],
   );
-  const copyValue = promptTab ? externalPrompt : promptValue;
+  const copyValue = promptTab ? (externalDraft ?? externalPrompt) : promptValue;
+
+  const rememberPrompt = (text: string) => {
+    if (!project) return;
+    updateProject(project.id, {
+      prompts: { ...project.prompts, art: text.trim() ? text : undefined },
+    });
+  };
 
   const update = <K extends keyof ImagePromptSpec>(key: K, value: ImagePromptSpec[K]) => {
     setSpec((current) => ({ ...current, [key]: value }));
@@ -555,6 +566,11 @@ export function ImageBriefDialog() {
               <textarea
                 value={copyValue}
                 onChange={(event) => {
+                  if (promptTab) {
+                    setExternalDraft(event.target.value);
+                    rememberPrompt(event.target.value);
+                    return;
+                  }
                   setOverride(event.target.value);
                   setOverrideDirty(true);
                 }}
@@ -564,7 +580,9 @@ export function ImageBriefDialog() {
               />
               <p className="mt-1.5 text-[10.5px] leading-relaxed text-ink-faint">
                 {promptTab
-                  ? `${copyValue.length} characters · editable · paste into Midjourney, DALL·E, Stable Diffusion or any other generator.`
+                  ? `${copyValue.length} characters · editable · ${
+                      project ? 'saved with this project · ' : ''
+                    }paste into Midjourney, DALL·E, Stable Diffusion or any other generator.`
                   : `${promptValue.length} characters · this is exactly what is sent to the provider.`}
                 {promptTab && !spec.subject.trim() ? ' Add a subject above to unlock copying.' : ''}
               </p>
