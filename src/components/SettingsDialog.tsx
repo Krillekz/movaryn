@@ -2,6 +2,7 @@ import { useState } from 'react';
 import {
   CheckCircle2,
   Database,
+  Heart,
   Info,
   Loader2,
   Monitor,
@@ -20,13 +21,14 @@ import { useApp } from '../store/useApp';
 import { cx, downloadJson } from '../lib/utils';
 import { Modal } from './ui/Modal';
 
-type TabId = 'provider' | 'models' | 'appearance' | 'data' | 'about';
+type TabId = 'provider' | 'models' | 'appearance' | 'data' | 'credits' | 'about';
 
 const TABS: { id: TabId; label: string; icon: typeof Plug }[] = [
   { id: 'provider', label: 'Provider', icon: Plug },
   { id: 'models', label: 'Models', icon: SlidersHorizontal },
   { id: 'appearance', label: 'Appearance', icon: Palette },
   { id: 'data', label: 'Data & privacy', icon: Database },
+  { id: 'credits', label: 'Credits', icon: Heart },
   { id: 'about', label: 'About', icon: Info },
 ];
 
@@ -403,6 +405,40 @@ export function SettingsDialog() {
                   Delete everything
                 </button>
               </div>
+            </div>
+          ) : null}
+
+          {tab === 'credits' ? (
+            <div className="flex flex-col gap-4">
+              <section className="rounded-xl border border-line bg-panel px-4 py-4">
+                <div className="flex items-center gap-3">
+                  <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-accent-soft text-[17px] font-semibold text-accent">
+                    R
+                  </span>
+                  <div className="min-w-0">
+                    <h3 className="text-[15px] font-semibold tracking-tight text-ink">Raevik</h3>
+                    <p className="mt-0.5 text-[11.5px] text-ink-muted">Creator of Movaryn</p>
+                  </div>
+                  <Heart size={16} className="ml-auto shrink-0 text-accent" />
+                </div>
+                <p className="mt-3 text-[11.5px] leading-relaxed text-ink-muted">
+                  Movaryn is designed and built by Raevik — the moveset studio, the concept art briefs and
+                  the character cards all come from that work.
+                </p>
+              </section>
+
+              <section className="rounded-xl border border-line bg-panel px-3.5 py-3">
+                <h3 className="text-[12px] font-semibold text-ink">Built with</h3>
+                <p className="mt-1.5 text-[11.5px] leading-relaxed text-ink-muted">
+                  React, Vite, Tailwind CSS and Electron, with icons from lucide. Moveset text is drawn on
+                  your device, so cards and exports stay readable without a provider.
+                </p>
+              </section>
+
+              <p className="text-[11px] leading-relaxed text-ink-faint">
+                Thanks for building movesets with it. If you make something with Movaryn, that is the
+                credit worth having.
+              </p>
             </div>
           ) : null}
 

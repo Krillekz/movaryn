@@ -1,5 +1,16 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Dices, Eye, Image as ImageIcon, Loader2, RotateCcw, Upload, Wand2, X } from 'lucide-react';
+import {
+  Check,
+  ClipboardCopy,
+  Dices,
+  Eye,
+  Image as ImageIcon,
+  Loader2,
+  RotateCcw,
+  Upload,
+  Wand2,
+  X,
+} from 'lucide-react';
 import type { AspectRatio, Framing, ImagePromptSpec, Project, Settings } from '../../shared/types';
 import { ASPECT_RATIOS, FRAMING_OPTIONS } from '../../shared/types';
 import { buildImagePrompt } from '../../shared/imagePrompt';
@@ -8,7 +19,7 @@ import { generateConceptImage } from '../lib/chatEngine';
 import { readImageFile } from '../lib/image';
 import { randomImageSpec } from '../lib/imageRandom';
 import { Modal } from './ui/Modal';
-import { cx } from '../lib/utils';
+import { copyText, cx } from '../lib/utils';
 
 function defaultSpec(project: Project | null, settings: Settings): ImagePromptSpec {
   return {
@@ -35,6 +46,7 @@ export function ImageBriefDialog() {
   const close = useApp((state) => state.closeImageBrief);
   const updateSettings = useApp((state) => state.updateSettings);
   const openSettings = useApp((state) => state.openSettings);
+  const pushToast = useApp((state) => state.pushToast);
 
   const project = useApp((state) => {
     const conversation = state.activeId ? state.conversations[state.activeId] : null;
@@ -48,6 +60,8 @@ export function ImageBriefDialog() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [reading, setReading] = useState(false);
+  const [tab, setTab] = useState<'generate' | 'prompt'>('generate');
+  const [copied, setCopied] = useState(false);
 
   useEffect(() => {
     if (!brief.open) return;
@@ -57,6 +71,8 @@ export function ImageBriefDialog() {
     setOverrideDirty(false);
     setError(null);
     setBusy(false);
+    setTab('generate');
+    setCopied(false);
     // Re-initialise only when the dialog opens or targets a different brief.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [brief.open, brief.spec, brief.messageId]);
@@ -64,6 +80,12 @@ export function ImageBriefDialog() {
   const generated = useMemo(() => buildImagePrompt(spec), [spec]);
   const promptValue = overrideDirty ? override : generated;
   const imageReady = Boolean(provider?.image.configured);
+  const promptTab = tab === 'prompt';
+  const externalPrompt = useMemo(
+    () => (overrideDirty ? override : `${generated} Aspect ratio: ${spec.aspect}.`).trim(),
+    [overrideDirty, override, generated, spec.aspect],
+  );
+  const copyValue = promptTab ? externalPrompt : promptValue;
 
   const update = <K extends keyof ImagePromptSpec>(key: K, value: ImagePromptSpec[K]) => {
     setSpec((current) => ({ ...current, [key]: value }));
@@ -117,7 +139,7 @@ export function ImageBriefDialog() {
   };
 
   const rollRandom = () => {
-    if (busy || !imageReady) return;
+    if (busy || reading || (!imageReady && !promptTab)) return;
     const next = randomImageSpec({
       aspect: spec.aspect,
       framing: spec.framing,
@@ -127,15 +149,36 @@ export function ImageBriefDialog() {
     setOverride('');
     setOverrideDirty(false);
     setShowPrompt(false);
+    setError(null);
+    // In prompt-only mode a roll fills the form so the user can read and edit it first.
+    if (promptTab) return;
     void submit(next);
+  };
+
+  const copyPrompt = async () => {
+    const text = copyValue.trim();
+    if (!text) return;
+    const ok = await copyText(text);
+    if (!ok) {
+      setError('The clipboard is unavailable here. Select the prompt text and copy it manually.');
+      return;
+    }
+    setError(null);
+    setCopied(true);
+    pushToast('Prompt copied — paste it into any image generator.', 'success');
+    window.setTimeout(() => setCopied(false), 1_800);
   };
 
   return (
     <Modal
       open={brief.open}
       onClose={close}
-      title={brief.mode === 'revise' ? 'Revise concept art' : 'Create concept art'}
-      description="Movaryn turns this brief into a detailed, consistent image prompt. Nothing is generated until you press the button."
+      title={brief.mode === 'revise' ? 'Revise concept art' : 'Concept art'}
+      description={
+        promptTab
+          ? 'Fill in the brief and copy a finished prompt. Nothing is sent anywhere in this tab.'
+          : 'Movaryn turns this brief into a detailed, consistent image prompt. Nothing is generated until you press the button.'
+      }
       width="max-w-2xl"
       footer={
         <div className="flex flex-wrap items-center justify-between gap-2">
@@ -147,8 +190,12 @@ export function ImageBriefDialog() {
               type="button"
               className="btn btn-secondary"
               onClick={rollRandom}
-              disabled={busy || !imageReady || reading}
-              title="Roll a random character brief and generate it straight away"
+              disabled={busy || reading || (!imageReady && !promptTab)}
+              title={
+                promptTab
+                  ? 'Roll a random character brief into the form'
+                  : 'Roll a random character brief and generate it straight away'
+              }
             >
               <Dices size={15} />
               Random
@@ -156,25 +203,73 @@ export function ImageBriefDialog() {
             <button type="button" className="btn btn-ghost" onClick={close} disabled={busy}>
               Cancel
             </button>
-            <button
-              type="button"
-              className="btn btn-primary"
-              onClick={() => void submit()}
-              disabled={busy || !imageReady || reading}
-            >
-              {busy ? <Loader2 size={15} className="animate-spin" /> : <Wand2 size={15} />}
-              {busy
-                ? 'Generating…'
-                : brief.mode === 'revise'
-                  ? 'Update image'
-                  : 'Generate image'}
-            </button>
+            {promptTab ? (
+              <button
+                type="button"
+                className="btn btn-primary"
+                onClick={() => void copyPrompt()}
+                disabled={reading || !spec.subject.trim()}
+              >
+                {copied ? <Check size={15} /> : <ClipboardCopy size={15} />}
+                {copied ? 'Copied' : 'Copy prompt'}
+              </button>
+            ) : (
+              <button
+                type="button"
+                className="btn btn-primary"
+                onClick={() => void submit()}
+                disabled={busy || !imageReady || reading}
+              >
+                {busy ? <Loader2 size={15} className="animate-spin" /> : <Wand2 size={15} />}
+                {busy
+                  ? 'Generating…'
+                  : brief.mode === 'revise'
+                    ? 'Update image'
+                    : 'Generate image'}
+              </button>
+            )}
           </div>
         </div>
       }
     >
       <div className="flex flex-col gap-4">
-        {!imageReady ? (
+        <div
+          className="flex gap-1 rounded-xl border border-line bg-panel p-1"
+          role="tablist"
+          aria-label="Concept art mode"
+        >
+          {(
+            [
+              { id: 'generate' as const, label: 'Generate image', icon: Wand2 },
+              { id: 'prompt' as const, label: 'Prompt only', icon: ClipboardCopy },
+            ] as const
+          ).map((item) => {
+            const Icon = item.icon;
+            return (
+              <button
+                key={item.id}
+                type="button"
+                role="tab"
+                aria-selected={tab === item.id}
+                onClick={() => {
+                  setTab(item.id);
+                  setError(null);
+                }}
+                className={cx(
+                  'flex flex-1 items-center justify-center gap-1.5 rounded-lg px-2.5 py-1.5 text-[12px] transition-colors',
+                  tab === item.id
+                    ? 'bg-surface text-ink'
+                    : 'text-ink-muted hover:text-ink',
+                )}
+              >
+                <Icon size={14} />
+                {item.label}
+              </button>
+            );
+          })}
+        </div>
+
+        {!imageReady && !promptTab ? (
           <div className="rounded-xl border border-warn/30 bg-panel px-3.5 py-3 text-[12px] leading-relaxed text-ink-muted">
             <p className="font-medium text-ink">Image generation is not configured.</p>
             <p className="mt-1">
@@ -191,6 +286,13 @@ export function ImageBriefDialog() {
               }}
             >
               Open settings
+            </button>
+            <button
+              type="button"
+              className="btn btn-ghost mt-2 ml-1.5 h-7 text-[11.5px]"
+              onClick={() => setTab('prompt')}
+            >
+              Prompt only
             </button>
           </div>
         ) : null}
@@ -404,50 +506,67 @@ export function ImageBriefDialog() {
           <div className="flex flex-wrap items-center justify-between gap-2">
             <span className="inline-flex items-center gap-1.5 text-[11.5px] font-medium text-ink">
               <ImageIcon size={13} className="text-accent" />
-              Image prompt
+              {promptTab ? 'Prompt for another generator' : 'Image prompt'}
             </span>
             <div className="flex items-center gap-1">
-              {showPrompt && overrideDirty ? (
+              {promptTab ? (
                 <button
                   type="button"
                   className="btn btn-ghost h-6 px-1.5 text-[11px]"
-                  onClick={() => {
-                    setOverride(generated);
-                    setOverrideDirty(false);
-                  }}
+                  onClick={() => void copyPrompt()}
+                  disabled={!spec.subject.trim()}
                 >
-                  <RotateCcw size={11} />
-                  Reset
+                  {copied ? <Check size={11} /> : <ClipboardCopy size={11} />}
+                  {copied ? 'Copied' : 'Copy'}
                 </button>
-              ) : null}
-              <button
-                type="button"
-                className="btn btn-ghost h-6 px-1.5 text-[11px]"
-                onClick={() => {
-                  if (!showPrompt && !overrideDirty) setOverride(generated);
-                  setShowPrompt((value) => !value);
-                }}
-              >
-                <Eye size={11} />
-                {showPrompt ? 'Hide' : 'Show prompt'}
-              </button>
+              ) : (
+                <>
+                  {showPrompt && overrideDirty ? (
+                    <button
+                      type="button"
+                      className="btn btn-ghost h-6 px-1.5 text-[11px]"
+                      onClick={() => {
+                        setOverride(generated);
+                        setOverrideDirty(false);
+                      }}
+                    >
+                      <RotateCcw size={11} />
+                      Reset
+                    </button>
+                  ) : null}
+                  <button
+                    type="button"
+                    className="btn btn-ghost h-6 px-1.5 text-[11px]"
+                    onClick={() => {
+                      if (!showPrompt && !overrideDirty) setOverride(generated);
+                      setShowPrompt((value) => !value);
+                    }}
+                  >
+                    <Eye size={11} />
+                    {showPrompt ? 'Hide' : 'Show prompt'}
+                  </button>
+                </>
+              )}
             </div>
           </div>
 
-          {showPrompt ? (
+          {showPrompt || promptTab ? (
             <>
               <textarea
-                value={promptValue}
+                value={copyValue}
                 onChange={(event) => {
                   setOverride(event.target.value);
                   setOverrideDirty(true);
                 }}
-                rows={6}
+                rows={promptTab ? 9 : 6}
                 className="field scroll-thin mt-2 resize-y font-mono text-[11.5px] leading-relaxed"
-                aria-label="Image prompt"
+                aria-label={promptTab ? 'Prompt for another generator' : 'Image prompt'}
               />
-              <p className="mt-1.5 text-[10.5px] text-ink-faint">
-                {promptValue.length} characters · this is exactly what is sent to the provider.
+              <p className="mt-1.5 text-[10.5px] leading-relaxed text-ink-faint">
+                {promptTab
+                  ? `${copyValue.length} characters · editable · paste into Midjourney, DALL·E, Stable Diffusion or any other generator.`
+                  : `${promptValue.length} characters · this is exactly what is sent to the provider.`}
+                {promptTab && !spec.subject.trim() ? ' Add a subject above to unlock copying.' : ''}
               </p>
             </>
           ) : (

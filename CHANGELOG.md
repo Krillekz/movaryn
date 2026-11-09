@@ -1,5 +1,14 @@
 # Update log
 
+## 1.4.0 — Credits, and prompts you can take elsewhere
+
+- Settings has a Credits tab naming Raevik, who Movaryn is designed and built by.
+- Concept art has two modes now. **Generate image** works as before. **Prompt only** takes the same
+  brief and hands back a finished prompt, aspect ratio included, to paste into Midjourney, DALL·E,
+  Stable Diffusion or any other generator. Nothing is sent anywhere in that tab, so it works even with
+  no image provider configured.
+- Random in Prompt only fills the form instead of spending a generation.
+
 ## 1.3.1 — The whole theme, not half of it
 
 - The character/theme header above a moveset no longer cuts a long theme off with an ellipsis. It wraps
