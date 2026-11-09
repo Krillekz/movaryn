@@ -1,5 +1,10 @@
 # Update log
 
+## 1.4.3 — Read the prompt behind saved art
+
+- Every concept art tile in a project now has a collapsed Prompt note that expands to the full text,
+  so saved artwork can be understood and reproduced without copying it blind.
+
 ## 1.4.2 — Copy a prompt from saved art
 
 - Concept art tiles in a project now have a copy action beside download, so saved artwork can be
