@@ -1,11 +1,20 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Download, FolderPlus, Loader2, Sparkles, Wand2 } from 'lucide-react';
+import {
+  Check,
+  ClipboardCopy,
+  Download,
+  FolderPlus,
+  Loader2,
+  Sparkles,
+  Wand2,
+} from 'lucide-react';
 import type { ImagePromptSpec } from '../../shared/types';
 import type { ParsedResponse } from '../../shared/moveset';
+import { buildImagePrompt } from '../../shared/imagePrompt';
 import { useApp } from '../store/useApp';
 import { generateConceptImage } from '../lib/chatEngine';
 import { renderCharacterCard, type CharacterCardMove } from '../lib/characterCard';
-import { downloadUrl, slugify, uid } from '../lib/utils';
+import { copyText, cx, downloadUrl, slugify, uid } from '../lib/utils';
 import { Modal } from './ui/Modal';
 
 interface CharacterCardDialogProps {
@@ -35,6 +44,9 @@ export function CharacterCardDialog({
   const [rendering, setRendering] = useState(false);
   const [generating, setGenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [tab, setTab] = useState<'generate' | 'prompt'>('generate');
+  const [promptDraft, setPromptDraft] = useState<string | null>(null);
+  const [copied, setCopied] = useState(false);
 
   const moves = useMemo<CharacterCardMove[]>(() => {
     if (project && project.moves.length > 0) {
@@ -77,6 +89,30 @@ export function CharacterCardDialog({
 
   const selected = artOptions.find((option) => option.id === selectedId) ?? artOptions.at(-1) ?? null;
   const canGenerateArt = Boolean(provider?.image.configured);
+  const promptTab = tab === 'prompt';
+
+  const cardSpec = useMemo<ImagePromptSpec>(
+    () => ({
+      subject: theme ? `${name} — ${theme}` : name,
+      details: project?.description?.trim() || '',
+      outfit: '',
+      pose: 'standing three-quarter view, weapon visible',
+      framing: 'three-quarter',
+      angle: 'eye-level three-quarter view',
+      setting: 'plain studio backdrop',
+      lighting: 'soft rim light from the left',
+      style: 'clean game character concept art',
+      palette: '',
+      aspect: '3:4',
+      reference: project?.references?.[0],
+    }),
+    [name, theme, project],
+  );
+  const externalPrompt = useMemo(
+    () => `${buildImagePrompt(cardSpec)} Aspect ratio: ${cardSpec.aspect}.`,
+    [cardSpec],
+  );
+  const promptValue = promptDraft ?? externalPrompt;
   const movesKey = moves.map((move) => `${move.name}|${move.purpose ?? ''}|${move.description ?? ''}`).join('~');
 
   useEffect(() => {
@@ -84,6 +120,9 @@ export function CharacterCardDialog({
     let cancelled = false;
     setRendering(true);
     setError(null);
+    setTab('generate');
+    setPromptDraft(null);
+    setCopied(false);
     renderCharacterCard({ name, game, theme, moves, art: selected?.src })
       .then((dataUrl) => {
         if (!cancelled) setCard(dataUrl);
@@ -107,26 +146,26 @@ export function CharacterCardDialog({
   const generateArt = async () => {
     if (generating) return;
     setGenerating(true);
-    const spec: ImagePromptSpec = {
-      subject: theme ? `${name} — ${theme}` : name,
-      details: project?.description?.trim() || '',
-      outfit: '',
-      pose: 'standing three-quarter view, weapon visible',
-      framing: 'three-quarter',
-      angle: 'eye-level three-quarter view',
-      setting: 'plain studio backdrop',
-      lighting: 'soft rim light from the left',
-      style: 'clean game character concept art',
-      palette: '',
-      aspect: '3:4',
-      reference: project?.references?.[0],
-    };
-    const ok = await generateConceptImage(spec, { conversationId });
+    const ok = await generateConceptImage(cardSpec, { conversationId });
     setGenerating(false);
     if (ok) {
       setSelectedId(null);
       pushToast('Character art generated in this chat and placed on the card.', 'success');
     }
+  };
+
+  const copyPrompt = async () => {
+    const text = promptValue.trim();
+    if (!text) return;
+    const ok = await copyText(text);
+    if (!ok) {
+      setError('The clipboard is unavailable here. Select the prompt text and copy it manually.');
+      return;
+    }
+    setError(null);
+    setCopied(true);
+    pushToast('Prompt copied — paste it into any image generator.', 'success');
+    window.setTimeout(() => setCopied(false), 1_800);
   };
 
   const download = () => {
@@ -153,14 +192,31 @@ export function CharacterCardDialog({
       open={open}
       onClose={onClose}
       title="Character card"
-      description="Character on the right, name and moves on the left. Text is drawn on this device, so every move is spelled exactly as you saved it."
+      description={
+        promptTab
+          ? 'A finished art prompt for this character, ready to paste into any image generator. Nothing is generated or sent anywhere in this tab.'
+          : 'Character on the right, name and moves on the left. Text is drawn on this device, so every move is spelled exactly as you saved it.'
+      }
       width="max-w-4xl"
       bodyClassName="px-4 pb-4 pt-3"
       footer={
         <div className="flex flex-wrap items-center justify-between gap-2">
-          <span className="text-[11px] text-ink-faint">1600 × 1000 PNG</span>
+          <span className="text-[11px] text-ink-faint">
+            {promptTab ? 'Prompt only · nothing is generated' : '1600 × 1000 PNG'}
+          </span>
           <div className="flex flex-wrap gap-2">
-            {canGenerateArt ? (
+            {promptTab ? (
+              <button
+                type="button"
+                className="btn btn-primary"
+                onClick={() => void copyPrompt()}
+                disabled={!promptValue.trim()}
+              >
+                {copied ? <Check size={14} /> : <ClipboardCopy size={14} />}
+                {copied ? 'Copied' : 'Copy prompt'}
+              </button>
+            ) : null}
+            {canGenerateArt && !promptTab ? (
               <button
                 type="button"
                 className="btn btn-secondary"
@@ -176,7 +232,7 @@ export function CharacterCardDialog({
                 {generating ? 'Generating…' : 'Generate art'}
               </button>
             ) : null}
-            {project ? (
+            {project && !promptTab ? (
               <button
                 type="button"
                 className="btn btn-secondary"
@@ -187,15 +243,54 @@ export function CharacterCardDialog({
                 Save to project art
               </button>
             ) : null}
-            <button type="button" className="btn btn-primary" onClick={download} disabled={!card}>
-              <Download size={14} />
-              Download PNG
-            </button>
+            {promptTab ? null : (
+              <button type="button" className="btn btn-primary" onClick={download} disabled={!card}>
+                <Download size={14} />
+                Download PNG
+              </button>
+            )}
           </div>
         </div>
       }
     >
       <div className="flex flex-col gap-3">
+        <div
+          className="flex gap-1 rounded-xl border border-line bg-panel p-1"
+          role="tablist"
+          aria-label="Character art mode"
+        >
+          {(
+            [
+              { id: 'generate' as const, label: 'Generate art', icon: Wand2 },
+              { id: 'prompt' as const, label: 'Prompt only', icon: ClipboardCopy },
+            ] as const
+          ).map((item) => {
+            const Icon = item.icon;
+            return (
+              <button
+                key={item.id}
+                type="button"
+                role="tab"
+                aria-selected={tab === item.id}
+                onClick={() => {
+                  setTab(item.id);
+                  setPromptDraft(null);
+                  setCopied(false);
+                }}
+                className={cx(
+                  'flex flex-1 items-center justify-center gap-1.5 rounded-lg px-2.5 py-1.5 text-[12px] transition-colors',
+                  tab === item.id
+                    ? 'bg-surface text-ink'
+                    : 'text-ink-muted hover:text-ink',
+                )}
+              >
+                <Icon size={14} />
+                {item.label}
+              </button>
+            );
+          })}
+        </div>
+
         <div className="relative overflow-hidden rounded-xl border border-line bg-panel">
           {card ? (
             <img src={card} alt={`${name} character card`} className="w-full" />
@@ -221,6 +316,37 @@ export function CharacterCardDialog({
             </span>
           ) : null}
         </div>
+
+        {promptTab ? (
+          <div className="rounded-xl border border-line bg-panel px-3.5 py-3">
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <span className="inline-flex items-center gap-1.5 text-[11.5px] font-medium text-ink">
+                <ClipboardCopy size={13} className="text-accent" />
+                Prompt for another generator
+              </span>
+              <button
+                type="button"
+                className="btn btn-ghost h-6 px-1.5 text-[11px]"
+                onClick={() => void copyPrompt()}
+                disabled={!promptValue.trim()}
+              >
+                {copied ? <Check size={11} /> : <ClipboardCopy size={11} />}
+                {copied ? 'Copied' : 'Copy'}
+              </button>
+            </div>
+            <textarea
+              value={promptValue}
+              onChange={(event) => setPromptDraft(event.target.value)}
+              rows={8}
+              className="field scroll-thin mt-2 resize-y font-mono text-[11.5px] leading-relaxed"
+              aria-label="Prompt for another generator"
+            />
+            <p className="mt-1.5 text-[10.5px] leading-relaxed text-ink-faint">
+              {promptValue.length} characters · editable · describes the character art only. The
+              card&apos;s name and moves are drawn on this device, so nothing else is needed.
+            </p>
+          </div>
+        ) : null}
 
         {error ? (
           <p className="rounded-lg border border-danger/30 bg-panel px-3 py-2 text-[11.5px] leading-relaxed text-danger">
