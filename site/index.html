@@ -46,6 +46,7 @@
         <nav class="nav-links" aria-label="Primary">
           <a href="#features">Features</a>
           <a href="#workflow">Workflow</a>
+          <a href="#faq">FAQ</a>
           <a href="changelog.html">Update log</a>
           <a href="https://github.com/Krillekz/movaryn" rel="noreferrer">GitHub</a>
         </nav>
@@ -354,6 +355,98 @@
         </div>
       </section>
 
+      <section class="section" id="faq">
+        <div class="shell">
+          <header class="section-head">
+            <p class="eyebrow">FAQ</p>
+            <h2>Short answers before you start</h2>
+            <p class="section-lede">
+              Setup, keys and the games this is built for — the practical parts, without a sales pitch.
+            </p>
+          </header>
+
+          <div class="faq">
+            <details class="faq-item">
+              <summary>
+                <span>How do I get set up?</span>
+                <span class="faq-mark" aria-hidden="true"></span>
+              </summary>
+              <div class="faq-body">
+                <p>
+                  Install <strong>Movaryn Setup</strong> or run the portable build. Neither bundles a key:
+                  create <code>%APPDATA%\Movaryn\provider.env</code> with at least <code>AI_API_KEY</code>,
+                  <code>AI_BASE_URL</code> and <code>AI_MODEL</code>, then launch the app.
+                </p>
+                <p>
+                  For concept art, add <code>IMAGE_API_KEY</code> and <code>IMAGE_MODEL</code>, or use
+                  Cloudflare Workers AI with <code>IMAGE_PROVIDER=cloudflare</code>,
+                  <code>IMAGE_ACCOUNT_ID</code> and <code>IMAGE_API_KEY</code>.
+                </p>
+                <p>
+                  Working from source instead? Node.js 20.19+ is required: <code>npm install</code>, copy
+                  <code>.env.example</code> to <code>.env</code>, then <code>npm run dev</code>.
+                </p>
+              </div>
+            </details>
+
+            <details class="faq-item">
+              <summary>
+                <span>Do I need my own provider key?</span>
+                <span class="faq-mark" aria-hidden="true"></span>
+              </summary>
+              <div class="faq-body">
+                <p>
+                  Yes for chat. There is no shared key and no hosted account. Without a key the app still
+                  opens, but AI features say they need configuration rather than pretending to work.
+                </p>
+                <p>
+                  Keys are read by the local API server only — the page has no key handling and never sees
+                  one. Any OpenAI-compatible endpoint works: OpenAI, OpenRouter, Together, the Freebuff
+                  API, or a local server such as Ollama, LM Studio or vLLM.
+                </p>
+                <p>
+                  The Prompt only tab assembles the image prompt from your brief and sends nothing, so it
+                  works with no image provider at all.
+                </p>
+              </div>
+            </details>
+
+            <details class="faq-item">
+              <summary>
+                <span>Which games is it built for?</span>
+                <span class="faq-mark" aria-hidden="true"></span>
+              </summary>
+              <div class="faq-body">
+                <p>
+                  Jujutsu Shenanigans (JJS), The Strongest Battlegrounds (TSB) and similar arena or
+                  battleground combat games. The brief has a free-form game field, so other combat games
+                  work as long as you describe their move rules.
+                </p>
+                <p>
+                  Mechanics knowledge is not live. When Movaryn cannot verify that a Skill Builder
+                  feature exists, it says so and offers a buildable alternative instead of inventing one.
+                  It is not affiliated with Roblox or any game it mentions.
+                </p>
+              </div>
+            </details>
+
+            <details class="faq-item">
+              <summary>
+                <span>Where does my work live?</span>
+                <span class="faq-mark" aria-hidden="true"></span>
+              </summary>
+              <div class="faq-body">
+                <p>
+                  Conversations, projects, saved moves and generated images stay on your device. There
+                  are no accounts, no sync and no telemetry; exports give you an escape hatch. Only the
+                  messages, brief and images you send reach the provider you configured.
+                </p>
+              </div>
+            </details>
+          </div>
+        </div>
+      </section>
+
       <section class="section section-alt" id="updates">
         <div class="shell">
           <header class="section-head section-head-row">
@@ -399,6 +492,7 @@
         <nav class="footer-links" aria-label="Footer">
           <a href="#features">Features</a>
           <a href="#workflow">Workflow</a>
+          <a href="#faq">FAQ</a>
           <a href="changelog.html">Update log</a>
           <a href="https://github.com/Krillekz/movaryn" rel="noreferrer">GitHub</a>
           <a href="https://github.com/Krillekz/movaryn/releases" rel="noreferrer">Releases</a>

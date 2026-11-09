@@ -619,6 +619,10 @@ ol {
   border-bottom: 1px solid var(--line);
 }
 
+section[id] {
+  scroll-margin-top: 84px;
+}
+
 .section-alt {
   background: linear-gradient(180deg, #0a0a0f, #08080b);
 }
@@ -1194,6 +1198,106 @@ ol {
 
 .log-release-link:hover {
   color: var(--accent-strong);
+}
+
+/* ── FAQ ─────────────────────────────────────────────────── */
+
+.faq {
+  max-width: 52rem;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--panel);
+  overflow: hidden;
+}
+
+.faq-item + .faq-item {
+  border-top: 1px solid var(--line);
+}
+
+.faq-item summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 19px 24px;
+  color: var(--ink);
+  font-size: 14.5px;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  cursor: pointer;
+  list-style: none;
+  transition: background-color 150ms ease;
+}
+
+.faq-item summary::-webkit-details-marker {
+  display: none;
+}
+
+.faq-item summary:hover,
+.faq-item[open] summary {
+  background: var(--panel-2);
+}
+
+.faq-mark {
+  position: relative;
+  flex: none;
+  width: 14px;
+  height: 14px;
+}
+
+.faq-mark::before,
+.faq-mark::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  background: var(--ink-faint);
+  transition:
+    transform 160ms ease,
+    opacity 160ms ease;
+}
+
+.faq-mark::before {
+  width: 14px;
+  height: 1.5px;
+  transform: translate(-50%, -50%);
+}
+
+.faq-mark::after {
+  width: 1.5px;
+  height: 14px;
+  transform: translate(-50%, -50%);
+}
+
+.faq-item[open] .faq-mark::after {
+  transform: translate(-50%, -50%) scaleY(0);
+  opacity: 0;
+}
+
+.faq-body {
+  padding: 2px 24px 22px;
+  color: var(--ink-muted);
+  font-size: 13.5px;
+  line-height: 1.7;
+}
+
+.faq-body p + p {
+  margin-top: 10px;
+}
+
+.faq-body code {
+  padding: 1px 5px;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  background: var(--surface);
+  font-family: var(--font-mono);
+  font-size: 0.86em;
+  overflow-wrap: anywhere;
+}
+
+.faq-body strong {
+  color: var(--ink);
+  font-weight: 600;
 }
 
 /* ── Responsive ──────────────────────────────────────────── */
