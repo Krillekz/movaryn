@@ -194,6 +194,8 @@ function AssistantMessage({
   );
   const toast = useApp.getState().pushToast;
 
+  const imagePrompt = useMemo(() => imagePromptFor(message), [message]);
+
   const saveMoves = () => {
     if (!parsed || parsed.moves.length === 0) return;
     const state = useApp.getState();
@@ -426,11 +428,12 @@ function AssistantMessage({
           <button
             type="button"
             className="btn btn-ghost h-7 px-2 text-[11.5px]"
+            aria-label="Copy prompt"
             onClick={async () => {
-              const prompt = message.images?.[0]?.prompt ?? '';
-              const ok = await copyText(prompt);
+              const ok = await copyText(imagePrompt);
               toast(ok ? 'Image prompt copied.' : 'Copy failed.', ok ? 'success' : 'danger');
             }}
+            disabled={!imagePrompt}
           >
             Copy prompt
           </button>
@@ -456,6 +459,8 @@ function ImageMessageBody({
   onPreview: (image: PreviewImage) => void;
 }) {
   const aspectStyle = { aspectRatio: aspectRatioCss(message.promptSpec?.aspect ?? '1:1') };
+  const toast = useApp.getState().pushToast;
+  const imagePrompt = imagePromptFor(message);
 
   if (message.status === 'streaming') {
     return (
@@ -519,9 +524,19 @@ function ImageMessageBody({
           <summary className="cursor-pointer list-none text-[11px] font-medium text-ink-faint hover:text-ink-muted">
             Image prompt · {message.promptSpec.framing.replace('-', ' ')} · {message.promptSpec.aspect}
           </summary>
-          <p className="mt-2 whitespace-pre-line text-[11.5px] leading-relaxed text-ink-muted">
-            {resolveImagePrompt(message.promptSpec)}
-          </p>
+          <div className="mt-2 flex items-start gap-2">
+            <p className="min-w-0 flex-1 whitespace-pre-line text-[11.5px] leading-relaxed text-ink-muted">
+              {imagePrompt || resolveImagePrompt(message.promptSpec)}
+            </p>
+            <CopyButton
+              text={imagePrompt}
+              label="Copy prompt"
+              className="h-7 w-7 shrink-0"
+              onCopied={(ok) =>
+                toast(ok ? 'Image prompt copied.' : 'Copy failed.', ok ? 'success' : 'danger')
+              }
+            />
+          </div>
           {message.promptSpec.reference ? (
             <p className="mt-1.5 text-[10.5px] text-ink-faint">
               Reference image: {message.promptSpec.reference.name}
@@ -531,6 +546,15 @@ function ImageMessageBody({
       ) : null}
     </div>
   );
+}
+
+/**
+ * The reproducible prompt for an image message. The brief is the source; the provider's
+ * echo can be missing or rewritten, so it is only a fallback.
+ */
+function imagePromptFor(message: ChatMessage): string {
+  if (!message.promptSpec) return message.images?.[0]?.prompt ?? '';
+  return `${resolveImagePrompt(message.promptSpec)} Aspect ratio: ${message.promptSpec.aspect}.`;
 }
 
 function ImageDownloadButton({ image, index }: { image: GeneratedImage; index: number }) {
