@@ -1,5 +1,10 @@
 # Update log
 
+## 1.3.1 — The whole theme, not half of it
+
+- The character/theme header above a moveset no longer cuts a long theme off with an ellipsis. It wraps
+  to as many lines as it needs, so the full sentence stays readable.
+
 ## 1.3.0 — Random ideas and character cards
 
 - A Random button in the concept art dialog rolls a complete character brief — subject, outfit,
