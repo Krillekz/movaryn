@@ -275,7 +275,7 @@ function AssistantMessage({
         <div>
           {message.content ? (
             parsed?.isMoveset ? (
-              <MovesetView parsed={parsed} content={message.content} />
+              <MovesetView parsed={parsed} content={message.content} conversationId={conversationId} />
             ) : (
               <div className={cx(message.status === 'streaming' && 'stream-caret')}>
                 <Markdown>{message.content}</Markdown>

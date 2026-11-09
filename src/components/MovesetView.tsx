@@ -1,15 +1,17 @@
 import { useState } from 'react';
-import { Copy, CornerDownRight, Sparkles } from 'lucide-react';
+import { Copy, CornerDownRight, LayoutTemplate, Sparkles } from 'lucide-react';
 import type { ParsedMove, ParsedResponse } from '../../shared/moveset';
 import { moveToText } from '../../shared/moveset';
 import { Markdown } from './Markdown';
 import { CopyButton } from './ui/CopyButton';
 import { useApp } from '../store/useApp';
 import { copyText, cx } from '../lib/utils';
+import { CharacterCardDialog } from './CharacterCardDialog';
 
 interface MovesetViewProps {
   parsed: ParsedResponse;
   content: string;
+  conversationId: string;
 }
 
 const META_ROWS: { key: 'character' | 'theme' | 'game'; label: string }[] = [
@@ -18,8 +20,9 @@ const META_ROWS: { key: 'character' | 'theme' | 'game'; label: string }[] = [
   { key: 'game', label: 'Game' },
 ];
 
-export function MovesetView({ parsed, content }: MovesetViewProps) {
+export function MovesetView({ parsed, content, conversationId }: MovesetViewProps) {
   const [raw, setRaw] = useState(false);
+  const [cardOpen, setCardOpen] = useState(false);
   const hasMeta = META_ROWS.some((row) => parsed.meta[row.key]);
 
   if (raw) {
@@ -56,6 +59,15 @@ export function MovesetView({ parsed, content }: MovesetViewProps) {
             onClick={() => setRaw(true)}
           >
             Raw text
+          </button>
+          <button
+            type="button"
+            className="btn btn-secondary h-7 px-2 text-[11.5px]"
+            onClick={() => setCardOpen(true)}
+            title="Make a character card from this moveset"
+          >
+            <LayoutTemplate size={12} />
+            Character card
           </button>
           <button
             type="button"
@@ -108,6 +120,13 @@ export function MovesetView({ parsed, content }: MovesetViewProps) {
           return <Markdown key={`text-${index}`} className="text-[14px] text-ink-muted">{block.text}</Markdown>;
         })}
       </div>
+
+      <CharacterCardDialog
+        open={cardOpen}
+        onClose={() => setCardOpen(false)}
+        parsed={parsed}
+        conversationId={conversationId}
+      />
     </div>
   );
 }

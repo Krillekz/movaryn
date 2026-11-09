@@ -1,5 +1,15 @@
 # Update log
 
+## 1.3.0 — Random ideas and character cards
+
+- A Random button in the concept art dialog rolls a complete character brief — subject, outfit,
+  pose, setting, lighting, palette and style — and generates it in one press. Every field comes from
+  a visible bank, so you can read, edit and reuse the prompt instead of guessing what a model invented.
+- Character cards: under any generated moveset, “Character card” composes a 1600 × 1000 PNG with the
+  character on the right and the name, game, theme and moves on the left. The text is drawn on your
+  device, so move names are always spelled exactly as saved. Download the card, or save it into the
+  project’s concept art.
+
 ## 1.2.0 — Movesets that come back in
 
 - Import a moveset from the project workspace as JSON or CSV. JSON accepts Movaryn's own export, the

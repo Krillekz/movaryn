@@ -1,11 +1,12 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Eye, Image as ImageIcon, Loader2, RotateCcw, Upload, Wand2, X } from 'lucide-react';
+import { Dices, Eye, Image as ImageIcon, Loader2, RotateCcw, Upload, Wand2, X } from 'lucide-react';
 import type { AspectRatio, Framing, ImagePromptSpec, Project, Settings } from '../../shared/types';
 import { ASPECT_RATIOS, FRAMING_OPTIONS } from '../../shared/types';
 import { buildImagePrompt } from '../../shared/imagePrompt';
 import { useApp } from '../store/useApp';
 import { generateConceptImage } from '../lib/chatEngine';
 import { readImageFile } from '../lib/image';
+import { randomImageSpec } from '../lib/imageRandom';
 import { Modal } from './ui/Modal';
 import { cx } from '../lib/utils';
 
@@ -82,20 +83,23 @@ export function ImageBriefDialog() {
     }
   };
 
-  const submit = async () => {
+  const submit = async (candidate?: ImagePromptSpec) => {
     if (busy) return;
-    if (!spec.subject.trim()) {
+    const active = candidate ?? spec;
+    if (!active.subject.trim()) {
       setError('Describe what should be pictured — even one line is enough.');
       return;
     }
-    const prompt = (overrideDirty && override.trim() ? override : generated).trim();
+    const prompt = (
+      !candidate && overrideDirty && override.trim() ? override : buildImagePrompt(active)
+    ).trim();
     if (!prompt) {
       setError('The image prompt is empty. Add a subject or write a prompt.');
       return;
     }
     setBusy(true);
     setError(null);
-    const finalSpec: ImagePromptSpec = { ...spec, promptOverride: prompt };
+    const finalSpec: ImagePromptSpec = { ...active, promptOverride: prompt };
     const ok = await generateConceptImage(
       finalSpec,
       brief.messageId
@@ -105,11 +109,25 @@ export function ImageBriefDialog() {
     setBusy(false);
     if (ok) {
       updateSettings({
-        lastImageStyle: spec.style?.trim() ?? '',
-        aspect: spec.aspect,
+        lastImageStyle: active.style?.trim() ?? '',
+        aspect: active.aspect,
       });
       close();
     }
+  };
+
+  const rollRandom = () => {
+    if (busy || !imageReady) return;
+    const next = randomImageSpec({
+      aspect: spec.aspect,
+      framing: spec.framing,
+      style: settings.lastImageStyle || undefined,
+    });
+    setSpec(next);
+    setOverride('');
+    setOverrideDirty(false);
+    setShowPrompt(false);
+    void submit(next);
   };
 
   return (
@@ -125,6 +143,16 @@ export function ImageBriefDialog() {
             {spec.aspect} · {spec.framing.replace('-', ' ')}
           </span>
           <div className="flex gap-2">
+            <button
+              type="button"
+              className="btn btn-secondary"
+              onClick={rollRandom}
+              disabled={busy || !imageReady || reading}
+              title="Roll a random character brief and generate it straight away"
+            >
+              <Dices size={15} />
+              Random
+            </button>
             <button type="button" className="btn btn-ghost" onClick={close} disabled={busy}>
               Cancel
             </button>
