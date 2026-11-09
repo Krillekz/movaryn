@@ -28,6 +28,7 @@ import {
   projectToJson,
   projectToMarkdown,
 } from '../lib/movesetExport';
+import { briefPatch, parseMovesetFile } from '../lib/movesetImport';
 import { Modal } from './ui/Modal';
 import { CopyButton } from './ui/CopyButton';
 import { Dropdown, DropdownItem } from './ui/Dropdown';
@@ -41,6 +42,7 @@ export function ProjectDrawer() {
   const updateProject = useApp((state) => state.updateProject);
   const deleteProject = useApp((state) => state.deleteProject);
   const removeProjectMove = useApp((state) => state.removeProjectMove);
+  const addProjectMove = useApp((state) => state.addProjectMove);
   const addProjectReference = useApp((state) => state.addProjectReference);
   const removeProjectReference = useApp((state) => state.removeProjectReference);
   const newConversation = useApp((state) => state.newConversation);
@@ -48,6 +50,7 @@ export function ProjectDrawer() {
   const requestConfirm = useApp((state) => state.requestConfirm);
   const pushToast = useApp((state) => state.pushToast);
   const fileRef = useRef<HTMLInputElement>(null);
+  const importRef = useRef<HTMLInputElement>(null);
   const [moveQuery, setMoveQuery] = useState('');
   const [purposeFilter, setPurposeFilter] = useState<string | null>(null);
 
@@ -98,6 +101,42 @@ export function ProjectDrawer() {
       }.`,
       'success',
     );
+  };
+
+  const importMoveset = async (files: FileList | null) => {
+    const file = files?.[0];
+    if (!file) return;
+    try {
+      const imported = parseMovesetFile(await file.text(), file.name);
+      const patch = briefPatch(project, imported.brief);
+      if (Object.keys(patch).length > 0) updateProject(project.id, patch);
+
+      const existing = new Set(project.moves.map((move) => move.name.toLowerCase()));
+      const updated = imported.moves.filter((move) => existing.has(move.name.toLowerCase())).length;
+      for (const move of imported.moves) {
+        addProjectMove(project.id, {
+          name: move.name,
+          description: move.description,
+          purpose: move.purpose,
+          source: 'import',
+        });
+      }
+
+      const added = imported.moves.length - updated;
+      const parts = [
+        added > 0 ? `${added} new move${added === 1 ? '' : 's'}` : '',
+        updated > 0 ? `${updated} updated` : '',
+        imported.skipped > 0
+          ? `${imported.skipped} row${imported.skipped === 1 ? '' : 's'} skipped`
+          : '',
+      ].filter(Boolean);
+      pushToast(`Imported ${parts.join(', ')}.`, 'success');
+    } catch (error) {
+      pushToast(
+        error instanceof Error ? error.message : 'That file could not be imported.',
+        'danger',
+      );
+    }
   };
 
   const brief = [
@@ -294,17 +333,39 @@ export function ProjectDrawer() {
             <h3 className="text-[11px] font-semibold uppercase tracking-[0.14em] text-ink-faint">
               Saved moves ({project.moves.length})
             </h3>
-            {project.moves.length > 0 ? (
-              <span className="text-[10.5px] text-ink-faint">
-                {movesWithoutPurpose === 0
-                  ? 'Every move has a purpose'
-                  : `${movesWithoutPurpose} without a purpose`}
-              </span>
-            ) : null}
+            <div className="flex items-center gap-2">
+              {project.moves.length > 0 ? (
+                <span className="text-[10.5px] text-ink-faint">
+                  {movesWithoutPurpose === 0
+                    ? 'Every move has a purpose'
+                    : `${movesWithoutPurpose} without a purpose`}
+                </span>
+              ) : null}
+              <button
+                type="button"
+                className="btn btn-ghost h-6 gap-1 px-1.5 text-[11px]"
+                onClick={() => importRef.current?.click()}
+                title="Import moves from a JSON or CSV export"
+              >
+                <Upload size={12} />
+                Import
+              </button>
+            </div>
           </div>
+          <input
+            ref={importRef}
+            type="file"
+            accept=".json,.csv,application/json,text/csv,text/plain"
+            className="hidden"
+            aria-label="Import moveset file"
+            onChange={(event) => {
+              void importMoveset(event.target.files);
+              event.target.value = '';
+            }}
+          />
           {project.moves.length === 0 ? (
             <p className="mt-2 rounded-lg border border-dashed border-line px-3 py-3 text-[11.5px] text-ink-faint">
-              Use “Save moves” under a Movaryn reply to collect moves here.
+              Use “Save moves” under a Movaryn reply to collect moves here, or import a JSON/CSV export.
             </p>
           ) : (
             <div className="mt-2 flex flex-col gap-2">
