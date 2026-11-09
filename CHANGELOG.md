@@ -1,5 +1,13 @@
 # Update log
 
+## 1.2.0 — Movesets that come back in
+
+- Import a moveset from the project workspace as JSON or CSV. JSON accepts Movaryn's own export, the
+  older project-shaped export and a bare move array; CSV copes with quoted commas, embedded newlines
+  and header variants, and also works without a header row.
+- Imported moves merge by name, so re-importing updates rather than duplicates. Blank brief fields are
+  filled from the file, and unusable rows are reported instead of silently dropped.
+
 ## 1.1.0 — Movesets that leave the app
 
 - Export a project's moveset as a Markdown design sheet, a CSV table for spreadsheets or engine import,
