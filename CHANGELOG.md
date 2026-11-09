@@ -1,5 +1,12 @@
 # Update log
 
+## 1.4.1 — Copy the prompt from an old image
+
+- Image messages in a chat now copy the prompt rebuilt from the saved brief, aspect ratio included,
+  instead of relying on the provider's echo (which can be empty).
+- The expandable prompt panel has its own copy button, and the row button disables itself when there is
+  nothing to copy.
+
 ## 1.4.0 — Credits, and prompts you can take elsewhere
 
 - Settings has a Credits tab naming Raevik, who Movaryn is designed and built by.
