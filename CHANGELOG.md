@@ -1,5 +1,10 @@
 # Update log
 
+## 1.4.6 — Prompts you edit are kept
+
+- Prompt-only text is remembered per project, separately for concept art and the character card.
+  Close the dialog, switch chats or restart the app and your edited prompt is still there.
+
 ## 1.4.5 — Copy the card's art prompt
 
 - The character card has **Generate art** and **Prompt only** tabs. Prompt only builds the card's
