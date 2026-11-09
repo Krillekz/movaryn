@@ -95,7 +95,9 @@ export function MovesetView({ parsed, content, conversationId }: MovesetViewProp
                 <dt className="text-[10px] font-semibold uppercase tracking-[0.16em] text-ink-faint">
                   {row.label}
                 </dt>
-                <dd className="mt-0.5 truncate text-[13.5px] text-ink">{value}</dd>
+                <dd className="mt-0.5 whitespace-pre-line break-words text-[13.5px] leading-relaxed text-ink">
+                  {value}
+                </dd>
               </div>
             );
           })}
