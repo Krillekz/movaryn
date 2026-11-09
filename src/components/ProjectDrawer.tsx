@@ -478,6 +478,23 @@ export function ProjectDrawer() {
                   >
                     <Download size={12} />
                   </a>
+                  {image.prompt?.trim() ? (
+                    <button
+                      type="button"
+                      className="absolute left-9 top-1.5 flex h-6 w-6 items-center justify-center rounded-md bg-panel/90 text-ink-muted opacity-0 backdrop-blur transition-opacity group-hover:opacity-100 hover:text-ink"
+                      aria-label="Copy concept art prompt"
+                      title="Copy the prompt for this image"
+                      onClick={async () => {
+                        const ok = await copyText(image.prompt);
+                        pushToast(
+                          ok ? 'Concept art prompt copied.' : 'Copy failed.',
+                          ok ? 'success' : 'danger',
+                        );
+                      }}
+                    >
+                      <ClipboardCopy size={12} />
+                    </button>
+                  ) : null}
                   <button
                     type="button"
                     className="absolute right-1.5 top-1.5 flex h-6 w-6 items-center justify-center rounded-md bg-panel/90 text-ink-muted opacity-0 backdrop-blur transition-opacity group-hover:opacity-100 hover:text-danger"
