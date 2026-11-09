@@ -1,0 +1,515 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="color-scheme" content="dark" />
+    <title>Update log — Movaryn</title>
+    <meta
+      name="description"
+      content="Every Movaryn release, newest first: what changed, what was fixed and what was added."
+    />
+    <meta name="theme-color" content="#08080b" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Update log — Movaryn" />
+    <meta
+      property="og:description"
+      content="Every Movaryn release, newest first: what changed, what was fixed and what was added."
+    />
+    <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+    <link rel="stylesheet" href="assets/site.css" />
+  </head>
+  <body>
+    <a class="skip" href="#main">Skip to content</a>
+
+    <header class="nav">
+      <div class="shell nav-inner">
+        <a class="brand" href="./" aria-label="Movaryn home">
+          <span class="brand-mark" aria-hidden="true">
+            <svg viewBox="0 0 64 64" fill="none">
+              <path
+                d="M15 44 L23.5 19 L32 35 L40.5 19 L49 44"
+                stroke="currentColor"
+                stroke-width="5.2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+              <circle cx="32" cy="49.5" r="3.1" fill="currentColor" />
+            </svg>
+          </span>
+          <span class="brand-text">
+            <strong>Movaryn</strong>
+            <small>Moveset studio</small>
+          </span>
+        </a>
+
+        <nav class="nav-links" aria-label="Primary">
+          <a href="./#features">Features</a>
+          <a href="./#workflow">Workflow</a>
+          <a href="changelog.html" aria-current="page">Update log</a>
+          <a href="https://github.com/Krillekz/movaryn" rel="noreferrer">GitHub</a>
+        </nav>
+
+        <a
+          class="btn btn-primary nav-cta"
+          href="https://github.com/Krillekz/movaryn/releases/latest"
+          data-download="setup"
+        >
+          Download
+        </a>
+      </div>
+    </header>
+
+    <main id="main">
+      <section class="log-hero">
+        <div class="shell">
+          <p class="eyebrow"><span class="dot"></span> 17 releases</p>
+          <h1>Update log</h1>
+          <p>
+            What changed in every Movaryn build, newest first. The newest release is
+            <strong>1.4.6</strong> — Prompts you edit are kept.
+          </p>
+        </div>
+      </section>
+
+      <div class="shell log-layout">
+        <aside class="log-index">
+          <p>All releases</p>
+          <ol>
+        <li>
+          <a href="#v1.4.6">
+            1.4.6
+            <small>Prompts you edit are kept</small>
+          </a>
+        </li>
+        <li>
+          <a href="#v1.4.5">
+            1.4.5
+            <small>Copy the card's art prompt</small>
+          </a>
+        </li>
+        <li>
+          <a href="#v1.4.4">
+            1.4.4
+            <small>Find the art you saved</small>
+          </a>
+        </li>
+        <li>
+          <a href="#v1.4.3">
+            1.4.3
+            <small>Read the prompt behind saved art</small>
+          </a>
+        </li>
+        <li>
+          <a href="#v1.4.2">
+            1.4.2
+            <small>Copy a prompt from saved art</small>
+          </a>
+        </li>
+        <li>
+          <a href="#v1.4.1">
+            1.4.1
+            <small>Copy the prompt from an old image</small>
+          </a>
+        </li>
+        <li>
+          <a href="#v1.4.0">
+            1.4.0
+            <small>Credits, and prompts you can take elsewhere</small>
+          </a>
+        </li>
+        <li>
+          <a href="#v1.3.1">
+            1.3.1
+            <small>The whole theme, not half of it</small>
+          </a>
+        </li>
+        <li>
+          <a href="#v1.3.0">
+            1.3.0
+            <small>Random ideas and character cards</small>
+          </a>
+        </li>
+        <li>
+          <a href="#v1.2.0">
+            1.2.0
+            <small>Movesets that come back in</small>
+          </a>
+        </li>
+        <li>
+          <a href="#v1.1.0">
+            1.1.0
+            <small>Movesets that leave the app</small>
+          </a>
+        </li>
+        <li>
+          <a href="#v1.0.5">
+            1.0.5
+            <small>Image generation stops failing on stale settings</small>
+          </a>
+        </li>
+        <li>
+          <a href="#v1.0.4">
+            1.0.4
+            <small>Crop follows the subject</small>
+          </a>
+        </li>
+        <li>
+          <a href="#v1.0.3">
+            1.0.3
+            <small>Aspect-accurate concept art</small>
+          </a>
+        </li>
+        <li>
+          <a href="#v1.0.2">
+            1.0.2
+            <small>Free image generation</small>
+          </a>
+        </li>
+        <li>
+          <a href="#v1.0.1">
+            1.0.1
+            <small>Provider honesty</small>
+          </a>
+        </li>
+        <li>
+          <a href="#v1.0.0">
+            1.0.0
+            <small>Initial release</small>
+          </a>
+        </li>
+          </ol>
+        </aside>
+
+        <section class="log-entries" aria-label="Release notes">
+      <article class="log-entry" id="v1.4.6">
+        <header class="log-entry-header">
+          <h2>1.4.6</h2>
+          <span class="log-title">Prompts you edit are kept</span>
+          <span class="log-latest">Latest</span>
+        </header>
+        <ul>
+          <li>Prompt-only text is remembered per project, separately for concept art and the character card. Close the dialog, switch chats or restart the app and your edited prompt is still there.</li>
+        </ul>
+        <a class="log-release-link" href="https://github.com/Krillekz/movaryn/releases/tag/v1.4.6">
+          Release notes on GitHub <span aria-hidden="true">→</span>
+        </a>
+      </article>
+
+      <article class="log-entry" id="v1.4.5">
+        <header class="log-entry-header">
+          <h2>1.4.5</h2>
+          <span class="log-title">Copy the card's art prompt</span>
+          
+        </header>
+        <ul>
+          <li>The character card has <strong>Generate art</strong> and <strong>Prompt only</strong> tabs. Prompt only builds the card's art prompt from the saved character brief, ready to edit and paste into any image generator.</li>
+        </ul>
+        <a class="log-release-link" href="https://github.com/Krillekz/movaryn/releases/tag/v1.4.5">
+          Release notes on GitHub <span aria-hidden="true">→</span>
+        </a>
+      </article>
+
+      <article class="log-entry" id="v1.4.4">
+        <header class="log-entry-header">
+          <h2>1.4.4</h2>
+          <span class="log-title">Find the art you saved</span>
+          
+        </header>
+        <ul>
+          <li>Concept art in a project has a filter now, matching saved moves: search the prompts, narrow by aspect ratio with chips, and get a clear empty state when nothing matches.</li>
+        </ul>
+        <a class="log-release-link" href="https://github.com/Krillekz/movaryn/releases/tag/v1.4.4">
+          Release notes on GitHub <span aria-hidden="true">→</span>
+        </a>
+      </article>
+
+      <article class="log-entry" id="v1.4.3">
+        <header class="log-entry-header">
+          <h2>1.4.3</h2>
+          <span class="log-title">Read the prompt behind saved art</span>
+          
+        </header>
+        <ul>
+          <li>Every concept art tile in a project now has a collapsed Prompt note that expands to the full text, so saved artwork can be understood and reproduced without copying it blind.</li>
+        </ul>
+        <a class="log-release-link" href="https://github.com/Krillekz/movaryn/releases/tag/v1.4.3">
+          Release notes on GitHub <span aria-hidden="true">→</span>
+        </a>
+      </article>
+
+      <article class="log-entry" id="v1.4.2">
+        <header class="log-entry-header">
+          <h2>1.4.2</h2>
+          <span class="log-title">Copy a prompt from saved art</span>
+          
+        </header>
+        <ul>
+          <li>Concept art tiles in a project now have a copy action beside download, so saved artwork can be reproduced elsewhere. Tiles without a saved prompt show no button.</li>
+        </ul>
+        <a class="log-release-link" href="https://github.com/Krillekz/movaryn/releases/tag/v1.4.2">
+          Release notes on GitHub <span aria-hidden="true">→</span>
+        </a>
+      </article>
+
+      <article class="log-entry" id="v1.4.1">
+        <header class="log-entry-header">
+          <h2>1.4.1</h2>
+          <span class="log-title">Copy the prompt from an old image</span>
+          
+        </header>
+        <ul>
+          <li>Image messages in a chat now copy the prompt rebuilt from the saved brief, aspect ratio included, instead of relying on the provider's echo (which can be empty).</li>
+          <li>The expandable prompt panel has its own copy button, and the row button disables itself when there is nothing to copy.</li>
+        </ul>
+        <a class="log-release-link" href="https://github.com/Krillekz/movaryn/releases/tag/v1.4.1">
+          Release notes on GitHub <span aria-hidden="true">→</span>
+        </a>
+      </article>
+
+      <article class="log-entry" id="v1.4.0">
+        <header class="log-entry-header">
+          <h2>1.4.0</h2>
+          <span class="log-title">Credits, and prompts you can take elsewhere</span>
+          
+        </header>
+        <ul>
+          <li>Settings has a Credits tab naming Raevik, who Movaryn is designed and built by.</li>
+          <li>Concept art has two modes now. <strong>Generate image</strong> works as before. <strong>Prompt only</strong> takes the same brief and hands back a finished prompt, aspect ratio included, to paste into Midjourney, DALL·E, Stable Diffusion or any other generator. Nothing is sent anywhere in that tab, so it works even with no image provider configured.</li>
+          <li>Random in Prompt only fills the form instead of spending a generation.</li>
+        </ul>
+        <a class="log-release-link" href="https://github.com/Krillekz/movaryn/releases/tag/v1.4.0">
+          Release notes on GitHub <span aria-hidden="true">→</span>
+        </a>
+      </article>
+
+      <article class="log-entry" id="v1.3.1">
+        <header class="log-entry-header">
+          <h2>1.3.1</h2>
+          <span class="log-title">The whole theme, not half of it</span>
+          
+        </header>
+        <ul>
+          <li>The character/theme header above a moveset no longer cuts a long theme off with an ellipsis. It wraps to as many lines as it needs, so the full sentence stays readable.</li>
+        </ul>
+        <a class="log-release-link" href="https://github.com/Krillekz/movaryn/releases/tag/v1.3.1">
+          Release notes on GitHub <span aria-hidden="true">→</span>
+        </a>
+      </article>
+
+      <article class="log-entry" id="v1.3.0">
+        <header class="log-entry-header">
+          <h2>1.3.0</h2>
+          <span class="log-title">Random ideas and character cards</span>
+          
+        </header>
+        <ul>
+          <li>A Random button in the concept art dialog rolls a complete character brief — subject, outfit, pose, setting, lighting, palette and style — and generates it in one press. Every field comes from a visible bank, so you can read, edit and reuse the prompt instead of guessing what a model invented.</li>
+          <li>Character cards: under any generated moveset, “Character card” composes a 1600 × 1000 PNG with the character on the right and the name, game, theme and moves on the left. The text is drawn on your device, so move names are always spelled exactly as saved. Download the card, or save it into the project’s concept art.</li>
+        </ul>
+        <a class="log-release-link" href="https://github.com/Krillekz/movaryn/releases/tag/v1.3.0">
+          Release notes on GitHub <span aria-hidden="true">→</span>
+        </a>
+      </article>
+
+      <article class="log-entry" id="v1.2.0">
+        <header class="log-entry-header">
+          <h2>1.2.0</h2>
+          <span class="log-title">Movesets that come back in</span>
+          
+        </header>
+        <ul>
+          <li>Import a moveset from the project workspace as JSON or CSV. JSON accepts Movaryn's own export, the older project-shaped export and a bare move array; CSV copes with quoted commas, embedded newlines and header variants, and also works without a header row.</li>
+          <li>Imported moves merge by name, so re-importing updates rather than duplicates. Blank brief fields are filled from the file, and unusable rows are reported instead of silently dropped.</li>
+        </ul>
+        <a class="log-release-link" href="https://github.com/Krillekz/movaryn/releases/tag/v1.2.0">
+          Release notes on GitHub <span aria-hidden="true">→</span>
+        </a>
+      </article>
+
+      <article class="log-entry" id="v1.1.0">
+        <header class="log-entry-header">
+          <h2>1.1.0</h2>
+          <span class="log-title">Movesets that leave the app</span>
+          
+        </header>
+        <ul>
+          <li>Export a project's moveset as a Markdown design sheet, a CSV table for spreadsheets or engine import, or a JSON backup that keeps the brief fields. Available from the project workspace.</li>
+          <li>Filter saved moves by text or by purpose, and see at a glance how many moves still lack a purpose.</li>
+          <li>Concept art downloads now use the real file type and a readable name instead of a timestamped <code>.png</code>, and saved project art can be downloaded from the workspace.</li>
+        </ul>
+        <a class="log-release-link" href="https://github.com/Krillekz/movaryn/releases/tag/v1.1.0">
+          Release notes on GitHub <span aria-hidden="true">→</span>
+        </a>
+      </article>
+
+      <article class="log-entry" id="v1.0.5">
+        <header class="log-entry-header">
+          <h2>1.0.5</h2>
+          <span class="log-title">Image generation stops failing on stale settings</span>
+          
+        </header>
+        <ul>
+          <li>An image model left in settings from an OpenAI-style setup (such as <code>gpt-image-1</code>) no longer overrides the configured Cloudflare model, which made Workers AI answer <code>No route for that URI</code>.</li>
+          <li>Cloudflare no longer borrows <code>AI_API_KEY</code> when its own token is missing, which turned a missing <code>IMAGE_API_KEY</code> into a confusing 401 from another service.</li>
+          <li>A wrong <code>IMAGE_MODEL</code> now names the model and the expected Workers AI form instead of a bare route error.</li>
+        </ul>
+        <a class="log-release-link" href="https://github.com/Krillekz/movaryn/releases/tag/v1.0.5">
+          Release notes on GitHub <span aria-hidden="true">→</span>
+        </a>
+      </article>
+
+      <article class="log-entry" id="v1.0.4">
+        <header class="log-entry-header">
+          <h2>1.0.4</h2>
+          <span class="log-title">Crop follows the subject</span>
+          
+        </header>
+        <ul>
+          <li>Cropping now follows the image content instead of taking a fixed centre slice: brightness-gradient profiles find where the subject sits, rows keep a small margin above the subject and trim surplus from the bottom, and the subject is centred horizontally.</li>
+          <li>Wide and portrait concept art no longer loses the top of a head or hat, and an off-centre figure stays in frame. Flat frames still fall back to a centred crop.</li>
+        </ul>
+        <a class="log-release-link" href="https://github.com/Krillekz/movaryn/releases/tag/v1.0.4">
+          Release notes on GitHub <span aria-hidden="true">→</span>
+        </a>
+      </article>
+
+      <article class="log-entry" id="v1.0.3">
+        <header class="log-entry-header">
+          <h2>1.0.3</h2>
+          <span class="log-title">Aspect-accurate concept art</span>
+          
+        </header>
+        <ul>
+          <li>Cloudflare images are center-cropped to the aspect ratio chosen in the brief, so a portrait or wide brief no longer shows a square inside a taller frame. JPEG output only; other formats pass through.</li>
+          <li>Cropping uses a pure-JS codec, so the packaged app carries no native image dependency.</li>
+          <li>If an image cannot be decoded, it is returned unchanged rather than failing the request.</li>
+        </ul>
+        <a class="log-release-link" href="https://github.com/Krillekz/movaryn/releases/tag/v1.0.3">
+          Release notes on GitHub <span aria-hidden="true">→</span>
+        </a>
+      </article>
+
+      <article class="log-entry" id="v1.0.2">
+        <header class="log-entry-header">
+          <h2>1.0.2</h2>
+          <span class="log-title">Free image generation</span>
+          
+        </header>
+        <ul>
+          <li>Cloudflare Workers AI is now an image backend. Set <code>IMAGE_PROVIDER=cloudflare</code> with <code>IMAGE_ACCOUNT_ID</code> and an API token, or just set the account id and it is detected. The free plan's daily allowance makes concept art usable without paying an image provider.</li>
+          <li>Existing OpenAI-compatible <code>/images/generations</code> hosts keep working unchanged.</li>
+          <li>FLUX.1 schnell returns square images and cannot take a reference image, so the app reports that instead of pretending the reference was used.</li>
+          <li>Failed quota and token errors now explain what to fix rather than surfacing a generic provider error.</li>
+        </ul>
+        <a class="log-release-link" href="https://github.com/Krillekz/movaryn/releases/tag/v1.0.2">
+          Release notes on GitHub <span aria-hidden="true">→</span>
+        </a>
+      </article>
+
+      <article class="log-entry" id="v1.0.1">
+        <header class="log-entry-header">
+          <h2>1.0.1</h2>
+          <span class="log-title">Provider honesty</span>
+          
+        </header>
+        <ul>
+          <li>Image generation now requires <code>IMAGE_MODEL</code>. A chat-only provider (such as OpenRouter's free tier) reports concept art as unconfigured instead of offering a button that can only fail.</li>
+          <li>The system prompt no longer lets a named Skill Builder node be marked <code>[Confirmed]</code>. Unverifiable features must be labelled <code>[Custom]</code> with a buildable alternative alongside them.</li>
+          <li>Rename and tweak requests return only the changed move instead of re-emitting the whole kit.</li>
+        </ul>
+        <a class="log-release-link" href="https://github.com/Krillekz/movaryn/releases/tag/v1.0.1">
+          Release notes on GitHub <span aria-hidden="true">→</span>
+        </a>
+      </article>
+
+      <article class="log-entry" id="v1.0.0">
+        <header class="log-entry-header">
+          <h2>1.0.0</h2>
+          <span class="log-title">Initial release</span>
+          
+        </header>
+        <h3>The workshop</h3>
+        <ul>
+          <li>Moveset-aware AI chat with streaming replies, a stop control and inline failure recovery.</li>
+          <li>Project briefs (character, game, theme, description, constraints, saved moves) injected into every reply in that project.</li>
+          <li>Exact-count and restriction handling, plus an automatic avoid-list of move names already used in the conversation or project.</li>
+          <li>Automatic conversation memory: older turns are condensed in the background, with no app-imposed message cap.</li>
+          <li>Rich moveset rendering with sections, move cards and per-move copy, plus a raw-text view for every reply. Copy the full moveset or a single move in one click.</li>
+          <li>Edit-and-resend for user messages, regenerate for replies, and a searchable, collapsible chat history with rename and delete.</li>
+        </ul>
+        <h3>Concept art</h3>
+        <ul>
+          <li>A structured image brief: subject, character details, outfit, pose, framing, camera, background, lighting, style, palette, aspect ratio and reference upload.</li>
+          <li>A prompt builder that refuses to invent scenery or props, with an inspectable and editable final prompt.</li>
+          <li>Generate, regenerate, revise, download, copy prompt, and save concept art to a project.</li>
+          <li>Reference images are sent to providers that support image edits; when they cannot be used, the app says so instead of pretending.</li>
+        </ul>
+        <h3>Workspace</h3>
+        <ul>
+          <li>Projects with saved moves, concept art, reference images and their own chats.</li>
+          <li>Light and dark themes, keyboard shortcuts, accessible dialogs and focus states.</li>
+          <li>Local-first storage in IndexedDB, JSON export, and full data deletion.</li>
+          <li>Provider configuration entirely on the server: OpenAI-compatible chat and image endpoints, configurable models, quality, aspect ratios and reference support.</li>
+          <li>Electron shell with context isolation, sandboxing and a minimal read-only preload bridge.</li>
+          <li>GitHub Pages workflow for the static frontend with a separately hosted API.</li>
+        </ul>
+        <h3>Desktop builds</h3>
+        <ul>
+          <li>Windows installer and a single-file portable exe, packaged with electron-builder and attached to GitHub Releases.</li>
+          <li>A tag-driven workflow rebuilds both artifacts and attaches them to the release automatically.</li>
+          <li>Builds are unsigned, so Windows SmartScreen shows an &quot;unknown publisher&quot; prompt on first launch.</li>
+        </ul>
+        <h3>Known gaps</h3>
+        <ul>
+          <li>No accounts or cross-device sync.</li>
+          <li>Reference conditioning depends on provider support for <code>/images/edits</code>.</li>
+          <li>Installer packaging for desktop is documented but not automated.</li>
+        </ul>
+        <a class="log-release-link" href="https://github.com/Krillekz/movaryn/releases/tag/v1.0.0">
+          Release notes on GitHub <span aria-hidden="true">→</span>
+        </a>
+      </article>
+        </section>
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="shell footer-grid">
+        <div>
+          <a class="brand" href="./" aria-label="Movaryn home">
+            <span class="brand-mark" aria-hidden="true">
+              <svg viewBox="0 0 64 64" fill="none">
+                <path
+                  d="M15 44 L23.5 19 L32 35 L40.5 19 L49 44"
+                  stroke="currentColor"
+                  stroke-width="5.2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+                <circle cx="32" cy="49.5" r="3.1" fill="currentColor" />
+              </svg>
+            </span>
+            <span class="brand-text"><strong>Movaryn</strong><small>Moveset studio</small></span>
+          </a>
+          <p class="footer-note">
+            Designed and built by <strong>Raevik</strong>. Ideas are yours; the keys never leave your
+            machine.
+          </p>
+        </div>
+        <nav class="footer-links" aria-label="Footer">
+          <a href="./">Home</a>
+          <a href="./#features">Features</a>
+          <a href="https://github.com/Krillekz/movaryn" rel="noreferrer">GitHub</a>
+          <a href="https://github.com/Krillekz/movaryn/releases" rel="noreferrer">Releases</a>
+        </nav>
+      </div>
+      <div class="shell footer-base">
+        <span>© <span id="year">2026</span> Movaryn</span>
+        <span>Not affiliated with any game or studio mentioned.</span>
+      </div>
+    </footer>
+
+    <script src="assets/site.js" defer></script>
+  </body>
+</html>

@@ -20,7 +20,8 @@
     "icon": "node scripts/make-icon.mjs",
     "package:win": "npm run build && npm run icon && electron-builder --win --publish never",
     "package:dir": "npm run build && npm run icon && electron-builder --dir",
-    "mock:provider": "node scripts/mock-provider.mjs"
+    "mock:provider": "node scripts/mock-provider.mjs",
+    "build:site": "node scripts/build-site.mjs"
   },
   "engines": {
     "node": ">=20.19"

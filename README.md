@@ -273,18 +273,20 @@ HOST=0.0.0.0 PORT=8787 npm start
 The API serves `dist/` and `/api` from one origin. Set `AI_*` / `IMAGE_*` as host environment variables.
 This is the simplest way to keep keys server-side and avoid CORS.
 
-### GitHub Pages frontend + hosted API
+### Landing site and update log (GitHub Pages)
 
-GitHub Pages is static and cannot hold keys, so the API must live elsewhere.
+`site/` is the public Movaryn page: features, downloads and an update log whose entries are generated
+from `CHANGELOG.md` by `scripts/build-site.mjs` (`npm run build:site`). It is plain HTML, CSS and JS with
+no build dependencies, so it can be opened locally or published as-is.
 
-1. Deploy the API to any Node host (Render, Railway, Fly.io, a VPS). Set `HOST=0.0.0.0`, your provider
-   variables, and `ALLOWED_ORIGINS=https://<your-user>.github.io`.
-2. Add a repository variable `VITE_API_BASE_URL=https://your-api.example.com`.
-3. Enable Pages → Source: GitHub Actions. `.github/workflows/deploy-pages.yml` builds and publishes
-   `dist/` on every push to `main`.
+1. Enable Pages → Source: GitHub Actions.
+2. `.github/workflows/deploy-pages.yml` rebuilds `site/changelog.html` and publishes `site/` on pushes
+   that touch the site, the changelog or the generator.
 
-`base: './'` in `vite.config.ts` means the build works from a repository subpath without extra config.
-There is no client-side router, so no 404 rewrite is needed.
+To host the web app itself, deploy the API to any Node host (Render, Railway, Fly.io, a VPS) with
+`HOST=0.0.0.0` and `ALLOWED_ORIGINS` set, build with `VITE_API_BASE_URL=https://your-api.example.com`, and
+serve `dist/` from that host or another static host. `base: './'` keeps the build portable to a
+repository subpath.
 
 ### Electron desktop
 

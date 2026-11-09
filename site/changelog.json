@@ -1,0 +1,87 @@
+[
+  {
+    "version": "1.4.6",
+    "title": "Prompts you edit are kept",
+    "summary": "Prompt-only text is remembered per project, separately for concept art and the character card. Close the dialog, switch chats or restart the app and…"
+  },
+  {
+    "version": "1.4.5",
+    "title": "Copy the card's art prompt",
+    "summary": "The character card has Generate art and Prompt only tabs. Prompt only builds the card's art prompt from the saved character brief, ready to edit and…"
+  },
+  {
+    "version": "1.4.4",
+    "title": "Find the art you saved",
+    "summary": "Concept art in a project has a filter now, matching saved moves: search the prompts, narrow by aspect ratio with chips, and get a clear empty state w…"
+  },
+  {
+    "version": "1.4.3",
+    "title": "Read the prompt behind saved art",
+    "summary": "Every concept art tile in a project now has a collapsed Prompt note that expands to the full text, so saved artwork can be understood and reproduced…"
+  },
+  {
+    "version": "1.4.2",
+    "title": "Copy a prompt from saved art",
+    "summary": "Concept art tiles in a project now have a copy action beside download, so saved artwork can be reproduced elsewhere. Tiles without a saved prompt sho…"
+  },
+  {
+    "version": "1.4.1",
+    "title": "Copy the prompt from an old image",
+    "summary": "Image messages in a chat now copy the prompt rebuilt from the saved brief, aspect ratio included, instead of relying on the provider's echo (which ca…"
+  },
+  {
+    "version": "1.4.0",
+    "title": "Credits, and prompts you can take elsewhere",
+    "summary": "Settings has a Credits tab naming Raevik, who Movaryn is designed and built by."
+  },
+  {
+    "version": "1.3.1",
+    "title": "The whole theme, not half of it",
+    "summary": "The character/theme header above a moveset no longer cuts a long theme off with an ellipsis. It wraps to as many lines as it needs, so the full sente…"
+  },
+  {
+    "version": "1.3.0",
+    "title": "Random ideas and character cards",
+    "summary": "A Random button in the concept art dialog rolls a complete character brief — subject, outfit, pose, setting, lighting, palette and style — and genera…"
+  },
+  {
+    "version": "1.2.0",
+    "title": "Movesets that come back in",
+    "summary": "Import a moveset from the project workspace as JSON or CSV. JSON accepts Movaryn's own export, the older project-shaped export and a bare move array;…"
+  },
+  {
+    "version": "1.1.0",
+    "title": "Movesets that leave the app",
+    "summary": "Export a project's moveset as a Markdown design sheet, a CSV table for spreadsheets or engine import, or a JSON backup that keeps the brief fields. A…"
+  },
+  {
+    "version": "1.0.5",
+    "title": "Image generation stops failing on stale settings",
+    "summary": "An image model left in settings from an OpenAI-style setup (such as gpt-image-1) no longer overrides the configured Cloudflare model, which made Work…"
+  },
+  {
+    "version": "1.0.4",
+    "title": "Crop follows the subject",
+    "summary": "Cropping now follows the image content instead of taking a fixed centre slice: brightness-gradient profiles find where the subject sits, rows keep a…"
+  },
+  {
+    "version": "1.0.3",
+    "title": "Aspect-accurate concept art",
+    "summary": "Cloudflare images are center-cropped to the aspect ratio chosen in the brief, so a portrait or wide brief no longer shows a square inside a taller fr…"
+  },
+  {
+    "version": "1.0.2",
+    "title": "Free image generation",
+    "summary": "Cloudflare Workers AI is now an image backend. Set IMAGE_PROVIDER=cloudflare with IMAGE_ACCOUNT_ID and an API token, or just set the account id and i…"
+  },
+  {
+    "version": "1.0.1",
+    "title": "Provider honesty",
+    "summary": "Image generation now requires IMAGE_MODEL. A chat-only provider (such as OpenRouter's free tier) reports concept art as unconfigured instead of offer…"
+  },
+  {
+    "version": "1.0.0",
+    "title": "Initial release",
+    "summary": "Moveset-aware AI chat with streaming replies, a stop control and inline failure recovery."
+  }
+]
