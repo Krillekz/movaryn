@@ -1,5 +1,6 @@
 import { useRef, useState } from 'react';
 import {
+  ChevronDown,
   ClipboardCopy,
   Download,
   FileText,
@@ -460,53 +461,72 @@ export function ProjectDrawer() {
           ) : (
             <div className="mt-2 grid grid-cols-2 gap-2">
               {project.images.map((image: GeneratedImage, index) => (
-                <div key={image.id} className="group relative overflow-hidden rounded-lg border border-line">
-                  <img
-                    src={image.dataUrl ?? image.url}
-                    alt={image.prompt.slice(0, 80)}
-                    className="h-36 w-full object-cover"
-                    loading="lazy"
-                  />
-                  <a
-                    href={image.dataUrl ?? image.url}
-                    download={`movaryn-${slugify(project.name, 32)}-art-${index + 1}.${extensionFromDataUrl(
-                      image.dataUrl ?? image.url ?? '',
-                    )}`}
-                    className="absolute left-1.5 top-1.5 flex h-6 w-6 items-center justify-center rounded-md bg-panel/90 text-ink-muted opacity-0 backdrop-blur transition-opacity group-hover:opacity-100 hover:text-ink"
-                    aria-label="Download concept art"
-                    title="Download concept art"
-                  >
-                    <Download size={12} />
-                  </a>
-                  {image.prompt?.trim() ? (
+                <div
+                  key={image.id}
+                  className="group/tile overflow-hidden rounded-lg border border-line bg-panel"
+                >
+                  <div className="relative">
+                    <img
+                      src={image.dataUrl ?? image.url}
+                      alt={image.prompt.slice(0, 80)}
+                      className="h-36 w-full object-cover"
+                      loading="lazy"
+                    />
+                    <a
+                      href={image.dataUrl ?? image.url}
+                      download={`movaryn-${slugify(project.name, 32)}-art-${index + 1}.${extensionFromDataUrl(
+                        image.dataUrl ?? image.url ?? '',
+                      )}`}
+                      className="absolute left-1.5 top-1.5 flex h-6 w-6 items-center justify-center rounded-md bg-panel/90 text-ink-muted opacity-0 backdrop-blur transition-opacity group-hover/tile:opacity-100 hover:text-ink"
+                      aria-label="Download concept art"
+                      title="Download concept art"
+                    >
+                      <Download size={12} />
+                    </a>
+                    {image.prompt?.trim() ? (
+                      <button
+                        type="button"
+                        className="absolute left-9 top-1.5 flex h-6 w-6 items-center justify-center rounded-md bg-panel/90 text-ink-muted opacity-0 backdrop-blur transition-opacity group-hover/tile:opacity-100 hover:text-ink"
+                        aria-label="Copy concept art prompt"
+                        title="Copy the prompt for this image"
+                        onClick={async () => {
+                          const ok = await copyText(image.prompt);
+                          pushToast(
+                            ok ? 'Concept art prompt copied.' : 'Copy failed.',
+                            ok ? 'success' : 'danger',
+                          );
+                        }}
+                      >
+                        <ClipboardCopy size={12} />
+                      </button>
+                    ) : null}
                     <button
                       type="button"
-                      className="absolute left-9 top-1.5 flex h-6 w-6 items-center justify-center rounded-md bg-panel/90 text-ink-muted opacity-0 backdrop-blur transition-opacity group-hover:opacity-100 hover:text-ink"
-                      aria-label="Copy concept art prompt"
-                      title="Copy the prompt for this image"
-                      onClick={async () => {
-                        const ok = await copyText(image.prompt);
-                        pushToast(
-                          ok ? 'Concept art prompt copied.' : 'Copy failed.',
-                          ok ? 'success' : 'danger',
-                        );
-                      }}
+                      className="absolute right-1.5 top-1.5 flex h-6 w-6 items-center justify-center rounded-md bg-panel/90 text-ink-muted opacity-0 backdrop-blur transition-opacity group-hover/tile:opacity-100 hover:text-danger"
+                      aria-label="Remove image"
+                      onClick={() =>
+                        updateProject(project.id, {
+                          images: project.images.filter((item) => item.id !== image.id),
+                        })
+                      }
                     >
-                      <ClipboardCopy size={12} />
+                      <X size={12} />
                     </button>
+                  </div>
+                  {image.prompt?.trim() ? (
+                    <details className="group/prompt border-t border-line">
+                      <summary className="flex cursor-pointer list-none items-center gap-1 px-2 py-1.5 text-[10.5px] font-medium text-ink-faint transition-colors hover:text-ink-muted">
+                        <ChevronDown
+                          size={11}
+                          className="shrink-0 transition-transform group-open/prompt:rotate-180"
+                        />
+                        Prompt
+                      </summary>
+                      <p className="scroll-thin max-h-40 overflow-y-auto whitespace-pre-line px-2 pb-2 text-[10.5px] leading-relaxed text-ink-muted">
+                        {image.prompt}
+                      </p>
+                    </details>
                   ) : null}
-                  <button
-                    type="button"
-                    className="absolute right-1.5 top-1.5 flex h-6 w-6 items-center justify-center rounded-md bg-panel/90 text-ink-muted opacity-0 backdrop-blur transition-opacity group-hover:opacity-100 hover:text-danger"
-                    aria-label="Remove image"
-                    onClick={() =>
-                      updateProject(project.id, {
-                        images: project.images.filter((item) => item.id !== image.id),
-                      })
-                    }
-                  >
-                    <X size={12} />
-                  </button>
                 </div>
               ))}
             </div>
