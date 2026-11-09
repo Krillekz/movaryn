@@ -1,5 +1,10 @@
 # Update log
 
+## 1.4.5 — Copy the card's art prompt
+
+- The character card has **Generate art** and **Prompt only** tabs. Prompt only builds the card's
+  art prompt from the saved character brief, ready to edit and paste into any image generator.
+
 ## 1.4.4 — Find the art you saved
 
 - Concept art in a project has a filter now, matching saved moves: search the prompts, narrow by
