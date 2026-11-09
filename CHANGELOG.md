@@ -1,5 +1,10 @@
 # Update log
 
+## 1.4.4 — Find the art you saved
+
+- Concept art in a project has a filter now, matching saved moves: search the prompts, narrow by
+  aspect ratio with chips, and get a clear empty state when nothing matches.
+
 ## 1.4.3 — Read the prompt behind saved art
 
 - Every concept art tile in a project now has a collapsed Prompt note that expands to the full text,
