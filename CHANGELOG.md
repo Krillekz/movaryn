@@ -1,5 +1,10 @@
 # Update log
 
+## 1.4.2 — Copy a prompt from saved art
+
+- Concept art tiles in a project now have a copy action beside download, so saved artwork can be
+  reproduced elsewhere. Tiles without a saved prompt show no button.
+
 ## 1.4.1 — Copy the prompt from an old image
 
 - Image messages in a chat now copy the prompt rebuilt from the saved brief, aspect ratio included,
