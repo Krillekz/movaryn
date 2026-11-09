@@ -54,6 +54,8 @@ export function ProjectDrawer() {
   const importRef = useRef<HTMLInputElement>(null);
   const [moveQuery, setMoveQuery] = useState('');
   const [purposeFilter, setPurposeFilter] = useState<string | null>(null);
+  const [artQuery, setArtQuery] = useState('');
+  const [artAspectFilter, setArtAspectFilter] = useState<string | null>(null);
 
   const chats = projectId
     ? order
@@ -82,6 +84,14 @@ export function ProjectDrawer() {
     if (purposeFilter && move.purpose?.trim() !== purposeFilter) return false;
     if (!query) return true;
     return `${move.name} ${move.purpose ?? ''} ${move.description}`.toLowerCase().includes(query);
+  });
+
+  const artAspects = Array.from(new Set(project.images.map((image) => image.aspect)));
+  const artQueryText = artQuery.trim().toLowerCase();
+  const filteredImages = project.images.filter((image) => {
+    if (artAspectFilter && image.aspect !== artAspectFilter) return false;
+    if (!artQueryText) return true;
+    return `${image.prompt} ${image.aspect}`.toLowerCase().includes(artQueryText);
   });
 
   const exportProject = (format: 'markdown' | 'csv' | 'json') => {
@@ -459,8 +469,53 @@ export function ProjectDrawer() {
               Generated images saved from the chat appear here.
             </p>
           ) : (
-            <div className="mt-2 grid grid-cols-2 gap-2">
-              {project.images.map((image: GeneratedImage, index) => (
+            <div className="mt-2 flex flex-col gap-2">
+              <div className="relative">
+                <Search
+                  size={13}
+                  className="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-ink-faint"
+                />
+                <input
+                  value={artQuery}
+                  onChange={(event) => setArtQuery(event.target.value)}
+                  placeholder="Filter saved art"
+                  aria-label="Filter saved art"
+                  className="field h-8 pl-7 text-[12px]"
+                />
+              </div>
+              {artAspects.length > 1 ? (
+                <div className="flex flex-wrap gap-1">
+                  <button
+                    type="button"
+                    className={cx('chip h-6', !artAspectFilter && 'border-accent/50 text-accent')}
+                    onClick={() => setArtAspectFilter(null)}
+                  >
+                    All
+                  </button>
+                  {artAspects.map((aspect) => (
+                    <button
+                      key={aspect}
+                      type="button"
+                      className={cx(
+                        'chip h-6',
+                        artAspectFilter === aspect && 'border-accent/50 text-accent',
+                      )}
+                      onClick={() =>
+                        setArtAspectFilter(artAspectFilter === aspect ? null : aspect)
+                      }
+                    >
+                      {aspect}
+                    </button>
+                  ))}
+                </div>
+              ) : null}
+              {filteredImages.length === 0 ? (
+                <p className="rounded-lg border border-dashed border-line px-3 py-3 text-[11.5px] text-ink-faint">
+                  No saved art matches that filter.
+                </p>
+              ) : (
+                <div className="grid grid-cols-2 gap-2">
+                  {filteredImages.map((image: GeneratedImage, index) => (
                 <div
                   key={image.id}
                   className="group/tile overflow-hidden rounded-lg border border-line bg-panel"
@@ -528,7 +583,9 @@ export function ProjectDrawer() {
                     </details>
                   ) : null}
                 </div>
-              ))}
+                  ))}
+                </div>
+              )}
             </div>
           )}
         </section>
