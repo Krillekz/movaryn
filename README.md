@@ -19,6 +19,14 @@ It is not a generic chatbot with a game skin:
   presets, searchable, insertable into the composer or the art brief.
 - **A local kit check.** Duplicate names, overused words, described sequences, roles and repeated
   openings are checked in the app, with no provider request.
+- **A character brief and opt-in research.** Series, version, abilities to keep or avoid, and a stated
+  canon/original/mixed mode travel with the project. Research keeps only facts with a named source and
+  says so when it finds none.
+- **A local kit sandbox.** Estimated start-up, active and recovery windows, a counterplay read and a
+  transparent scorecard, with frame-data export.
+- **Cross-game remapping.** Rewrites range and cooldown language for another game, lists every change
+  and flags what does not fit.
+- **Local versions and share links.** Snapshots you can restore, and a read-only kit encoded in a link.
 - **House rules.** Preferences set in Settings → Prompts travel with every chat, next to the project
   brief.
 - **A command palette.** Ctrl/⌘ K searches chats, projects and saved moves, and runs the app's
@@ -102,6 +110,7 @@ All values are read by the API server (`server/config.ts`) and never exposed to 
 | `AI_STREAM` | `true` | Set `false` if the provider cannot stream. |
 | `AI_VISION` | `true` | Set `false` if the model rejects image inputs. |
 | `AI_TIMEOUT_MS` | `180000` | Upstream chat timeout. |
+| `AI_RESEARCH` | `true` | Allow the opt-in `/api/research` character lookup. |
 | `IMAGE_BASE_URL` | falls back to `AI_BASE_URL` | Image API base URL. |
 | `IMAGE_API_KEY` | falls back to `AI_API_KEY` | Image key. |
 | `IMAGE_PROVIDER` | auto | `openai` (any `/images/generations` host) or `cloudflare` (Workers AI). Falls back to `cloudflare` when `IMAGE_ACCOUNT_ID` is set. |
@@ -192,6 +201,20 @@ view when the text really is a moveset (a move section, or labelled descriptions
 moves). Every move gets a copy button, the whole reply gets "Copy moveset", and every reply can be viewed
 as raw text. The same parser powers "Save moves" and the name avoid-list.
 
+### Kit tools
+
+Each project has a **Kit tools** panel with four tabs:
+
+- **Brief** — series, version, abilities to keep or avoid, a canon/original/mixed mode, and opt-in
+  research that keeps only facts with a named source.
+- **Sandbox** — estimated start-up, active and recovery windows from the saved moves and a per-game
+  preset, a counterplay read, a scorecard and matchup notes.
+- **Remap** — a transparent conversion of range and cooldown language to another game, with every
+  change listed and a new project created rather than overwriting the original.
+- **History** — local snapshots with restore, and a read-only share link encoded in the URL fragment.
+
+Nothing in Kit tools is uploaded, and the sandbox never presents an estimate as measured frame data.
+
 ### Image workflow
 
 1. The brief collects subject, character details, outfit, pose, framing, angle, background, lighting,
@@ -246,8 +269,8 @@ system: a project is a brief plus its outputs.
 └─ scripts/mock-provider.mjs   local test fixture
 ```
 
-The frontend never holds provider credentials. It calls only `/api/health`, `/api/chat`, `/api/image` and
-`/api/summarize`.
+The frontend never holds provider credentials. It calls only `/api/health`, `/api/chat`, `/api/image`,
+`/api/research` and `/api/summarize`.
 
 ---
 
@@ -401,6 +424,10 @@ model quality.
   without it fall back with a visible notice.
 - **Mechanics knowledge is not live.** Game updates change move editors. Movaryn labels uncertainty rather
   than claiming a feature exists.
+- **Research is model-based.** The lookup asks your chat provider for sourced facts; it does not browse
+  the web, and a source it names may be wrong. Facts stay labelled unverified until you check them.
+- **Share links are snapshots.** A shared kit is encoded in the URL fragment; it is not a live document
+  and it is not synced.
 - **Image prompts cannot guarantee perfect anatomy.** Revisions, prompt editing and reference images are
   the practical controls; no provider is perfect.
 

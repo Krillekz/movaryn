@@ -7,10 +7,12 @@ import {
   FolderPlus,
   Loader2,
   Plus,
+  Printer,
   Search,
   Table,
   Trash2,
   Upload,
+  Wrench,
   X,
 } from 'lucide-react';
 import type { GeneratedImage, ImageAttachment, Project } from '../../shared/types';
@@ -30,6 +32,13 @@ import {
   projectToMarkdown,
 } from '../lib/movesetExport';
 import { briefPatch, parseMovesetFile } from '../lib/movesetImport';
+import {
+  frameTableCsv,
+  presetForGame,
+  runSandbox,
+  type SandboxPresetId,
+} from '../../shared/sandbox';
+import { projectSheetHtml } from '../lib/printSheet';
 import { Modal } from './ui/Modal';
 import { CopyButton } from './ui/CopyButton';
 import { Dropdown, DropdownItem } from './ui/Dropdown';
@@ -50,6 +59,7 @@ export function ProjectDrawer() {
   const setActive = useApp((state) => state.setActive);
   const requestConfirm = useApp((state) => state.requestConfirm);
   const pushToast = useApp((state) => state.pushToast);
+  const openTools = useApp((state) => state.openTools);
   const fileRef = useRef<HTMLInputElement>(null);
   const importRef = useRef<HTMLInputElement>(null);
   const [moveQuery, setMoveQuery] = useState('');
@@ -94,7 +104,27 @@ export function ProjectDrawer() {
     return `${image.prompt} ${image.aspect}`.toLowerCase().includes(artQueryText);
   });
 
-  const exportProject = (format: 'markdown' | 'csv' | 'json') => {
+  const exportProject = (format: 'markdown' | 'csv' | 'json' | 'frames' | 'sheet') => {
+    if (format === 'frames' || format === 'sheet') {
+      const presetId = ((project.sandboxPreset as SandboxPresetId | undefined) ??
+        presetForGame(project.game)) as SandboxPresetId;
+      if (format === 'frames') {
+        downloadText(
+          projectFileName(project, 'frames.csv'),
+          frameTableCsv(runSandbox(project.moves, presetId)),
+          'text/csv',
+        );
+        pushToast('Frame-data estimates exported.', 'success');
+      } else {
+        downloadText(
+          projectFileName(project, 'sheet.html'),
+          projectSheetHtml(project),
+          'text/html',
+        );
+        pushToast('Printable sheet downloaded — open it in a browser to print.', 'success');
+      }
+      return;
+    }
     if (format === 'markdown') {
       downloadText(projectFileName(project, 'md'), projectToMarkdown(project), 'text/markdown');
     } else if (format === 'csv') {
@@ -232,9 +262,36 @@ export function ProjectDrawer() {
                     <FileText size={13} />
                     JSON backup
                   </DropdownItem>
+                  <DropdownItem
+                    onClick={() => {
+                      closeExport();
+                      exportProject('frames');
+                    }}
+                  >
+                    <Table size={13} />
+                    Frame data (CSV)
+                  </DropdownItem>
+                  <DropdownItem
+                    onClick={() => {
+                      closeExport();
+                      exportProject('sheet');
+                    }}
+                  >
+                    <Printer size={13} />
+                    Printable sheet (HTML)
+                  </DropdownItem>
                 </>
               )}
             </Dropdown>
+            <button
+              type="button"
+              className="icon-btn"
+              title="Kit tools: brief, sandbox, remap, history"
+              aria-label="Kit tools"
+              onClick={() => openTools('brief')}
+            >
+              <Wrench size={15} />
+            </button>
             <button
               type="button"
               className="icon-btn hover:text-danger"

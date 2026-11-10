@@ -116,6 +116,8 @@ export const config = {
     stream: bool(process.env.AI_STREAM, true),
     vision: bool(process.env.AI_VISION, true),
     timeoutMs: integer(process.env.AI_TIMEOUT_MS, 180_000, 10_000, 900_000),
+    // Opt-in per request, but a host can switch the lookup off entirely.
+    research: bool(process.env.AI_RESEARCH, true),
     configured: aiApiKey.length > 0 && aiModel.length > 0 && validHttpUrl(aiBaseUrl),
   },
   image: {

@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { ArrowUp, Image as ImageIcon, Lightbulb, Paperclip, Square, X } from 'lucide-react';
+import { ArrowUp, Image as ImageIcon, Lightbulb, Paperclip, Square, X, Zap } from 'lucide-react';
 import type { ImageAttachment } from '../../shared/types';
 import { sendMessage, stopGeneration } from '../lib/chatEngine';
 import { readImageFile } from '../lib/image';
@@ -14,6 +14,8 @@ export function Composer() {
   const openImageBrief = useApp((state) => state.openImageBrief);
   const openIdeas = useApp((state) => state.openIdeas);
   const pushToast = useApp((state) => state.pushToast);
+  const quickKit = useApp((state) => state.settings.quickKit);
+  const updateSettings = useApp((state) => state.updateSettings);
 
   const [attachments, setAttachments] = useState<ImageAttachment[]>([]);
   const [busy, setBusy] = useState(false);
@@ -164,6 +166,19 @@ export function Composer() {
             onClick={openIdeas}
           >
             <Lightbulb size={16} />
+          </button>
+          <button
+            type="button"
+            onClick={() => updateSettings({ quickKit: !quickKit })}
+            className={cx(
+              'chip ml-1 hidden h-7 gap-1 sm:inline-flex',
+              quickKit && 'border-accent/50 text-accent',
+            )}
+            title="One coherent pass: first move first, no preamble"
+            aria-pressed={quickKit}
+          >
+            <Zap size={12} />
+            Quick kit
           </button>
 
           <span className="ml-1 hidden select-none items-center gap-1 text-[11px] text-ink-faint sm:flex">

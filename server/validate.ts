@@ -5,9 +5,11 @@ import type {
   ImageQuality,
   ImageRequest,
   ProjectContextPayload,
+  ResearchRequest,
   SummaryRequest,
 } from '../shared/types';
 import { ASPECT_RATIOS } from '../shared/types';
+import { normaliseBrief } from '../shared/brief';
 import { AppError } from './errors';
 
 const MAX_MESSAGES = 220;
@@ -73,7 +75,13 @@ function validateProject(value: unknown): ProjectContextPayload | undefined {
     theme: optionalString(raw.theme, 'project.theme', 400),
     description: optionalString(raw.description, 'project.description', MAX_PROJECT_TEXT),
     constraints: optionalString(raw.constraints, 'project.constraints', MAX_PROJECT_TEXT),
+    matchupNotes: optionalString(raw.matchupNotes, 'project.matchupNotes', MAX_PROJECT_TEXT),
   };
+
+  if (raw.brief !== undefined && raw.brief !== null) {
+    project.brief = normaliseBrief(raw.brief);
+    if (!project.brief) fail('project.brief must be a character brief object.');
+  }
 
   if (movesRaw !== undefined) {
     if (!Array.isArray(movesRaw)) fail('project.moves must be a list.');
@@ -132,7 +140,19 @@ export function validateChatRequest(body: unknown): ChatRequest {
       .filter(Boolean);
   }
 
-  return { messages, summary, project: validateProject(raw.project), avoidNames, houseRules, model };
+  if (raw.quickKit !== undefined && typeof raw.quickKit !== 'boolean') {
+    fail('quickKit must be true or false.');
+  }
+
+  return {
+    messages,
+    summary,
+    project: validateProject(raw.project),
+    avoidNames,
+    houseRules,
+    model,
+    quickKit: raw.quickKit === true,
+  };
 }
 
 export function validateImageRequest(body: unknown): ImageRequest {
@@ -169,6 +189,16 @@ export function validateImageRequest(body: unknown): ImageRequest {
     quality: qualityRaw as ImageQuality,
     model,
     reference,
+  };
+}
+
+export function validateResearchRequest(body: unknown): ResearchRequest {
+  const raw = asObject(body, 'Request body');
+  return {
+    character: requiredString(raw.character, 'character', 160),
+    series: optionalString(raw.series, 'series', 200),
+    game: optionalString(raw.game, 'game', 160),
+    notes: optionalString(raw.notes, 'notes', 2_000),
   };
 }
 

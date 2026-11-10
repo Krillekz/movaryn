@@ -3,6 +3,8 @@ import type {
   ImageRequest,
   ImageResponse,
   ProviderStatus,
+  ResearchRequest,
+  ResearchResponse,
   SummaryRequest,
 } from '../../shared/types';
 import { apiBase } from './apiBase';
@@ -144,6 +146,21 @@ export async function requestImage(body: ImageRequest): Promise<ImageResponse> {
   }
   if (!response.ok) throw await readError(response);
   return (await response.json()) as ImageResponse;
+}
+
+export async function requestResearch(body: ResearchRequest): Promise<ResearchResponse> {
+  let response: Response;
+  try {
+    response = await fetch(apiUrl('/api/research'), {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    });
+  } catch {
+    throw new ApiError('Could not reach the research service. Check that the API is running.', 'network');
+  }
+  if (!response.ok) throw await readError(response);
+  return (await response.json()) as ResearchResponse;
 }
 
 export async function requestSummary(body: SummaryRequest): Promise<string> {

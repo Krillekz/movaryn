@@ -1,10 +1,10 @@
 # Sneak peeks
 
-Early looks at what is being built next. These are previews, not release notes — scope, wording and timing can change. Phases are themes, not dates.
+Early looks at what is being built next. These are previews, not release notes — scope, wording and timing can change. Phases are themes, not dates. Phases 2–5 shipped a first pass in 1.7.0; these entries now describe the direction and what is still to come.
 
 ## Movaryn: Phase 2
 
-In design · No release date
+First pass shipped in 1.7.0 · still evolving
 
 Phase 2 goes after the two things that slow a kit down most: the model not knowing who you are talking
 about, and the wait before a usable answer.
@@ -14,8 +14,8 @@ about, and the wait before a usable answer.
 Mentioning an obscure anime or manga character should not make a model pattern-match a name and invent
 abilities. Phase 2 puts an explicit research step before the first draft:
 
-- An optional lookup checks the character's series, powers, weapons and silhouette, and shows where
-  each fact came from.
+- An optional lookup checks the character's series, powers, weapons and silhouette, and shows the
+  source the model named for each fact. Sources are labelled unverified until you check them.
 - If the character cannot be verified, Movaryn says so and asks for the series or a short description
   instead of guessing.
 - **Follow canon** and **Original kit** are separate paths: one respects known abilities, the other
@@ -41,7 +41,7 @@ abilities. Phase 2 puts an explicit research step before the first draft:
 
 ## Movaryn: Phase 3
 
-In design · No release date
+First pass shipped in 1.7.0 · still evolving
 
 Phase 3 changes what a kit is for: instead of only describing a fight, the kit can be tried before it
 is built.
@@ -72,7 +72,7 @@ implies:
 
 ## Movaryn: Phase 4
 
-In design · No release date
+First pass shipped in 1.7.0 · still evolving
 
 Phase 4 treats a good kit as portable: the idea should survive a change of game.
 
@@ -99,9 +99,10 @@ Phase 4 treats a good kit as portable: the idea should survive a change of game.
 
 ## Movaryn: Phase 5
 
-In design · No release date
+First pass shipped in 1.7.0 · still evolving
 
-Phase 5 changes where the workshop lives. Local-first stays the default; sync becomes a choice.
+Phase 5 changes where the workshop lives. The 1.7.0 first pass adds local version history and
+read-only share links; accounts and sync are still ahead.
 
 ### The big change: an optional synced workspace
 
@@ -125,7 +126,7 @@ Phase 5 changes where the workshop lives. Local-first stays the default; sync be
 
 ## Movaryn: Character briefs
 
-In design · No release date
+First pass shipped in 1.7.0 · still evolving
 
 A closer look at the brief that Phase 2 introduces. Today each chat starts from whatever the model
 thinks it remembers, so a name can mean one thing in the first reply and something else after a

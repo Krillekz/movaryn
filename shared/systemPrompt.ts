@@ -1,4 +1,5 @@
-import type { ProjectContextPayload } from './types';
+import type { CharacterBrief, ProjectContextPayload } from './types';
+import { renderBrief } from './brief';
 
 /**
  * The Movaryn system prompt. This is the product's core behaviour:
@@ -131,6 +132,8 @@ export interface SystemPromptOptions {
   summary?: string;
   avoidNames?: string[];
   houseRules?: string;
+  brief?: CharacterBrief;
+  quickKit?: boolean;
 }
 
 export function buildSystemPrompt(options: SystemPromptOptions = {}): string {
@@ -157,6 +160,15 @@ export function buildSystemPrompt(options: SystemPromptOptions = {}): string {
     const unique = Array.from(new Set(avoid)).slice(0, 120);
     parts.push(
       `AVOID NAMES\nThese move names already exist in this project. Do not reuse them or make trivial variants of them:\n${unique.join(', ')}`,
+    );
+  }
+
+  const brief = options.brief ?? options.project?.brief;
+  if (brief) parts.push(renderBrief(brief));
+
+  if (options.quickKit) {
+    parts.push(
+      `QUICK KIT REQUEST\nAnswer in one coherent pass. Start with the first move immediately: no preamble, no restating the brief, no plan, no numbered outline of what you are about to do. Put usable content on screen in the first lines. Keep descriptions tight (the sequence, not an essay), and do not end with an offer to go deeper. If the user asks for more depth afterwards, give it then.`,
     );
   }
 

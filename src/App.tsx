@@ -1,9 +1,11 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Sidebar } from './components/Sidebar';
 import { ApiSetupBanner } from './components/ApiSetupBanner';
 import { ChatView } from './components/ChatView';
 import { SettingsDialog } from './components/SettingsDialog';
 import { ProjectDrawer } from './components/ProjectDrawer';
+import { KitToolsDialog } from './components/KitToolsDialog';
+import { SharedKitView } from './components/SharedKitView';
 import { ImageBriefDialog } from './components/ImageBriefDialog';
 import { IdeaLibraryDialog } from './components/IdeaLibraryDialog';
 import { CommandPalette } from './components/CommandPalette';
@@ -15,10 +17,15 @@ import { fetchHealth } from './lib/api';
 import { apiBase, isBrowserBuild } from './lib/apiBase';
 import { APP_VERSION, WHATS_NEW_KEY } from './lib/appVersion';
 import { useApp } from './store/useApp';
+import { sharedKitFromLocation } from '../shared/shareKit';
 
 export default function App() {
   const hydrated = useApp((state) => state.hydrated);
   const theme = useApp((state) => state.settings.theme);
+  // A shared kit opens read-only and never touches the local workspace.
+  const [sharedKit] = useState(() =>
+    typeof window === 'undefined' ? null : sharedKitFromLocation(window.location.hash),
+  );
 
   useEffect(() => {
     void useApp.getState().hydrate();
@@ -109,6 +116,10 @@ export default function App() {
     return () => window.removeEventListener('keydown', onKeyDown);
   }, []);
 
+  if (sharedKit) {
+    return <SharedKitView kit={sharedKit} />;
+  }
+
   if (!hydrated) {
     return (
       <div className="flex h-full items-center justify-center bg-canvas">
@@ -131,6 +142,7 @@ export default function App() {
       </main>
       <SettingsDialog />
       <ProjectDrawer />
+      <KitToolsDialog />
       <ImageBriefDialog />
       <IdeaLibraryDialog />
       <CommandPalette />

@@ -1,5 +1,10 @@
 [
   {
+    "version": "1.7.0",
+    "title": "Character research, a kit sandbox, remapping and local history",
+    "summary": "Character brief per project: series, which version, abilities to keep and avoid, and a stated Follow canon / Original kit / Mixed mode. The brief is…"
+  },
+  {
     "version": "1.6.0",
     "title": "A command palette, release notes in the app and a roadmap",
     "summary": "Command palette on Ctrl/⌘ K, plus a search button in the chat header. It searches chats, projects and saved moves, and runs actions: new chat, new pr…"

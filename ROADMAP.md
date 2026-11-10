@@ -4,17 +4,6 @@ A living document. Scope and order can change, and nothing here is a promise of 
 
 ## Now
 
-- **Character research before writing** — when a character is named, verify the series, abilities and
-  silhouette before drafting a kit. If it cannot be verified, say so and ask instead of guessing.
-- **Faster first answers** — cut the setup, start with the first move, and avoid restating the brief.
-  A **Quick kit** path drafts one coherent pass and offers depth on request.
-- **Character briefs** — save a canon or original-kit decision with the project so later chats keep
-  the same understanding of who the character is.
-- **Reorder saved moves** — drag a project's moves into combo order instead of adding them in chat
-  order.
-
-## Next
-
 - **Source cards in chat** — show where a character lookup got each fact, with a clear way to accept
   or ignore it before it shapes the kit.
 - **Research cache** — reuse a project's lookups so repeat questions are instant and cheap.
@@ -25,16 +14,26 @@ A living document. Scope and order can change, and nothing here is a promise of 
 - **Palette search for saved art** — find a saved image by its prompt without opening the project
   drawer.
 
-## Later
+## Next
 
-- **Balance scorecards** — local, explainable comparisons of damage, range and commitment across a kit.
+- **Deeper balance scorecards** — compare two kits on the same axes, not just one kit against itself.
 - **Reference library** — reusable outfit and silhouette references shared across projects.
 - **Offline character notebooks** — hand-written canon notes that work without any research provider.
 - **More games and formats** — templates for battleground games beyond JJS and TSB.
 - **Localisation** — interface and prompt translations that keep constraints intact.
 
+## Later
+
+- **Optional synced workspace** — accounts, cross-device projects and comments. Local-first stays the
+  default, and nothing moves to a server without an explicit choice.
+- **Team projects** — shared house rules and read-only review links for a group.
+- **Browser-first reading layout** — a phone-friendly view for reading and commenting.
+
 ## Shipped
 
+- **1.7.0** — character briefs and opt-in research, Quick kit, the local kit sandbox, cross-game
+  remap, local version history, read-only share links, frame-data export and printable sheets.
+  [Update log](changelog.html#v1.7.0)
 - **1.6.0** — command palette, in-app release notes, public roadmap, copyable kit check and eight bug fixes. [Update log](changelog.html#v1.6.0)
 - **1.5.0** — idea library, art presets, kit check, Review kit and house rules. [Update log](changelog.html#v1.5.0)
 - **1.4.0** — prompt-only art, credits and copyable image prompts. [Update log](changelog.html#v1.4.0)

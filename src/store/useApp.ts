@@ -32,6 +32,7 @@ export const DEFAULT_SETTINGS: Settings = {
   attachReferences: true,
   lastImageStyle: '',
   houseRules: '',
+  quickKit: false,
 };
 
 export interface Toast {
@@ -65,6 +66,8 @@ export type SettingsTabId =
   | 'credits'
   | 'about';
 
+export type ToolsTabId = 'brief' | 'sandbox' | 'remap' | 'history';
+
 interface UiState {
   sidebarCollapsed: boolean;
   mobileSidebar: boolean;
@@ -78,6 +81,8 @@ interface UiState {
   settingsTab: SettingsTabId;
   paletteOpen: boolean;
   whatsNewOpen: boolean;
+  toolsOpen: boolean;
+  toolsTab: ToolsTabId;
 }
 
 export interface AppState {
@@ -139,6 +144,9 @@ export interface AppState {
   closeImageBrief: () => void;
   openIdeas: () => void;
   closeIdeas: () => void;
+  openTools: (tab?: ToolsTabId) => void;
+  closeTools: () => void;
+  setToolsTab: (tab: ToolsTabId) => void;
 
   pushToast: (message: string, tone?: Toast['tone']) => void;
   dismissToast: (id: string) => void;
@@ -196,6 +204,8 @@ export const useApp = create<AppState>()((set, get) => ({
     settingsTab: 'provider',
     paletteOpen: false,
     whatsNewOpen: false,
+    toolsOpen: false,
+    toolsTab: 'brief',
   },
   toasts: [],
   confirm: null,
@@ -543,6 +553,17 @@ export const useApp = create<AppState>()((set, get) => ({
 
   openIdeas: () => set((state) => ({ ui: { ...state.ui, ideasOpen: true } })),
   closeIdeas: () => set((state) => ({ ui: { ...state.ui, ideasOpen: false } })),
+
+  openTools: (tab) =>
+    set((state) => ({
+      ui: {
+        ...state.ui,
+        toolsOpen: true,
+        ...(tab ? { toolsTab: tab } : {}),
+      },
+    })),
+  closeTools: () => set((state) => ({ ui: { ...state.ui, toolsOpen: false } })),
+  setToolsTab: (tab) => set((state) => ({ ui: { ...state.ui, toolsTab: tab } })),
 
   pushToast: (message, tone = 'default') => {
     const id = uid('toast');

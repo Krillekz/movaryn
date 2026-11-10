@@ -101,6 +101,28 @@ export interface SavedMove {
   createdAt: number;
 }
 
+export type BriefMode = 'canon' | 'original' | 'mixed';
+
+export interface CharacterFact {
+  id: string;
+  text: string;
+  source?: string;
+  /** Where the fact came from, so canon, research and invention stay distinct. */
+  origin: 'brief' | 'lookup' | 'invented';
+}
+
+export interface CharacterBrief {
+  series?: string;
+  version?: string;
+  abilities?: string;
+  avoid?: string;
+  mode: BriefMode;
+  facts: CharacterFact[];
+  /** True once a lookup produced at least one sourced fact the user kept. */
+  verified: boolean;
+  updatedAt: number;
+}
+
 export interface Project {
   id: string;
   name: string;
@@ -108,6 +130,10 @@ export interface Project {
   theme?: string;
   description?: string;
   constraints?: string;
+  /** Project-scoped character brief: canon decisions and sourced facts. */
+  brief?: CharacterBrief;
+  matchupNotes?: string;
+  sandboxPreset?: string;
   moves: SavedMove[];
   references: ImageAttachment[];
   images: GeneratedImage[];
@@ -138,6 +164,8 @@ export interface Settings {
   lastImageStyle: string;
   /** Extra instructions the user wants applied to every chat on this device. */
   houseRules: string;
+  /** Draft one coherent pass first instead of opening with an essay. */
+  quickKit: boolean;
 }
 
 export interface ProjectMovePayload {
@@ -154,6 +182,8 @@ export interface ProjectContextPayload {
   constraints?: string;
   moves?: ProjectMovePayload[];
   avoidNames?: string[];
+  brief?: CharacterBrief;
+  matchupNotes?: string;
 }
 
 export interface ChatTurnPayload {
@@ -171,6 +201,8 @@ export interface ChatRequest {
   /** Device-level preferences from Settings → Prompts. */
   houseRules?: string;
   model?: string;
+  /** Ask for one coherent pass, with the first move before the rest. */
+  quickKit?: boolean;
 }
 
 export interface ImageRequest {
@@ -190,6 +222,29 @@ export interface ImageResponse {
 export interface SummaryRequest {
   transcript: string;
   previous?: string;
+}
+
+export interface ResearchRequest {
+  character: string;
+  series?: string;
+  game?: string;
+  notes?: string;
+}
+
+export interface ResearchFact {
+  text: string;
+  source?: string;
+}
+
+export interface ResearchResponse {
+  character: string;
+  series?: string;
+  version?: string;
+  facts: ResearchFact[];
+  /** True when the lookup could not find sourced facts and the app should ask. */
+  uncertain: boolean;
+  message?: string;
+  model?: string;
 }
 
 export interface ProviderStatus {

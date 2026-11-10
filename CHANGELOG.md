@@ -1,5 +1,39 @@
 # Update log
 
+## 1.7.0 — Character research, a kit sandbox, remapping and local history
+
+- **Character brief** per project: series, which version, abilities to keep and avoid, and a stated
+  **Follow canon / Original kit / Mixed** mode. The brief is sent with every chat in the project, so a
+  restart or a new chat keeps the same understanding of the character.
+- **Opt-in character research** in Kit tools → Brief. It asks the configured chat provider for facts
+  that come with a named source, keeps only those, and lists each source beside the fact. If nothing
+  sourced comes back, Movaryn says so and leaves the brief alone instead of guessing. Sources are
+  model-provided and labelled unverified; open them before treating a detail as canon.
+- **Quick kit** toggle in the composer: one coherent pass, first move first, no preamble and no
+  restating the brief. The first move still streams before the rest of the answer is finished.
+- **Kit sandbox** (Kit tools → Sandbox): estimates start-up, active and recovery windows from the
+  written moves and a per-game preset (JJS, TSB or a general arena), draws the timeline, tests
+  sidestep, block, counter and ranged poke, and reports what the kit does not cover. Every window is
+  labelled estimated, never measured.
+- **Matchup notes** saved with the project and sent with chats.
+- **Cross-game remap** (Kit tools → Remap): rewrites range and cooldown language for the target game,
+  lists every change, flags moves that do not fit the target's move count, and warns about mechanics
+  with no equivalent. It creates a new project and never overwrites the original.
+- **Local version history** (Kit tools → History): save a snapshot of the brief and moves, restore it
+  later, and keep up to 25 per project. A snapshot of the current state is saved before a restore.
+- **Read-only share links**: a kit can be encoded into a link fragment and opened in the browser with
+  no account, no upload and no provider key. The kit travels in the link, not through a server.
+- **Frame-data export** (CSV and Markdown) and a **printable project sheet** (HTML) with the brief,
+  moves, sandbox estimates, scorecard and matchup notes.
+
+### Notes
+
+- There are still **no accounts and no cloud sync**. Version history and share links are local-first;
+  a shared kit is a snapshot in the URL, not a live document.
+- Research uses the chat provider you configured. It does not browse the web, and it cannot verify a
+  source for you.
+- Sandbox windows are design estimates. They are not the game's frame data.
+
 ## 1.6.0 — A command palette, release notes in the app and a roadmap
 
 - **Command palette** on Ctrl/⌘ K, plus a search button in the chat header. It searches chats,

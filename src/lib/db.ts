@@ -1,9 +1,10 @@
 import type { Conversation, Project, Settings } from '../../shared/types';
 
 const DB_NAME = 'movaryn';
-const DB_VERSION = 1;
+const DB_VERSION = 2;
 const CONVERSATIONS = 'conversations';
 const PROJECTS = 'projects';
+const VERSIONS = 'versions';
 const KV = 'kv';
 const SETTINGS_KEY = 'settings';
 
@@ -30,6 +31,10 @@ function openDb(): Promise<IDBDatabase | null> {
       const db = request.result;
       if (!db.objectStoreNames.contains(CONVERSATIONS)) db.createObjectStore(CONVERSATIONS, { keyPath: 'id' });
       if (!db.objectStoreNames.contains(PROJECTS)) db.createObjectStore(PROJECTS, { keyPath: 'id' });
+      if (!db.objectStoreNames.contains(VERSIONS)) {
+        const versions = db.createObjectStore(VERSIONS, { keyPath: 'id' });
+        versions.createIndex('projectId', 'projectId', { unique: false });
+      }
       if (!db.objectStoreNames.contains(KV)) db.createObjectStore(KV);
     };
     request.onsuccess = () => resolve(request.result);
@@ -136,9 +141,10 @@ export async function clearAllData(): Promise<void> {
   const db = await openDb();
   if (!db) return;
   try {
-    const transaction = db.transaction([CONVERSATIONS, PROJECTS, KV], 'readwrite');
+    const transaction = db.transaction([CONVERSATIONS, PROJECTS, VERSIONS, KV], 'readwrite');
     transaction.objectStore(CONVERSATIONS).clear();
     transaction.objectStore(PROJECTS).clear();
+    transaction.objectStore(VERSIONS).clear();
     transaction.objectStore(KV).clear();
   } catch {
     // ignored
@@ -201,6 +207,57 @@ export function deleteConversationRecord(id: string): void {
 export function deleteProjectRecord(id: string): void {
   pendingProjects.delete(id);
   void remove(PROJECTS, id);
+  void clearProjectVersions(id);
+}
+
+// ── Project version history ──────────────────────────────────
+export interface ProjectVersion {
+  id: string;
+  projectId: string;
+  createdAt: number;
+  label: string;
+  project: Project;
+}
+
+/** Snapshots are explicit saves; nothing is uploaded or synced. */
+export async function saveProjectVersion(
+  project: Project,
+  label: string,
+): Promise<ProjectVersion | null> {
+  const db = await openDb();
+  if (!db) return null;
+  const record: ProjectVersion = {
+    id: `ver_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 8)}`,
+    projectId: project.id,
+    createdAt: Date.now(),
+    label: label.trim().slice(0, 120) || 'Saved version',
+    project: JSON.parse(JSON.stringify(project)) as Project,
+  };
+  await write(VERSIONS, record);
+  const all = await readAll<ProjectVersion>(VERSIONS);
+  const forProject = all
+    .filter((version) => version.projectId === project.id)
+    .sort((a, b) => b.createdAt - a.createdAt);
+  for (const extra of forProject.slice(25)) await remove(VERSIONS, extra.id);
+  return record;
+}
+
+export async function listProjectVersions(projectId: string): Promise<ProjectVersion[]> {
+  const all = await readAll<ProjectVersion>(VERSIONS);
+  return all
+    .filter((version) => version.projectId === projectId)
+    .sort((a, b) => b.createdAt - a.createdAt);
+}
+
+export async function deleteProjectVersion(id: string): Promise<void> {
+  await remove(VERSIONS, id);
+}
+
+export async function clearProjectVersions(projectId: string): Promise<void> {
+  const all = await readAll<ProjectVersion>(VERSIONS);
+  for (const version of all.filter((entry) => entry.projectId === projectId)) {
+    await remove(VERSIONS, version.id);
+  }
 }
 
 if (typeof window !== 'undefined') {

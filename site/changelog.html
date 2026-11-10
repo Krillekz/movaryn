@@ -65,11 +65,11 @@
     <main id="main">
       <section class="log-hero">
         <div class="shell">
-          <p class="eyebrow"><span class="dot"></span> 19 releases</p>
+          <p class="eyebrow"><span class="dot"></span> 20 releases</p>
           <h1>Update log</h1>
           <p>
             What changed in every Movaryn build, newest first. The newest release is
-            <strong>1.6.0</strong> — A command palette, release notes in the app and a roadmap.
+            <strong>1.7.0</strong> — Character research, a kit sandbox, remapping and local history.
           </p>
         </div>
       </section>
@@ -78,6 +78,12 @@
         <aside class="log-index">
           <p>All releases</p>
           <ol>
+        <li>
+          <a href="#v1.7.0">
+            1.7.0
+            <small>Character research, a kit sandbox, remapping and local history</small>
+          </a>
+        </li>
         <li>
           <a href="#v1.6.0">
             1.6.0
@@ -196,11 +202,39 @@
         </aside>
 
         <section class="log-entries" aria-label="Release notes">
+      <article class="log-entry" id="v1.7.0">
+        <header class="log-entry-header">
+          <h2>1.7.0</h2>
+          <span class="log-title">Character research, a kit sandbox, remapping and local history</span>
+          <span class="log-latest">Latest</span>
+        </header>
+        <ul>
+          <li><strong>Character brief</strong> per project: series, which version, abilities to keep and avoid, and a stated <strong>Follow canon / Original kit / Mixed</strong> mode. The brief is sent with every chat in the project, so a restart or a new chat keeps the same understanding of the character.</li>
+          <li><strong>Opt-in character research</strong> in Kit tools → Brief. It asks the configured chat provider for facts that come with a named source, keeps only those, and lists each source beside the fact. If nothing sourced comes back, Movaryn says so and leaves the brief alone instead of guessing. Sources are model-provided and labelled unverified; open them before treating a detail as canon.</li>
+          <li><strong>Quick kit</strong> toggle in the composer: one coherent pass, first move first, no preamble and no restating the brief. The first move still streams before the rest of the answer is finished.</li>
+          <li><strong>Kit sandbox</strong> (Kit tools → Sandbox): estimates start-up, active and recovery windows from the written moves and a per-game preset (JJS, TSB or a general arena), draws the timeline, tests sidestep, block, counter and ranged poke, and reports what the kit does not cover. Every window is labelled estimated, never measured.</li>
+          <li><strong>Matchup notes</strong> saved with the project and sent with chats.</li>
+          <li><strong>Cross-game remap</strong> (Kit tools → Remap): rewrites range and cooldown language for the target game, lists every change, flags moves that do not fit the target's move count, and warns about mechanics with no equivalent. It creates a new project and never overwrites the original.</li>
+          <li><strong>Local version history</strong> (Kit tools → History): save a snapshot of the brief and moves, restore it later, and keep up to 25 per project. A snapshot of the current state is saved before a restore.</li>
+          <li><strong>Read-only share links</strong>: a kit can be encoded into a link fragment and opened in the browser with no account, no upload and no provider key. The kit travels in the link, not through a server.</li>
+          <li><strong>Frame-data export</strong> (CSV and Markdown) and a <strong>printable project sheet</strong> (HTML) with the brief, moves, sandbox estimates, scorecard and matchup notes.</li>
+        </ul>
+        <p>### Notes</p>
+        <ul>
+          <li>There are still <strong>no accounts and no cloud sync</strong>. Version history and share links are local-first; a shared kit is a snapshot in the URL, not a live document.</li>
+          <li>Research uses the chat provider you configured. It does not browse the web, and it cannot verify a source for you.</li>
+          <li>Sandbox windows are design estimates. They are not the game's frame data.</li>
+        </ul>
+        <a class="log-release-link" href="https://github.com/Krillekz/movaryn/releases/tag/v1.7.0">
+          Release notes on GitHub <span aria-hidden="true">→</span>
+        </a>
+      </article>
+
       <article class="log-entry" id="v1.6.0">
         <header class="log-entry-header">
           <h2>1.6.0</h2>
           <span class="log-title">A command palette, release notes in the app and a roadmap</span>
-          <span class="log-latest">Latest</span>
+          
         </header>
         <ul>
           <li><strong>Command palette</strong> on Ctrl/⌘ K, plus a search button in the chat header. It searches chats, projects and saved moves, and runs actions: new chat, new project, the idea library, concept art, any Settings tab, theme, sidebar, data export, What's New and the roadmap. Arrow keys move, Enter opens, Esc closes.</li>

@@ -5,6 +5,8 @@ import type {
   ChatRequest,
   ImageResponse,
   ProviderStatus,
+  ResearchRequest,
+  ResearchResponse,
 } from '../shared/types';
 import { buildSystemPrompt, SUMMARY_INSTRUCTION, SUMMARIZER_SYSTEM_PROMPT } from '../shared/systemPrompt';
 import { config, endpointHost, setupChecklist } from './config';
@@ -14,6 +16,7 @@ import { generateImage } from './providers/images';
 import {
   validateChatRequest,
   validateImageRequest,
+  validateResearchRequest,
   validateSummaryRequest,
 } from './validate';
 
@@ -171,6 +174,7 @@ app.post('/api/chat', rateLimit, async (req: Request, res: Response) => {
         summary: payload.summary,
         avoidNames: payload.avoidNames ?? payload.project?.avoidNames,
         houseRules: payload.houseRules,
+        quickKit: payload.quickKit,
       }),
     },
     ...normaliseHistory(payload.messages),
@@ -219,6 +223,107 @@ app.post('/api/chat', rateLimit, async (req: Request, res: Response) => {
   } finally {
     if (!res.writableEnded) res.end();
   }
+});
+
+// ── Character research ───────────────────────────────────────
+const RESEARCH_SYSTEM_PROMPT = `You research fictional characters for a moveset designer. You have no web access: use only what you can support from a named source.
+
+Return JSON only, with this exact shape:
+{"character":"...","series":"...","version":"...","facts":[{"text":"...","source":"..."}],"uncertain":false}
+
+Rules:
+- Include a fact only when you can name a real source for it: a manga chapter, an episode, an official profile, a databook, or an in-game description. Put that source in "source".
+- Never invent a source, a series, an ability, a weapon or a silhouette detail.
+- If you cannot name a source, leave the fact out.
+- If you do not know the character, return an empty facts list and "uncertain": true.
+- Do not claim to have browsed the web. Do not add commentary outside the JSON.
+- At most six facts, each under 200 characters.`;
+
+function cleanResearchText(value: unknown, max: number): string {
+  return typeof value === 'string' ? value.trim().replace(/\s+/g, ' ').slice(0, max) : '';
+}
+
+function parseResearchReply(
+  raw: string,
+  payload: ResearchRequest,
+  model: string,
+): ResearchResponse {
+  const start = raw.indexOf('{');
+  const end = raw.lastIndexOf('}');
+  if (start < 0 || end <= start) {
+    throw new AppError(
+      'The provider returned no readable research. Nothing was added to the brief.',
+      502,
+      'research_failed',
+    );
+  }
+  let parsed: Record<string, unknown>;
+  try {
+    parsed = JSON.parse(raw.slice(start, end + 1)) as Record<string, unknown>;
+  } catch {
+    throw new AppError(
+      'The provider returned unreadable research. Nothing was added to the brief.',
+      502,
+      'research_failed',
+    );
+  }
+
+  const factsRaw = Array.isArray(parsed.facts) ? parsed.facts : [];
+  const facts: ResearchResponse['facts'] = [];
+  for (const entry of factsRaw.slice(0, 6)) {
+    if (!entry || typeof entry !== 'object') continue;
+    const fact = entry as Record<string, unknown>;
+    const text = cleanResearchText(fact.text, 400);
+    const source = cleanResearchText(fact.source, 300);
+    // A fact without a named source is not shown: the point of the lookup is
+    // to avoid confident guessing, not to dress a guess up with a citation.
+    if (text && source) facts.push({ text, source });
+  }
+
+  const uncertain = parsed.uncertain === true || facts.length === 0;
+  return {
+    character: cleanResearchText(parsed.character, 160) || payload.character,
+    series: cleanResearchText(parsed.series, 200) || payload.series,
+    version: cleanResearchText(parsed.version, 200) || undefined,
+    facts,
+    uncertain,
+    message: uncertain
+      ? `No sourced facts came back for ${payload.character}. Add the series or a short description instead — Movaryn will not guess.`
+      : `Kept ${facts.length} sourced fact${facts.length === 1 ? '' : 's'}. Sources are listed beside each fact; open them before treating a detail as canon.`,
+    model,
+  };
+}
+
+app.post('/api/research', rateLimit, async (req: Request, res: Response) => {
+  const payload = validateResearchRequest(req.body);
+  requireChat();
+  if (!config.ai.research) {
+    throw new AppError(
+      'Character research is switched off on this API. Set AI_RESEARCH=true to enable it.',
+      503,
+      'research_disabled',
+    );
+  }
+
+  const prompt = [
+    `CHARACTER: ${payload.character}`,
+    payload.series ? `SERIES: ${payload.series}` : '',
+    payload.game ? `TARGET GAME: ${payload.game}` : '',
+    payload.notes ? `NOTES FROM THE USER: ${payload.notes}` : '',
+  ]
+    .filter(Boolean)
+    .join('\n');
+
+  const raw = await complete(
+    [
+      { role: 'system', content: RESEARCH_SYSTEM_PROMPT },
+      { role: 'user', content: prompt },
+    ],
+    { model: config.ai.model, temperature: 0.2, maxTokens: 700 },
+  );
+  const result = parseResearchReply(raw, payload, config.ai.model);
+  res.setHeader('Cache-Control', 'no-store');
+  res.json(result);
 });
 
 // ── Image generation ─────────────────────────────────────────

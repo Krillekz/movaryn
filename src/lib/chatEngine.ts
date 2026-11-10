@@ -97,6 +97,8 @@ function buildChatRequest(conversationId: string): ChatRequest {
           theme: project.theme,
           description: project.description,
           constraints: project.constraints,
+          brief: project.brief,
+          matchupNotes: project.matchupNotes,
           moves: project.moves.map((move) => ({
             name: move.name,
             description: move.description,
@@ -107,6 +109,7 @@ function buildChatRequest(conversationId: string): ChatRequest {
     avoidNames: Array.from(avoid).slice(0, 120),
     houseRules: settings.houseRules.trim() || undefined,
     model: settings.chatModel.trim() || undefined,
+    quickKit: settings.quickKit || undefined,
   };
 }
 
