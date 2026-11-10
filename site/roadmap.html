@@ -1,0 +1,178 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="color-scheme" content="dark" />
+    <title>Roadmap — Movaryn</title>
+    <meta
+      name="description"
+      content="What Movaryn is working on now, what comes next, what is being explored and what has already shipped."
+    />
+    <meta name="theme-color" content="#08080b" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Roadmap — Movaryn" />
+    <meta
+      property="og:description"
+      content="Now, next and later for the Movaryn moveset studio — plus everything already shipped."
+    />
+    <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+    <link rel="stylesheet" href="assets/site.css" />
+  </head>
+  <body>
+    <a class="skip" href="#main">Skip to content</a>
+
+    <header class="nav">
+      <div class="shell nav-inner">
+        <a class="brand" href="./" aria-label="Movaryn home">
+          <span class="brand-mark" aria-hidden="true">
+            <svg viewBox="0 0 64 64" fill="none">
+              <path
+                d="M15 44 L23.5 19 L32 35 L40.5 19 L49 44"
+                stroke="currentColor"
+                stroke-width="5.2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+              <circle cx="32" cy="49.5" r="3.1" fill="currentColor" />
+            </svg>
+          </span>
+          <span class="brand-text">
+            <strong>Movaryn</strong>
+            <small>Moveset studio</small>
+          </span>
+        </a>
+
+        <nav class="nav-links" aria-label="Primary">
+          <a href="./#features">Features</a>
+          <a href="./#workflow">Workflow</a>
+          <a href="roadmap.html" aria-current="page">Roadmap</a>
+          <a href="changelog.html">Update log</a>
+          <a href="https://github.com/Krillekz/movaryn" rel="noreferrer">GitHub</a>
+        </nav>
+
+        <a
+          class="btn btn-primary nav-cta"
+          href="https://github.com/Krillekz/movaryn/releases/latest"
+          data-download="setup"
+        >
+          Download
+        </a>
+      </div>
+    </header>
+
+    <main id="main">
+      <section class="log-hero">
+        <div class="shell">
+          <p class="eyebrow"><span class="dot"></span> Living document</p>
+          <h1>Roadmap</h1>
+          <p>
+            What Movaryn is working on now, what comes next and what is still being explored. It is
+            updated with each release; scope and order can change, and nothing here is a promise of a
+            date.
+          </p>
+        </div>
+      </section>
+
+      <div class="shell roadmap-layout">
+        <div class="roadmap-grid">
+        <section class="roadmap-column" id="now">
+          <header>
+            <h2>Now</h2>
+            <span class="roadmap-kicker">In progress</span>
+          </header>
+          
+          <ul class="roadmap-list">
+            <li><strong>More moveset sparks</strong> — per-game archetypes and starter kits, not only generic prompts.</li>
+            <li><strong>Reorder saved moves</strong> — drag a project's moves into combo order instead of adding them in chat order.</li>
+            <li><strong>Side-by-side kits</strong> — put two replies next to each other to compare roles, cooldowns and counterplay.</li>
+          </ul>
+        </section>
+        <section class="roadmap-column" id="next">
+          <header>
+            <h2>Next</h2>
+            <span class="roadmap-kicker">Planned</span>
+          </header>
+          
+          <ul class="roadmap-list">
+            <li><strong>Per-project art memory</strong> — keep a project's style, palette and references attached to its art brief.</li>
+            <li><strong>Printable project sheet</strong> — one export that includes the brief, moves, art prompts and kit check.</li>
+            <li><strong>Provider presets</strong> — pick OpenAI, OpenRouter, Ollama or the Freebuff API from Settings instead of typing endpoints.</li>
+            <li><strong>Palette search for saved art</strong> — find a saved image by its prompt without opening the project drawer.</li>
+          </ul>
+        </section>
+        <section class="roadmap-column" id="later">
+          <header>
+            <h2>Later</h2>
+            <span class="roadmap-kicker">Exploring</span>
+          </header>
+          
+          <ul class="roadmap-list">
+            <li><strong>Balance scorecards</strong> — local, explainable comparisons of damage, range and commitment across a kit.</li>
+            <li><strong>Reference library</strong> — reusable outfit and silhouette references shared across projects.</li>
+            <li><strong>More games and formats</strong> — templates for battleground games beyond JJS and TSB.</li>
+            <li><strong>Localisation</strong> — interface and prompt translations that keep constraints intact.</li>
+          </ul>
+        </section>
+        </div>
+
+      <section class="roadmap-shipped" id="shipped">
+        <h2>Shipped</h2>
+        <ul>
+          <li><strong>1.6.0</strong> — command palette, in-app release notes, public roadmap, copyable kit check and eight bug fixes. <a href="changelog.html#v1.6.0">Update log</a></li>
+          <li><strong>1.5.0</strong> — idea library, art presets, kit check, Review kit and house rules. <a href="changelog.html#v1.5.0">Update log</a></li>
+          <li><strong>1.4.0</strong> — prompt-only art, credits and copyable image prompts. <a href="changelog.html#v1.4.0">Update log</a></li>
+          <li><strong>1.3.0</strong> — random ideas, character cards and project-wide prompts. <a href="changelog.html#v1.3.0">Update log</a></li>
+          <li><strong>1.0.0</strong> — first public Windows build. <a href="changelog.html#v1.0.0">Update log</a></li>
+        </ul>
+      </section>
+
+        <p class="roadmap-note">
+          Have a feature that would make kits easier to build? Open an issue on
+          <a href="https://github.com/Krillekz/movaryn/issues">GitHub</a> — concrete problems are easier to act
+          on than votes.
+        </p>
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="shell footer-grid">
+        <div>
+          <a class="brand" href="./" aria-label="Movaryn home">
+            <span class="brand-mark" aria-hidden="true">
+              <svg viewBox="0 0 64 64" fill="none">
+                <path
+                  d="M15 44 L23.5 19 L32 35 L40.5 19 L49 44"
+                  stroke="currentColor"
+                  stroke-width="5.2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+                <circle cx="32" cy="49.5" r="3.1" fill="currentColor" />
+              </svg>
+            </span>
+            <span class="brand-text"><strong>Movaryn</strong><small>Moveset studio</small></span>
+          </a>
+          <p class="footer-note">
+            Designed and built by <strong>Raevik</strong>. Ideas are yours; the keys never leave your
+            machine.
+          </p>
+        </div>
+        <nav class="footer-links" aria-label="Footer">
+          <a href="./">Home</a>
+          <a href="./#features">Features</a>
+          <a href="roadmap.html">Roadmap</a>
+          <a href="changelog.html">Update log</a>
+          <a href="https://github.com/Krillekz/movaryn" rel="noreferrer">GitHub</a>
+          <a href="https://github.com/Krillekz/movaryn/releases" rel="noreferrer">Releases</a>
+        </nav>
+      </div>
+      <div class="shell footer-base">
+        <span>© <span id="year">2026</span> Movaryn</span>
+        <span>Not affiliated with any game or studio mentioned.</span>
+      </div>
+    </footer>
+
+    <script src="assets/site.js" defer></script>
+  </body>
+</html>

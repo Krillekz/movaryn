@@ -6,11 +6,14 @@ import { SettingsDialog } from './components/SettingsDialog';
 import { ProjectDrawer } from './components/ProjectDrawer';
 import { ImageBriefDialog } from './components/ImageBriefDialog';
 import { IdeaLibraryDialog } from './components/IdeaLibraryDialog';
+import { CommandPalette } from './components/CommandPalette';
+import { WhatsNewDialog } from './components/WhatsNewDialog';
 import { ConfirmDialog } from './components/ui/ConfirmDialog';
 import { Toasts } from './components/ui/Toasts';
 import { LogoMark } from './components/Logo';
 import { fetchHealth } from './lib/api';
 import { apiBase, isBrowserBuild } from './lib/apiBase';
+import { APP_VERSION, WHATS_NEW_KEY } from './lib/appVersion';
 import { useApp } from './store/useApp';
 
 export default function App() {
@@ -77,14 +80,25 @@ export default function App() {
   }, []);
 
   useEffect(() => {
+    if (!hydrated) return;
+    let seen: string | null = null;
+    try {
+      seen = localStorage.getItem(WHATS_NEW_KEY);
+    } catch {
+      return;
+    }
+    if (seen === APP_VERSION) return;
+    const timer = window.setTimeout(() => useApp.getState().openWhatsNew(), 800);
+    return () => window.clearTimeout(timer);
+  }, [hydrated]);
+
+  useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
       if (!(event.metaKey || event.ctrlKey) || event.altKey) return;
       const key = event.key.toLowerCase();
       if (key === 'k') {
         event.preventDefault();
-        const state = useApp.getState();
-        if (state.ui.sidebarCollapsed) state.setSidebarCollapsed(false);
-        window.setTimeout(() => document.getElementById('movaryn-search')?.focus(), 60);
+        useApp.getState().openPalette();
       } else if (key === 'b') {
         event.preventDefault();
         const state = useApp.getState();
@@ -119,6 +133,8 @@ export default function App() {
       <ProjectDrawer />
       <ImageBriefDialog />
       <IdeaLibraryDialog />
+      <CommandPalette />
+      <WhatsNewDialog />
       <ConfirmDialog />
       <Toasts />
     </div>

@@ -47,6 +47,7 @@
           <a href="./#features">Features</a>
           <a href="./#workflow">Workflow</a>
           <a href="changelog.html" aria-current="page">Update log</a>
+          <a href="roadmap.html">Roadmap</a>
           <a href="https://github.com/Krillekz/movaryn" rel="noreferrer">GitHub</a>
         </nav>
 
@@ -63,11 +64,11 @@
     <main id="main">
       <section class="log-hero">
         <div class="shell">
-          <p class="eyebrow"><span class="dot"></span> 18 releases</p>
+          <p class="eyebrow"><span class="dot"></span> 19 releases</p>
           <h1>Update log</h1>
           <p>
             What changed in every Movaryn build, newest first. The newest release is
-            <strong>1.5.0</strong> — An idea library, a kit check and house rules.
+            <strong>1.6.0</strong> — A command palette, release notes in the app and a roadmap.
           </p>
         </div>
       </section>
@@ -76,6 +77,12 @@
         <aside class="log-index">
           <p>All releases</p>
           <ol>
+        <li>
+          <a href="#v1.6.0">
+            1.6.0
+            <small>A command palette, release notes in the app and a roadmap</small>
+          </a>
+        </li>
         <li>
           <a href="#v1.5.0">
             1.5.0
@@ -188,11 +195,38 @@
         </aside>
 
         <section class="log-entries" aria-label="Release notes">
+      <article class="log-entry" id="v1.6.0">
+        <header class="log-entry-header">
+          <h2>1.6.0</h2>
+          <span class="log-title">A command palette, release notes in the app and a roadmap</span>
+          <span class="log-latest">Latest</span>
+        </header>
+        <ul>
+          <li><strong>Command palette</strong> on Ctrl/⌘ K, plus a search button in the chat header. It searches chats, projects and saved moves, and runs actions: new chat, new project, the idea library, concept art, any Settings tab, theme, sidebar, data export, What's New and the roadmap. Arrow keys move, Enter opens, Esc closes.</li>
+          <li><strong>What's New inside the app</strong> opens once per version and any time afterwards. It shows the newest three releases from the same <code>CHANGELOG.md</code> as the public update log, with links to the full log and the roadmap.</li>
+          <li><strong>Public roadmap</strong> at <a href="../roadmap.html">roadmap.html</a> with Now, Next, Later and Shipped columns, linked from the site navigation, footer, About tab and What's New dialog.</li>
+          <li><strong>Copy a kit check report</strong> as plain text, so a review can be pasted into a builder's notes.</li>
+          <li>Settings remembers which tab you were on, and the palette can jump straight to Provider, Prompts, Data or About instead of always opening the first tab.</li>
+        </ul>
+        <p>### Fixed</p>
+        <ul>
+          <li>The local API now <strong>rejects requests from origins outside <code>ALLOWED_ORIGINS</code></strong> with a 403. Before, a third-party page could still make the server spend provider credits even though it could not read the response.</li>
+          <li>A reply stream that closes <strong>without the server's done event</strong> is now reported as truncated instead of being treated as a finished answer.</li>
+          <li>Local saves now resolve <strong>after the IndexedDB transaction commits</strong>, so closing or reloading right after a change cannot silently drop the last write.</li>
+          <li>The About tab and data exports show the <strong>real build version</strong> when the API is offline; they used to fall back to <code>1.0.0</code>.</li>
+          <li>The idea library <strong>resets its search and tab</strong> when reopened, and its footer counts no longer say &quot;1 sparks&quot;.</li>
+          <li>The startup screen no longer stays on &quot;Opening your workspace…&quot; forever if saved data cannot be read — it starts a clean session and says so.</li>
+        </ul>
+        <a class="log-release-link" href="https://github.com/Krillekz/movaryn/releases/tag/v1.6.0">
+          Release notes on GitHub <span aria-hidden="true">→</span>
+        </a>
+      </article>
+
       <article class="log-entry" id="v1.5.0">
         <header class="log-entry-header">
           <h2>1.5.0</h2>
           <span class="log-title">An idea library, a kit check and house rules</span>
-          <span class="log-latest">Latest</span>
+          
         </header>
         <ul>
           <li><strong>Idea library</strong> with three tabs: 12 moveset sparks, 8 constraint packs and 10 art presets. Search it, roll a random spark, send a constraint straight into the composer, or apply an art preset to the concept-art brief. Open it from the welcome screen, the composer's lightbulb button or the art dialog.</li>
@@ -526,6 +560,8 @@
         <nav class="footer-links" aria-label="Footer">
           <a href="./">Home</a>
           <a href="./#features">Features</a>
+          <a href="roadmap.html">Roadmap</a>
+          <a href="changelog.html">Update log</a>
           <a href="https://github.com/Krillekz/movaryn" rel="noreferrer">GitHub</a>
           <a href="https://github.com/Krillekz/movaryn/releases" rel="noreferrer">Releases</a>
         </nav>

@@ -19,13 +19,14 @@ import type { ImageQuality, ThemePreference } from '../../shared/types';
 import { ASPECT_RATIOS } from '../../shared/types';
 import { fetchHealth } from '../lib/api';
 import { apiBase, isBrowserBuild, setApiBase } from '../lib/apiBase';
-import { useApp } from '../store/useApp';
-import { cx, downloadJson } from '../lib/utils';
+import { useApp, type SettingsTabId } from '../store/useApp';
+import { APP_VERSION } from '../lib/appVersion';
+import { exportAllData } from '../lib/exportData';
+import { CHANGELOG_URL, ROADMAP_URL } from '../lib/links';
+import { cx } from '../lib/utils';
 import { Modal } from './ui/Modal';
 
-type TabId = 'provider' | 'models' | 'prompts' | 'appearance' | 'data' | 'credits' | 'about';
-
-const TABS: { id: TabId; label: string; icon: typeof Plug }[] = [
+const TABS: { id: SettingsTabId; label: string; icon: typeof Plug }[] = [
   { id: 'provider', label: 'Provider', icon: Plug },
   { id: 'models', label: 'Models', icon: SlidersHorizontal },
   { id: 'prompts', label: 'Prompts', icon: Lightbulb },
@@ -57,7 +58,8 @@ export function SettingsDialog() {
   const resetAllData = useApp((state) => state.resetAllData);
   const pushToast = useApp((state) => state.pushToast);
 
-  const [tab, setTab] = useState<TabId>('provider');
+  const tab = useApp((state) => state.ui.settingsTab);
+  const setTab = useApp((state) => state.setSettingsTab);
   const [rechecking, setRechecking] = useState(false);
 
   const recheck = async () => {
@@ -80,14 +82,7 @@ export function SettingsDialog() {
   };
 
   const exportAll = () => {
-    const state = useApp.getState();
-    downloadJson('movaryn-export.json', {
-      exportedAt: new Date().toISOString(),
-      version: provider?.version ?? '1.0.0',
-      settings: state.settings,
-      conversations: state.order.map((id) => state.conversations[id]).filter(Boolean),
-      projects: state.projectOrder.map((id) => state.projects[id]).filter(Boolean),
-    });
+    exportAllData();
     pushToast('Export downloaded.', 'success');
   };
 
@@ -541,9 +536,37 @@ export function SettingsDialog() {
                 <h3 className="text-[14px] font-semibold tracking-tight text-ink">Movaryn</h3>
                 <p className="mt-1">Better ideas. Better movesets. Built for creators.</p>
                 <p className="mt-2">
-                  Version {provider?.version ?? '1.0.0'}
+                  Version {provider?.version ?? APP_VERSION}
                   {window.movarynDesktop ? ' · Desktop app' : ' · Web app'}
                 </p>
+                <div className="mt-3 flex flex-wrap gap-2">
+                  <button
+                    type="button"
+                    className="btn btn-secondary h-8 text-[12px]"
+                    onClick={() => {
+                      close();
+                      useApp.getState().openWhatsNew();
+                    }}
+                  >
+                    What&apos;s new
+                  </button>
+                  <a
+                    className="btn btn-secondary h-8 text-[12px]"
+                    href={ROADMAP_URL}
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    Roadmap
+                  </a>
+                  <a
+                    className="btn btn-ghost h-8 text-[12px]"
+                    href={CHANGELOG_URL}
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    Update log
+                  </a>
+                </div>
               </section>
               <section className="rounded-xl border border-line bg-panel px-3.5 py-3">
                 <h3 className="text-[12px] font-semibold text-ink">Keyboard</h3>
@@ -552,7 +575,7 @@ export function SettingsDialog() {
                     <kbd className="rounded border border-line bg-surface px-1.5 py-0.5 text-[10px]">
                       Ctrl/⌘ K
                     </kbd>{' '}
-                    search chats
+                    open the command palette
                   </li>
                   <li>
                     <kbd className="rounded border border-line bg-surface px-1.5 py-0.5 text-[10px]">

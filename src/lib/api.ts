@@ -117,6 +117,15 @@ export async function streamChat(body: ChatRequest, handlers: StreamHandlers): P
         boundary = buffer.indexOf('\n\n');
       }
     }
+
+    // A stream that closes without the server's done event used to look like a
+    // finished reply, silently cutting the answer short.
+    if (!completed && !handlers.signal?.aborted) {
+      throw new ApiError(
+        'The reply ended before the provider finished it. Try again or regenerate.',
+        'truncated',
+      );
+    }
   } finally {
     reader.cancel().catch(() => undefined);
   }

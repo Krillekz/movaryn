@@ -37,6 +37,28 @@ app.use((req, res, next) => {
     }
   }
 
+  // With an explicit allow-list, a disallowed page must not reach the API at
+  // all. Without this, a third-party page could still spend provider credits
+  // even though it could not read the response.
+  if (origin && config.allowedOrigins.length > 0 && !config.allowedOrigins.includes('*')) {
+    let sameHost = false;
+    try {
+      sameHost = new URL(origin).host === req.headers.host;
+    } catch {
+      sameHost = false;
+    }
+    if (!sameHost && !config.allowedOrigins.includes(origin)) {
+      res.status(403).json({
+        error: {
+          message: 'This origin is not allowed. Add it to ALLOWED_ORIGINS on the API server.',
+          code: 'origin_not_allowed',
+          status: 403,
+        },
+      });
+      return;
+    }
+  }
+
   if (req.method === 'OPTIONS') {
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type');

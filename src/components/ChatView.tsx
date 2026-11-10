@@ -10,6 +10,7 @@ import {
   Pencil,
   Plus,
   RefreshCw,
+  Search,
   Trash2,
 } from 'lucide-react';
 import type { Conversation } from '../../shared/types';
@@ -47,6 +48,7 @@ export function ChatView() {
   const openProject = useApp((state) => state.openProject);
   const openSettings = useApp((state) => state.openSettings);
   const openImageBrief = useApp((state) => state.openImageBrief);
+  const openPalette = useApp((state) => state.openPalette);
 
   const scrollRef = useRef<HTMLDivElement>(null);
   const stickRef = useRef(true);
@@ -289,6 +291,15 @@ export function ChatView() {
         </div>
 
         <div className="ml-auto flex items-center gap-1.5">
+          <button
+            type="button"
+            className="icon-btn hidden sm:inline-flex"
+            onClick={openPalette}
+            title="Command palette (Ctrl/⌘ K)"
+            aria-label="Open command palette"
+          >
+            <Search size={16} />
+          </button>
           <span className="hidden items-center gap-1.5 rounded-full border border-line bg-panel px-2.5 py-1 text-[10.5px] text-ink-muted sm:inline-flex">
             <span
               className={cx(
@@ -400,7 +411,7 @@ export function ChatView() {
             </p>
             <button
               type="button"
-              onClick={openSettings}
+              onClick={() => openSettings()}
               className="btn btn-secondary h-6 px-2 text-[11px]"
             >
               Setup

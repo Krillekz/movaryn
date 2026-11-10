@@ -256,7 +256,7 @@ export function Sidebar() {
               'btn btn-ghost w-full gap-2 px-2 text-[12.5px]',
               collapsed ? 'h-9 w-9 justify-center p-0' : 'justify-start',
             )}
-            onClick={openSettings}
+            onClick={() => openSettings()}
             title="Settings"
           >
             <Settings size={15} />

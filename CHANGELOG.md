@@ -1,5 +1,36 @@
 # Update log
 
+## 1.6.0 — A command palette, release notes in the app and a roadmap
+
+- **Command palette** on Ctrl/⌘ K, plus a search button in the chat header. It searches chats,
+  projects and saved moves, and runs actions: new chat, new project, the idea library, concept art,
+  any Settings tab, theme, sidebar, data export, What's New and the roadmap. Arrow keys move,
+  Enter opens, Esc closes.
+- **What's New inside the app** opens once per version and any time afterwards. It shows the newest
+  three releases from the same `CHANGELOG.md` as the public update log, with links to the full log
+  and the roadmap.
+- **Public roadmap** at [roadmap.html](../roadmap.html) with Now, Next, Later and Shipped columns,
+  linked from the site navigation, footer, About tab and What's New dialog.
+- **Copy a kit check report** as plain text, so a review can be pasted into a builder's notes.
+- Settings remembers which tab you were on, and the palette can jump straight to Provider, Prompts,
+  Data or About instead of always opening the first tab.
+
+### Fixed
+
+- The local API now **rejects requests from origins outside `ALLOWED_ORIGINS`** with a 403. Before,
+  a third-party page could still make the server spend provider credits even though it could not read
+  the response.
+- A reply stream that closes **without the server's done event** is now reported as truncated instead
+  of being treated as a finished answer.
+- Local saves now resolve **after the IndexedDB transaction commits**, so closing or reloading right
+  after a change cannot silently drop the last write.
+- The About tab and data exports show the **real build version** when the API is offline; they used to
+  fall back to `1.0.0`.
+- The idea library **resets its search and tab** when reopened, and its footer counts no longer say
+  "1 sparks".
+- The startup screen no longer stays on "Opening your workspace…" forever if saved data cannot be
+  read — it starts a clean session and says so.
+
 ## 1.5.0 — An idea library, a kit check and house rules
 
 - **Idea library** with three tabs: 12 moveset sparks, 8 constraint packs and 10 art presets. Search

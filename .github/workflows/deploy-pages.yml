@@ -13,6 +13,7 @@ on:
       - 'package.json'
       - 'package-lock.json'
       - 'CHANGELOG.md'
+      - 'ROADMAP.md'
       - 'scripts/build-site.mjs'
       - '.github/workflows/deploy-pages.yml'
   workflow_dispatch:

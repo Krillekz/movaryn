@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Dices, Image as ImageIcon, Lightbulb, Search, ShieldCheck, Sparkles } from 'lucide-react';
 import { ART_PRESETS, CONSTRAINT_PACKS, MOVE_IDEAS, randomMoveIdea } from '../../shared/promptIdeas';
 import { useApp } from '../store/useApp';
@@ -28,6 +28,13 @@ export function IdeaLibraryDialog() {
   const [tab, setTab] = useState<LibraryTab>('moves');
   const [query, setQuery] = useState('');
   const [lastMoveId, setLastMoveId] = useState<string | undefined>(undefined);
+
+  // Reopening the library should start from a clean search and the first tab.
+  useEffect(() => {
+    if (!open) return;
+    setQuery('');
+    setTab('moves');
+  }, [open]);
 
   const search = query.trim().toLowerCase();
 
@@ -98,10 +105,10 @@ export function IdeaLibraryDialog() {
         <div className="flex w-full items-center justify-between gap-2">
           <span className="text-[11px] text-ink-faint">
             {tab === 'moves'
-              ? `${moves.length} sparks`
+              ? `${moves.length} ${moves.length === 1 ? 'spark' : 'sparks'}`
               : tab === 'constraints'
-                ? `${constraints.length} constraint packs`
-                : `${presets.length} art presets`}
+                ? `${constraints.length} constraint pack${constraints.length === 1 ? '' : 's'}`
+                : `${presets.length} art preset${presets.length === 1 ? '' : 's'}`}
           </span>
           <div className="flex gap-2">
             {tab === 'moves' ? (

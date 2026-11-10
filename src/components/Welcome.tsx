@@ -1,5 +1,6 @@
 import { Crown, Image as ImageIcon, Lightbulb, Scale, Swords, Wrench } from 'lucide-react';
 import { apiBase, isBrowserBuild } from '../lib/apiBase';
+import { ROADMAP_URL } from '../lib/links';
 import { useApp } from '../store/useApp';
 import { WelcomeMark } from './Logo';
 
@@ -72,6 +73,7 @@ export function Welcome() {
   const setDraft = useApp((state) => state.setDraft);
   const openImageBrief = useApp((state) => state.openImageBrief);
   const openIdeas = useApp((state) => state.openIdeas);
+  const openWhatsNew = useApp((state) => state.openWhatsNew);
   const provider = useApp((state) => state.provider);
   const project = useApp((state) => {
     const conversation = state.activeId ? state.conversations[state.activeId] : null;
@@ -157,6 +159,25 @@ export function Welcome() {
         </span>
         <span className="shrink-0 text-[12px] text-accent">Browse</span>
       </button>
+
+      <div className="mt-2 flex flex-wrap items-center justify-between gap-2 px-1 text-[11px] text-ink-faint">
+        <span>
+          Press{' '}
+          <kbd className="rounded border border-line bg-surface px-1.5 py-0.5 text-[10px]">
+            Ctrl/⌘ K
+          </kbd>{' '}
+          for chats, saved moves and commands.
+        </span>
+        <span className="flex items-center gap-2">
+          <button type="button" className="text-accent hover:underline" onClick={openWhatsNew}>
+            What&apos;s new
+          </button>
+          <span aria-hidden="true">·</span>
+          <a className="hover:text-ink" href={ROADMAP_URL} target="_blank" rel="noreferrer">
+            Roadmap
+          </a>
+        </span>
+      </div>
 
       {!provider ? (
         <div className="mt-6 rounded-xl border border-warn/30 bg-panel-2 px-3.5 py-3 text-[12px] leading-relaxed text-ink-muted">

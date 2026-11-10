@@ -1,5 +1,10 @@
 [
   {
+    "version": "1.6.0",
+    "title": "A command palette, release notes in the app and a roadmap",
+    "summary": "Command palette on Ctrl/⌘ K, plus a search button in the chat header. It searches chats, projects and saved moves, and runs actions: new chat, new pr…"
+  },
+  {
     "version": "1.5.0",
     "title": "An idea library, a kit check and house rules",
     "summary": "Idea library with three tabs: 12 moveset sparks, 8 constraint packs and 10 art presets. Search it, roll a random spark, send a constraint straight in…"

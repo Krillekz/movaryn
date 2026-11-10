@@ -56,6 +56,15 @@ export interface ImageBriefState {
   messageId?: string;
 }
 
+export type SettingsTabId =
+  | 'provider'
+  | 'models'
+  | 'prompts'
+  | 'appearance'
+  | 'data'
+  | 'credits'
+  | 'about';
+
 interface UiState {
   sidebarCollapsed: boolean;
   mobileSidebar: boolean;
@@ -66,6 +75,9 @@ interface UiState {
   projectId: string | null;
   imageBrief: ImageBriefState;
   ideasOpen: boolean;
+  settingsTab: SettingsTabId;
+  paletteOpen: boolean;
+  whatsNewOpen: boolean;
 }
 
 export interface AppState {
@@ -114,8 +126,13 @@ export interface AppState {
   setDraft: (value: string) => void;
   setSidebarCollapsed: (value: boolean) => void;
   setMobileSidebar: (value: boolean) => void;
-  openSettings: () => void;
+  openSettings: (tab?: SettingsTabId) => void;
   closeSettings: () => void;
+  setSettingsTab: (tab: SettingsTabId) => void;
+  openPalette: () => void;
+  closePalette: () => void;
+  openWhatsNew: () => void;
+  closeWhatsNew: () => void;
   openProject: (id: string) => void;
   closeProject: () => void;
   openImageBrief: (options?: { spec?: ImagePromptSpec; conversationId?: string; messageId?: string }) => void;
@@ -176,6 +193,9 @@ export const useApp = create<AppState>()((set, get) => ({
     projectId: null,
     imageBrief: { open: false, spec: null, mode: 'new' },
     ideasOpen: false,
+    settingsTab: 'provider',
+    paletteOpen: false,
+    whatsNewOpen: false,
   },
   toasts: [],
   confirm: null,
@@ -185,7 +205,8 @@ export const useApp = create<AppState>()((set, get) => ({
     if (hydratePromise) return hydratePromise;
 
     hydratePromise = (async () => {
-      const loaded = await loadState();
+      try {
+        const loaded = await loadState();
       const conversations: Record<string, Conversation> = {};
       for (const conversation of loaded.conversations) {
         conversations[conversation.id] = {
@@ -224,8 +245,15 @@ export const useApp = create<AppState>()((set, get) => ({
         hydrated: true,
       });
 
-      if (!storageAvailable) {
-        get().pushToast('Local storage is unavailable — this session will not be saved.', 'danger');
+        if (!storageAvailable) {
+          get().pushToast('Local storage is unavailable — this session will not be saved.', 'danger');
+        }
+      } catch {
+        set({ hydrated: true });
+        get().pushToast(
+          'Your saved workspace could not be opened. Starting a clean session.',
+          'danger',
+        );
       }
     })();
 
@@ -476,8 +504,22 @@ export const useApp = create<AppState>()((set, get) => ({
 
   setMobileSidebar: (value) => set((state) => ({ ui: { ...state.ui, mobileSidebar: value } })),
 
-  openSettings: () => set((state) => ({ ui: { ...state.ui, settingsOpen: true } })),
+  openSettings: (tab) =>
+    set((state) => ({
+      ui: {
+        ...state.ui,
+        settingsOpen: true,
+        ...(tab ? { settingsTab: tab } : {}),
+      },
+    })),
   closeSettings: () => set((state) => ({ ui: { ...state.ui, settingsOpen: false } })),
+  setSettingsTab: (tab) => set((state) => ({ ui: { ...state.ui, settingsTab: tab } })),
+
+  openPalette: () => set((state) => ({ ui: { ...state.ui, paletteOpen: true } })),
+  closePalette: () => set((state) => ({ ui: { ...state.ui, paletteOpen: false } })),
+
+  openWhatsNew: () => set((state) => ({ ui: { ...state.ui, whatsNewOpen: true } })),
+  closeWhatsNew: () => set((state) => ({ ui: { ...state.ui, whatsNewOpen: false } })),
 
   openProject: (id) => set((state) => ({ ui: { ...state.ui, projectId: id } })),
   closeProject: () => set((state) => ({ ui: { ...state.ui, projectId: null } })),

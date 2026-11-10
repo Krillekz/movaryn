@@ -69,10 +69,20 @@ async function write(store: string, value: unknown, key?: string): Promise<void>
   const db = await openDb();
   if (!db) return;
   try {
-    const transaction = db.transaction(store, 'readwrite');
-    const objectStore = transaction.objectStore(store);
-    if (key === undefined) objectStore.put(value);
-    else objectStore.put(value, key);
+    // Resolve on transaction completion, not on put(), so a reload or app close
+    // right after a save cannot drop the queued write before it commits.
+    await new Promise<void>((resolve) => {
+      const transaction = db.transaction(store, 'readwrite');
+      const objectStore = transaction.objectStore(store);
+      if (key === undefined) objectStore.put(value);
+      else objectStore.put(value, key);
+      transaction.oncomplete = () => resolve();
+      transaction.onerror = () => {
+        storageAvailable = false;
+        resolve();
+      };
+      transaction.onabort = () => resolve();
+    });
   } catch {
     storageAvailable = false;
   }
@@ -82,8 +92,13 @@ async function remove(store: string, key: string): Promise<void> {
   const db = await openDb();
   if (!db) return;
   try {
-    const transaction = db.transaction(store, 'readwrite');
-    transaction.objectStore(store).delete(key);
+    await new Promise<void>((resolve) => {
+      const transaction = db.transaction(store, 'readwrite');
+      transaction.objectStore(store).delete(key);
+      transaction.oncomplete = () => resolve();
+      transaction.onerror = () => resolve();
+      transaction.onabort = () => resolve();
+    });
   } catch {
     // ignored: the in-memory state is still correct
   }

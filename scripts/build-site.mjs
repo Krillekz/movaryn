@@ -194,6 +194,7 @@ function renderPage(entries) {
           <a href="./#features">Features</a>
           <a href="./#workflow">Workflow</a>
           <a href="changelog.html" aria-current="page">Update log</a>
+          <a href="roadmap.html">Roadmap</a>
           <a href="https://github.com/${repo}" rel="noreferrer">GitHub</a>
         </nav>
 
@@ -259,6 +260,215 @@ ${entries.map(renderEntry).join('\n\n')}
         <nav class="footer-links" aria-label="Footer">
           <a href="./">Home</a>
           <a href="./#features">Features</a>
+          <a href="roadmap.html">Roadmap</a>
+          <a href="changelog.html">Update log</a>
+          <a href="https://github.com/${repo}" rel="noreferrer">GitHub</a>
+          <a href="https://github.com/${repo}/releases" rel="noreferrer">Releases</a>
+        </nav>
+      </div>
+      <div class="shell footer-base">
+        <span>© <span id="year">${new Date().getFullYear()}</span> Movaryn</span>
+        <span>Not affiliated with any game or studio mentioned.</span>
+      </div>
+    </footer>
+
+    <script src="assets/site.js" defer></script>
+  </body>
+</html>
+`;
+}
+
+function parseRoadmap(text) {
+  const stages = [];
+  let stage = null;
+
+  for (const raw of text.replace(/\r\n?/g, '\n').split('\n')) {
+    const line = raw.trim();
+    if (!line || line.startsWith('# ')) continue;
+
+    const heading = /^##\s+(.+)$/.exec(line);
+    if (heading) {
+      stage = { title: heading[1].trim(), intro: '', items: [] };
+      stages.push(stage);
+      continue;
+    }
+    if (!stage) continue;
+
+    const bullet = /^-\s+(.*)$/.exec(line);
+    if (bullet) {
+      stage.items.push(bullet[1].trim());
+      continue;
+    }
+    stage.intro = stage.intro ? `${stage.intro} ${line}` : line;
+  }
+
+  return stages;
+}
+
+function slugify(value) {
+  return value
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-|-$/g, '');
+}
+
+function renderRoadmapPage(stages) {
+  const order = ['now', 'next', 'later', 'shipped'];
+  const sorted = [...stages].sort(
+    (a, b) => order.indexOf(a.title.toLowerCase()) - order.indexOf(b.title.toLowerCase()),
+  );
+  const columns = sorted.filter((stage) => stage.title.toLowerCase() !== 'shipped');
+  const shipped = sorted.find((stage) => stage.title.toLowerCase() === 'shipped');
+
+  const columnHtml = columns
+    .map(
+      (stage) => `        <section class="roadmap-column" id="${slugify(stage.title)}">
+          <header>
+            <h2>${escapeHtml(stage.title)}</h2>
+            <span class="roadmap-kicker">${
+              stage.title.toLowerCase() === 'now'
+                ? 'In progress'
+                : stage.title.toLowerCase() === 'next'
+                  ? 'Planned'
+                  : 'Exploring'
+            }</span>
+          </header>
+          ${stage.intro ? `<p class="roadmap-intro">${inline(stage.intro)}</p>` : ''}
+          <ul class="roadmap-list">
+${stage.items.map((item) => `            <li>${inline(item)}</li>`).join('\n')}
+          </ul>
+        </section>`,
+    )
+    .join('\n');
+
+  const shippedHtml = shipped
+    ? `      <section class="roadmap-shipped" id="shipped">
+        <h2>Shipped</h2>
+        <ul>
+${shipped.items.map((item) => `          <li>${inline(item)}</li>`).join('\n')}
+        </ul>
+      </section>`
+    : '';
+
+  return `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="color-scheme" content="dark" />
+    <title>Roadmap — Movaryn</title>
+    <meta
+      name="description"
+      content="What Movaryn is working on now, what comes next, what is being explored and what has already shipped."
+    />
+    <meta name="theme-color" content="#08080b" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Roadmap — Movaryn" />
+    <meta
+      property="og:description"
+      content="Now, next and later for the Movaryn moveset studio — plus everything already shipped."
+    />
+    <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+    <link rel="stylesheet" href="assets/site.css" />
+  </head>
+  <body>
+    <a class="skip" href="#main">Skip to content</a>
+
+    <header class="nav">
+      <div class="shell nav-inner">
+        <a class="brand" href="./" aria-label="Movaryn home">
+          <span class="brand-mark" aria-hidden="true">
+            <svg viewBox="0 0 64 64" fill="none">
+              <path
+                d="M15 44 L23.5 19 L32 35 L40.5 19 L49 44"
+                stroke="currentColor"
+                stroke-width="5.2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+              <circle cx="32" cy="49.5" r="3.1" fill="currentColor" />
+            </svg>
+          </span>
+          <span class="brand-text">
+            <strong>Movaryn</strong>
+            <small>Moveset studio</small>
+          </span>
+        </a>
+
+        <nav class="nav-links" aria-label="Primary">
+          <a href="./#features">Features</a>
+          <a href="./#workflow">Workflow</a>
+          <a href="roadmap.html" aria-current="page">Roadmap</a>
+          <a href="changelog.html">Update log</a>
+          <a href="https://github.com/${repo}" rel="noreferrer">GitHub</a>
+        </nav>
+
+        <a
+          class="btn btn-primary nav-cta"
+          href="https://github.com/${repo}/releases/latest"
+          data-download="setup"
+        >
+          Download
+        </a>
+      </div>
+    </header>
+
+    <main id="main">
+      <section class="log-hero">
+        <div class="shell">
+          <p class="eyebrow"><span class="dot"></span> Living document</p>
+          <h1>Roadmap</h1>
+          <p>
+            What Movaryn is working on now, what comes next and what is still being explored. It is
+            updated with each release; scope and order can change, and nothing here is a promise of a
+            date.
+          </p>
+        </div>
+      </section>
+
+      <div class="shell roadmap-layout">
+        <div class="roadmap-grid">
+${columnHtml}
+        </div>
+
+${shippedHtml}
+
+        <p class="roadmap-note">
+          Have a feature that would make kits easier to build? Open an issue on
+          <a href="https://github.com/${repo}/issues">GitHub</a> — concrete problems are easier to act
+          on than votes.
+        </p>
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="shell footer-grid">
+        <div>
+          <a class="brand" href="./" aria-label="Movaryn home">
+            <span class="brand-mark" aria-hidden="true">
+              <svg viewBox="0 0 64 64" fill="none">
+                <path
+                  d="M15 44 L23.5 19 L32 35 L40.5 19 L49 44"
+                  stroke="currentColor"
+                  stroke-width="5.2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+                <circle cx="32" cy="49.5" r="3.1" fill="currentColor" />
+              </svg>
+            </span>
+            <span class="brand-text"><strong>Movaryn</strong><small>Moveset studio</small></span>
+          </a>
+          <p class="footer-note">
+            Designed and built by <strong>Raevik</strong>. Ideas are yours; the keys never leave your
+            machine.
+          </p>
+        </div>
+        <nav class="footer-links" aria-label="Footer">
+          <a href="./">Home</a>
+          <a href="./#features">Features</a>
+          <a href="roadmap.html">Roadmap</a>
+          <a href="changelog.html">Update log</a>
           <a href="https://github.com/${repo}" rel="noreferrer">GitHub</a>
           <a href="https://github.com/${repo}/releases" rel="noreferrer">Releases</a>
         </nav>
@@ -301,4 +511,13 @@ const summary = entries.map((entry) => {
 await writeFile(path.join(siteDir, 'changelog.json'), `${JSON.stringify(summary, null, 2)}\n`);
 await copyFile(path.join(root, 'public', 'favicon.svg'), path.join(siteDir, 'favicon.svg'));
 
-console.log(`Built site/changelog.html and site/changelog.json (${entries.length} releases).`);
+const roadmapText = await readFile(path.join(root, 'ROADMAP.md'), 'utf8');
+const roadmapStages = parseRoadmap(roadmapText);
+if (roadmapStages.length === 0) {
+  throw new Error('No stages found in ROADMAP.md — expected "## Now" style headings.');
+}
+await writeFile(path.join(siteDir, 'roadmap.html'), renderRoadmapPage(roadmapStages));
+
+console.log(
+  `Built site/changelog.html and site/changelog.json (${entries.length} releases), and site/roadmap.html (${roadmapStages.length} stages).`,
+);

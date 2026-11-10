@@ -1404,3 +1404,141 @@ section[id] {
     padding: 22px 20px;
   }
 }
+
+/* ── Roadmap ─────────────────────────────────────────────── */
+
+.roadmap-layout {
+  padding: 12px 0 80px;
+}
+
+.roadmap-grid {
+  display: grid;
+  gap: 18px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.roadmap-column {
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--panel);
+  padding: 20px;
+}
+
+.roadmap-column header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.roadmap-column h2 {
+  font-size: 18px;
+}
+
+.roadmap-kicker {
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 3px 9px;
+  color: var(--ink-faint);
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.roadmap-intro {
+  margin-bottom: 12px;
+  color: var(--ink-muted);
+  font-size: 13px;
+}
+
+.roadmap-list {
+  display: flex;
+  flex-direction: column;
+  gap: 11px;
+}
+
+.roadmap-list li {
+  position: relative;
+  padding-left: 18px;
+  color: var(--ink-muted);
+  font-size: 13.5px;
+  line-height: 1.55;
+}
+
+.roadmap-list li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 8px;
+  width: 7px;
+  height: 7px;
+  border-radius: 2px;
+  background: var(--accent);
+  opacity: 0.8;
+}
+
+.roadmap-list strong,
+.roadmap-shipped strong {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.roadmap-shipped {
+  margin-top: 28px;
+  border-top: 1px solid var(--line);
+  padding-top: 26px;
+}
+
+.roadmap-shipped h2 {
+  margin-bottom: 14px;
+  font-size: 21px;
+}
+
+.roadmap-shipped ul {
+  display: grid;
+  gap: 10px 26px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.roadmap-shipped li {
+  position: relative;
+  padding-left: 18px;
+  color: var(--ink-muted);
+  font-size: 13.5px;
+  line-height: 1.55;
+}
+
+.roadmap-shipped li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 8px;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--ok);
+  opacity: 0.85;
+}
+
+.roadmap-note {
+  margin-top: 30px;
+  max-width: 70ch;
+  color: var(--ink-faint);
+  font-size: 13px;
+}
+
+.roadmap-note a {
+  color: var(--accent);
+}
+
+@media (max-width: 900px) {
+  .roadmap-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .roadmap-shipped ul {
+    grid-template-columns: 1fr;
+  }
+}

@@ -28,6 +28,10 @@ export function MovesetView({ parsed, content, conversationId }: MovesetViewProp
   const [checkOpen, setCheckOpen] = useState(false);
   const setDraft = useApp((state) => state.setDraft);
   const audit = useMemo(() => auditKit(parsed.moves), [parsed.moves]);
+  const reportText = [
+    `Kit check — ${audit.passed}/${audit.items.length} checks passed (${audit.score}%)`,
+    ...audit.items.map((item) => `${item.status.toUpperCase()} — ${item.label}: ${item.detail}`),
+  ].join('\n');
   const hasMeta = META_ROWS.some((row) => parsed.meta[row.key]);
 
   const reviewKit = () => {
@@ -141,14 +145,33 @@ export function MovesetView({ parsed, content, conversationId }: MovesetViewProp
               <ListChecks size={12} className="text-accent" />
               Kit check
             </span>
-            <span
-              className={cx(
-                'text-[11px] font-medium tabular-nums',
-                audit.score === 100 ? 'text-ok' : audit.score >= 60 ? 'text-warn' : 'text-danger',
-              )}
-            >
-              {audit.passed}/{audit.items.length} checks · {audit.score}%
-            </span>
+            <div className="flex items-center gap-1.5">
+              <span
+                className={cx(
+                  'text-[11px] font-medium tabular-nums',
+                  audit.score === 100 ? 'text-ok' : audit.score >= 60 ? 'text-warn' : 'text-danger',
+                )}
+              >
+                {audit.passed}/{audit.items.length} checks · {audit.score}%
+              </span>
+              <button
+                type="button"
+                className="btn btn-ghost h-6 px-1.5 text-[10.5px]"
+                title="Copy this report as text"
+                onClick={async () => {
+                  const ok = await copyText(reportText);
+                  useApp
+                    .getState()
+                    .pushToast(
+                      ok ? 'Kit check report copied.' : 'Copy failed.',
+                      ok ? 'success' : 'danger',
+                    );
+                }}
+              >
+                <Copy size={11} />
+                Copy report
+              </button>
+            </div>
           </div>
           <ul className="mt-2.5 flex flex-col gap-1.5">
             {audit.items.map((item) => (
