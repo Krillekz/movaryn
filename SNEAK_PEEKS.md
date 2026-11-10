@@ -1,0 +1,43 @@
+# Sneak peeks
+
+Early looks at what is being built next. These are previews, not release notes — scope, wording and timing can change.
+
+## Movaryn: Phase 2
+
+In design · No release date
+
+Phase 2 targets the two things that slow a kit down most: the model not knowing who you are talking
+about, and the wait before a useful answer appears.
+
+### Research before invention
+
+Mentioning an obscure anime or manga character should not make a model pattern-match a name and
+invent abilities. Phase 2 adds an explicit research step before the first draft:
+
+- An optional lookup checks the character's series, powers, weapons and silhouette, and shows where
+  each fact came from.
+- If the character cannot be verified, Movaryn says so and asks for the series or a short description
+  instead of guessing.
+- **Follow canon** and **Original kit** are separate paths: one respects known abilities, the other
+  uses the design as a starting point and labels what was invented.
+- A character brief is saved with the project, so a later chat does not re-litigate who the character
+  is.
+- Research is opt-in and server-side: no silent web requests, no key in the browser, and the app still
+  works with no lookup configured.
+
+### A faster path to the first move
+
+- Shorter setup before the kit, with no restating the brief back at you.
+- The first move streams before the rest of the answer is finished, so something usable is on screen
+  sooner.
+- A **Quick kit** path drafts one coherent pass first, then offers depth on request instead of
+  opening with an essay.
+- Clear progress states while a lookup runs, so waiting has a reason and an end.
+
+### What Phase 2 will not do
+
+- Invent canon for a character it cannot verify.
+- Scrape or upload anything silently.
+- Promise a date before the work is real.
+
+The roadmap is updated as this moves.

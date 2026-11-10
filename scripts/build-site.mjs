@@ -193,8 +193,9 @@ function renderPage(entries) {
         <nav class="nav-links" aria-label="Primary">
           <a href="./#features">Features</a>
           <a href="./#workflow">Workflow</a>
-          <a href="changelog.html" aria-current="page">Update log</a>
+          <a href="sneak-peeks.html">Sneak peeks</a>
           <a href="roadmap.html">Roadmap</a>
+          <a href="changelog.html" aria-current="page">Update log</a>
           <a href="https://github.com/${repo}" rel="noreferrer">GitHub</a>
         </nav>
 
@@ -260,6 +261,230 @@ ${entries.map(renderEntry).join('\n\n')}
         <nav class="footer-links" aria-label="Footer">
           <a href="./">Home</a>
           <a href="./#features">Features</a>
+          <a href="sneak-peeks.html">Sneak peeks</a>
+          <a href="roadmap.html">Roadmap</a>
+          <a href="changelog.html">Update log</a>
+          <a href="https://github.com/${repo}" rel="noreferrer">GitHub</a>
+          <a href="https://github.com/${repo}/releases" rel="noreferrer">Releases</a>
+        </nav>
+      </div>
+      <div class="shell footer-base">
+        <span>© <span id="year">${new Date().getFullYear()}</span> Movaryn</span>
+        <span>Not affiliated with any game or studio mentioned.</span>
+      </div>
+    </footer>
+
+    <script src="assets/site.js" defer></script>
+  </body>
+</html>
+`;
+}
+
+function parseSneakPeeks(text) {
+  const lines = text.replace(/\r\n?/g, '\n').split('\n');
+  const entries = [];
+  let entry = null;
+  let list = null;
+  let paragraph = null;
+
+  const flushList = () => {
+    if (entry && list && list.length > 0) entry.blocks.push({ type: 'list', items: list });
+    list = null;
+  };
+  const flushParagraph = () => {
+    if (entry && paragraph) entry.blocks.push({ type: 'p', text: paragraph });
+    paragraph = null;
+  };
+  const flushAll = () => {
+    flushList();
+    flushParagraph();
+  };
+
+  for (const raw of lines) {
+    const line = raw.trimEnd();
+    if (/^#\s+/.test(line)) continue;
+
+    const heading = /^##\s+(.+)$/.exec(line);
+    if (heading) {
+      flushAll();
+      entry = { title: heading[1].trim(), blocks: [] };
+      entries.push(entry);
+      continue;
+    }
+    if (!entry) continue;
+
+    if (!line.trim()) {
+      flushAll();
+      continue;
+    }
+
+    const subheading = /^###\s+(.+)$/.exec(line);
+    if (subheading) {
+      flushAll();
+      entry.blocks.push({ type: 'h', text: subheading[1].trim() });
+      continue;
+    }
+
+    const bullet = /^-\s+(.*)$/.exec(line);
+    if (bullet) {
+      flushParagraph();
+      if (!list) list = [];
+      list.push(bullet[1].trim());
+      continue;
+    }
+
+    if (/^\s{2,}\S/.test(raw) && list && list.length > 0) {
+      list[list.length - 1] += ` ${line.trim()}`;
+      continue;
+    }
+
+    flushList();
+    paragraph = paragraph ? `${paragraph} ${line.trim()}` : line.trim();
+  }
+
+  flushAll();
+  return entries;
+}
+
+function renderPeekBlocks(blocks) {
+  return blocks
+    .map((block) => {
+      if (block.type === 'list') {
+        const items = block.items.map((item) => `            <li>${inline(item)}</li>`).join('\n');
+        return `          <ul>\n${items}\n          </ul>`;
+      }
+      if (block.type === 'h') return `          <h3>${inline(block.text)}</h3>`;
+      return `          <p>${inline(block.text)}</p>`;
+    })
+    .join('\n');
+}
+
+function renderSneakPeeksPage(peeks) {
+  const entries = peeks
+    .map(
+      (peek, index) => `      <article class="peek-entry" id="${slugify(peek.title)}">
+        <p class="peek-kicker">Sneak peek ${String(index + 1).padStart(2, '0')}</p>
+        <h2>${inline(peek.title)}</h2>
+        <div class="peek-body">
+${renderPeekBlocks(peek.blocks)}
+        </div>
+      </article>`,
+    )
+    .join('\n');
+
+  return `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="color-scheme" content="dark" />
+    <title>Sneak peeks — Movaryn</title>
+    <meta
+      name="description"
+      content="Early looks at what Movaryn is building next, including Movaryn: Phase 2 character research and faster drafts."
+    />
+    <meta name="theme-color" content="#08080b" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Sneak peeks — Movaryn" />
+    <meta
+      property="og:description"
+      content="Early looks at what Movaryn is building next, including Movaryn: Phase 2."
+    />
+    <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+    <link rel="stylesheet" href="assets/site.css" />
+  </head>
+  <body>
+    <a class="skip" href="#main">Skip to content</a>
+
+    <header class="nav">
+      <div class="shell nav-inner">
+        <a class="brand" href="./" aria-label="Movaryn home">
+          <span class="brand-mark" aria-hidden="true">
+            <svg viewBox="0 0 64 64" fill="none">
+              <path
+                d="M15 44 L23.5 19 L32 35 L40.5 19 L49 44"
+                stroke="currentColor"
+                stroke-width="5.2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+              <circle cx="32" cy="49.5" r="3.1" fill="currentColor" />
+            </svg>
+          </span>
+          <span class="brand-text">
+            <strong>Movaryn</strong>
+            <small>Moveset studio</small>
+          </span>
+        </a>
+
+        <nav class="nav-links" aria-label="Primary">
+          <a href="./#features">Features</a>
+          <a href="./#workflow">Workflow</a>
+          <a href="sneak-peeks.html" aria-current="page">Sneak peeks</a>
+          <a href="roadmap.html">Roadmap</a>
+          <a href="changelog.html">Update log</a>
+          <a href="https://github.com/${repo}" rel="noreferrer">GitHub</a>
+        </nav>
+
+        <a
+          class="btn btn-primary nav-cta"
+          href="https://github.com/${repo}/releases/latest"
+          data-download="setup"
+        >
+          Download
+        </a>
+      </div>
+    </header>
+
+    <main id="main">
+      <section class="log-hero">
+        <div class="shell">
+          <p class="eyebrow"><span class="dot"></span> Early looks</p>
+          <h1>Sneak peeks</h1>
+          <p>
+            Previews of what is being built next. These are earlier than release notes: scope, wording
+            and timing can change. The <a href="roadmap.html">roadmap</a> tracks the same work at a
+            higher level.
+          </p>
+        </div>
+      </section>
+
+      <div class="shell peek-layout">
+${entries}
+        <p class="peek-note">
+          New peeks appear here when there is something concrete to show, not on a schedule. Have a
+          problem worth solving? <a href="https://github.com/${repo}/issues">Open an issue on GitHub</a>.
+        </p>
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="shell footer-grid">
+        <div>
+          <a class="brand" href="./" aria-label="Movaryn home">
+            <span class="brand-mark" aria-hidden="true">
+              <svg viewBox="0 0 64 64" fill="none">
+                <path
+                  d="M15 44 L23.5 19 L32 35 L40.5 19 L49 44"
+                  stroke="currentColor"
+                  stroke-width="5.2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+                <circle cx="32" cy="49.5" r="3.1" fill="currentColor" />
+              </svg>
+            </span>
+            <span class="brand-text"><strong>Movaryn</strong><small>Moveset studio</small></span>
+          </a>
+          <p class="footer-note">
+            Designed and built by <strong>Raevik</strong>. Ideas are yours; the keys never leave your
+            machine.
+          </p>
+        </div>
+        <nav class="footer-links" aria-label="Footer">
+          <a href="./">Home</a>
+          <a href="./#features">Features</a>
+          <a href="sneak-peeks.html">Sneak peeks</a>
           <a href="roadmap.html">Roadmap</a>
           <a href="changelog.html">Update log</a>
           <a href="https://github.com/${repo}" rel="noreferrer">GitHub</a>
@@ -398,6 +623,7 @@ ${shipped.items.map((item) => `          <li>${inline(item)}</li>`).join('\n')}
         <nav class="nav-links" aria-label="Primary">
           <a href="./#features">Features</a>
           <a href="./#workflow">Workflow</a>
+          <a href="sneak-peeks.html">Sneak peeks</a>
           <a href="roadmap.html" aria-current="page">Roadmap</a>
           <a href="changelog.html">Update log</a>
           <a href="https://github.com/${repo}" rel="noreferrer">GitHub</a>
@@ -434,6 +660,11 @@ ${columnHtml}
 ${shippedHtml}
 
         <p class="roadmap-note">
+          Early look: <a href="sneak-peeks.html#movaryn-phase-2">Movaryn: Phase 2</a> covers character
+          research, saved character briefs and a faster path to the first move.
+        </p>
+
+        <p class="roadmap-note">
           Have a feature that would make kits easier to build? Open an issue on
           <a href="https://github.com/${repo}/issues">GitHub</a> — concrete problems are easier to act
           on than votes.
@@ -467,6 +698,7 @@ ${shippedHtml}
         <nav class="footer-links" aria-label="Footer">
           <a href="./">Home</a>
           <a href="./#features">Features</a>
+          <a href="sneak-peeks.html">Sneak peeks</a>
           <a href="roadmap.html">Roadmap</a>
           <a href="changelog.html">Update log</a>
           <a href="https://github.com/${repo}" rel="noreferrer">GitHub</a>
@@ -518,6 +750,13 @@ if (roadmapStages.length === 0) {
 }
 await writeFile(path.join(siteDir, 'roadmap.html'), renderRoadmapPage(roadmapStages));
 
+const sneakText = await readFile(path.join(root, 'SNEAK_PEEKS.md'), 'utf8');
+const peeks = parseSneakPeeks(sneakText);
+if (peeks.length === 0) {
+  throw new Error('No sneak peeks found in SNEAK_PEEKS.md — expected "## <title>" headings.');
+}
+await writeFile(path.join(siteDir, 'sneak-peeks.html'), renderSneakPeeksPage(peeks));
+
 console.log(
-  `Built site/changelog.html and site/changelog.json (${entries.length} releases), and site/roadmap.html (${roadmapStages.length} stages).`,
+  `Built site/changelog.html and site/changelog.json (${entries.length} releases), site/roadmap.html (${roadmapStages.length} stages) and site/sneak-peeks.html (${peeks.length} peek).`,
 );
