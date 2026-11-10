@@ -9,8 +9,8 @@
 - **What's New inside the app** opens once per version and any time afterwards. It shows the newest
   three releases from the same `CHANGELOG.md` as the public update log, with links to the full log
   and the roadmap.
-- **Public roadmap** at [roadmap.html](../roadmap.html) with Now, Next, Later and Shipped columns,
-  linked from the site navigation, footer, About tab and What's New dialog.
+- **Public roadmap** with Now, Next, Later and Shipped columns, linked from the site navigation,
+  footer, About tab and What's New dialog.
 - **Copy a kit check report** as plain text, so a review can be pasted into a builder's notes.
 - Settings remembers which tab you were on, and the palette can jump straight to Provider, Prompts,
   Data or About instead of always opening the first tab.
