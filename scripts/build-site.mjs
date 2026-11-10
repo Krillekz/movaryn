@@ -660,8 +660,8 @@ ${columnHtml}
 ${shippedHtml}
 
         <p class="roadmap-note">
-          Early look: <a href="sneak-peeks.html#movaryn-phase-2">Movaryn: Phase 2</a> covers character
-          research, saved character briefs and a faster path to the first move.
+          Early look: the <a href="sneak-peeks.html">sneak peeks</a> cover Phases 2 through 5, from
+          character research to an optional synced workspace.
         </p>
 
         <p class="roadmap-note">

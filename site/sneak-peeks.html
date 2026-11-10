@@ -81,38 +81,119 @@
         <h2>Movaryn: Phase 2</h2>
         <div class="peek-body">
           <p>In design · No release date</p>
-          <p>Phase 2 targets the two things that slow a kit down most: the model not knowing who you are talking about, and the wait before a useful answer appears.</p>
-          <h3>Research before invention</h3>
-          <p>Mentioning an obscure anime or manga character should not make a model pattern-match a name and invent abilities. Phase 2 adds an explicit research step before the first draft:</p>
+          <p>Phase 2 goes after the two things that slow a kit down most: the model not knowing who you are talking about, and the wait before a usable answer.</p>
+          <h3>The big change: it finds out who the character is</h3>
+          <p>Mentioning an obscure anime or manga character should not make a model pattern-match a name and invent abilities. Phase 2 puts an explicit research step before the first draft:</p>
           <ul>
             <li>An optional lookup checks the character's series, powers, weapons and silhouette, and shows where each fact came from.</li>
             <li>If the character cannot be verified, Movaryn says so and asks for the series or a short description instead of guessing.</li>
             <li><strong>Follow canon</strong> and <strong>Original kit</strong> are separate paths: one respects known abilities, the other uses the design as a starting point and labels what was invented.</li>
-            <li>A character brief is saved with the project, so a later chat does not re-litigate who the character is.</li>
             <li>Research is opt-in and server-side: no silent web requests, no key in the browser, and the app still works with no lookup configured.</li>
           </ul>
-          <h3>A faster path to the first move</h3>
+          <h3>Also in this phase</h3>
           <ul>
             <li>Shorter setup before the kit, with no restating the brief back at you.</li>
             <li>The first move streams before the rest of the answer is finished, so something usable is on screen sooner.</li>
-            <li>A <strong>Quick kit</strong> path drafts one coherent pass first, then offers depth on request instead of opening with an essay.</li>
+            <li>A <strong>Quick kit</strong> path drafts one coherent pass, then offers depth on request instead of opening with an essay.</li>
             <li>Clear progress states while a lookup runs, so waiting has a reason and an end.</li>
+            <li>A character brief saved with the project, so later chats keep the same understanding.</li>
           </ul>
-          <h3>What Phase 2 will not do</h3>
+          <h3>What it will not do</h3>
           <ul>
             <li>Invent canon for a character it cannot verify.</li>
             <li>Scrape or upload anything silently.</li>
             <li>Promise a date before the work is real.</li>
           </ul>
-          <p>The roadmap is updated as this moves.</p>
+        </div>
+      </article>
+      <article class="peek-entry" id="movaryn-phase-3">
+        <p class="peek-kicker">Sneak peek 02</p>
+        <h2>Movaryn: Phase 3</h2>
+        <div class="peek-body">
+          <p>In design · No release date</p>
+          <p>Phase 3 changes what a kit is for: instead of only describing a fight, the kit can be tried before it is built.</p>
+          <h3>The big change: a sandbox that runs the kit</h3>
+          <p>A local simulation plays the saved moves against simple archetypes and reports what the text actually implies:</p>
+          <ul>
+            <li>Startup, active and recovery windows are estimated from the move sequence and drawn as a timeline.</li>
+            <li>Common answers are tested — sidestep, block, counter, ranged poke — and summarised in a short counterplay report.</li>
+            <li>A kit can be tuned in the sandbox before it is exported, using the same limits the selected game enforces.</li>
+          </ul>
+          <h3>Also in this phase</h3>
+          <ul>
+            <li>Frame-data table export alongside Markdown, CSV and JSON.</li>
+            <li>Matchup notes attached to a kit and carried into later drafts.</li>
+            <li>A read-only kit link that renders the moves and the counterplay report.</li>
+            <li>Sandbox presets per game, so JJS and TSB timings do not share one assumption.</li>
+          </ul>
+          <h3>What it will not do</h3>
+          <ul>
+            <li>Claim to be the real game's netcode or physics.</li>
+            <li>Present estimated windows as measured frame data.</li>
+            <li>Upload a kit anywhere without an explicit action.</li>
+          </ul>
+        </div>
+      </article>
+      <article class="peek-entry" id="movaryn-phase-4">
+        <p class="peek-kicker">Sneak peek 03</p>
+        <h2>Movaryn: Phase 4</h2>
+        <div class="peek-body">
+          <p>In design · No release date</p>
+          <p>Phase 4 treats a good kit as portable: the idea should survive a change of game.</p>
+          <h3>The big change: one kit, remapped to another game</h3>
+          <ul>
+            <li>A saved kit can be translated into another supported format, with each move rewritten to that game's rules rather than copied across.</li>
+            <li>The remap shows what changed and why: range, cooldown, resource cost and move count.</li>
+            <li>Moves that cannot exist in the target game are flagged with a buildable alternative instead of being dropped quietly.</li>
+          </ul>
+          <h3>Also in this phase</h3>
+          <ul>
+            <li>Rule packs that describe a game's limits once and apply them to every project.</li>
+            <li>Balance scorecards comparing damage, range and commitment across a kit.</li>
+            <li>Import from CSV and clipboard, so old sheets do not have to be retyped.</li>
+            <li>A printable project sheet with the brief, moves, art prompts and kit check.</li>
+          </ul>
+          <h3>What it will not do</h3>
+          <ul>
+            <li>Pretend a remap is a drop-in replacement for the original kit.</li>
+            <li>Invent mechanics for a game it has no rules for.</li>
+            <li>Replace the user's own balance judgement.</li>
+          </ul>
+        </div>
+      </article>
+      <article class="peek-entry" id="movaryn-phase-5">
+        <p class="peek-kicker">Sneak peek 04</p>
+        <h2>Movaryn: Phase 5</h2>
+        <div class="peek-body">
+          <p>In design · No release date</p>
+          <p>Phase 5 changes where the workshop lives. Local-first stays the default; sync becomes a choice.</p>
+          <h3>The big change: an optional synced workspace</h3>
+          <ul>
+            <li>Projects can follow you between machines with an account, while local-only projects keep working untouched.</li>
+            <li>Share links open a read-only kit in the browser, with no install and no provider key.</li>
+            <li>Collaborators can comment on moves instead of copying the whole project.</li>
+          </ul>
+          <h3>Also in this phase</h3>
+          <ul>
+            <li>Version history per project, with restore.</li>
+            <li>A browser-first layout that works on a phone for reading and commenting.</li>
+            <li>Team projects with shared house rules.</li>
+            <li>Account-free export stays, so a project can leave at any time.</li>
+          </ul>
+          <h3>What it will not do</h3>
+          <ul>
+            <li>Move existing local projects to a server without asking.</li>
+            <li>Require an account to use the app.</li>
+            <li>Put provider keys anywhere but your own machine.</li>
+          </ul>
         </div>
       </article>
       <article class="peek-entry" id="movaryn-character-briefs">
-        <p class="peek-kicker">Sneak peek 02</p>
+        <p class="peek-kicker">Sneak peek 05</p>
         <h2>Movaryn: Character briefs</h2>
         <div class="peek-body">
           <p>In design · No release date</p>
-          <p>Today each chat starts from whatever the model thinks it remembers, so a name can mean one thing in the first reply and something else after a restart. A character brief makes that understanding explicit, project-scoped and editable.</p>
+          <p>A closer look at the brief that Phase 2 introduces. Today each chat starts from whatever the model thinks it remembers, so a name can mean one thing in the first reply and something else after a restart. A character brief makes that understanding explicit, project-scoped and editable.</p>
           <h3>One brief per character</h3>
           <ul>
             <li>A short brief records the series, which version of the character is meant, the abilities worth keeping and the ones to avoid.</li>
@@ -133,7 +214,6 @@
             <li>Lock a project to one interpretation forever.</li>
             <li>Hide the canon-or-original choice inside a prompt you cannot see.</li>
           </ul>
-          <p>The roadmap tracks this work alongside Phase 2.</p>
         </div>
       </article>
         <p class="peek-note">
