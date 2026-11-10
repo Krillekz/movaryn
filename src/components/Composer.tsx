@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { ArrowUp, Image as ImageIcon, Paperclip, Square, X } from 'lucide-react';
+import { ArrowUp, Image as ImageIcon, Lightbulb, Paperclip, Square, X } from 'lucide-react';
 import type { ImageAttachment } from '../../shared/types';
 import { sendMessage, stopGeneration } from '../lib/chatEngine';
 import { readImageFile } from '../lib/image';
@@ -12,6 +12,7 @@ export function Composer() {
   const streaming = useApp((state) => state.streaming);
   const provider = useApp((state) => state.provider);
   const openImageBrief = useApp((state) => state.openImageBrief);
+  const openIdeas = useApp((state) => state.openIdeas);
   const pushToast = useApp((state) => state.pushToast);
 
   const [attachments, setAttachments] = useState<ImageAttachment[]>([]);
@@ -154,6 +155,15 @@ export function Composer() {
             onClick={() => openImageBrief()}
           >
             <ImageIcon size={16} />
+          </button>
+          <button
+            type="button"
+            className="icon-btn h-8 w-8"
+            title="Prompt ideas"
+            aria-label="Open the prompt idea library"
+            onClick={openIdeas}
+          >
+            <Lightbulb size={16} />
           </button>
 
           <span className="ml-1 hidden select-none items-center gap-1 text-[11px] text-ink-faint sm:flex">

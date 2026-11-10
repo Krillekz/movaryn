@@ -5,6 +5,7 @@ import {
   Dices,
   Eye,
   Image as ImageIcon,
+  Lightbulb,
   Loader2,
   RotateCcw,
   Upload,
@@ -13,6 +14,7 @@ import {
 } from 'lucide-react';
 import type { AspectRatio, Framing, ImagePromptSpec, Project, Settings } from '../../shared/types';
 import { ASPECT_RATIOS, FRAMING_OPTIONS } from '../../shared/types';
+import { ART_PRESETS } from '../../shared/promptIdeas';
 import { buildImagePrompt } from '../../shared/imagePrompt';
 import { useApp } from '../store/useApp';
 import { generateConceptImage } from '../lib/chatEngine';
@@ -47,6 +49,7 @@ export function ImageBriefDialog() {
   const updateSettings = useApp((state) => state.updateSettings);
   const updateProject = useApp((state) => state.updateProject);
   const openSettings = useApp((state) => state.openSettings);
+  const openIdeas = useApp((state) => state.openIdeas);
   const pushToast = useApp((state) => state.pushToast);
 
   const project = useApp((state) => {
@@ -446,6 +449,50 @@ export function ImageBriefDialog() {
               placeholder="Overcast rim light from the left"
               className="field"
             />
+          </div>
+        </div>
+
+        <div>
+          <div className="flex items-center justify-between gap-2">
+            <span className="field-label">Style presets</span>
+            <button
+              type="button"
+              className="btn btn-ghost h-6 px-1.5 text-[11px]"
+              onClick={() => {
+                close();
+                openIdeas();
+              }}
+            >
+              <Lightbulb size={11} />
+              More ideas
+            </button>
+          </div>
+          <div className="flex flex-wrap gap-1.5">
+            {ART_PRESETS.map((preset) => (
+              <button
+                key={preset.id}
+                type="button"
+                title={preset.body}
+                onClick={() =>
+                  setSpec((current) => ({
+                    ...current,
+                    style: preset.style,
+                    palette: preset.palette,
+                    lighting: preset.lighting,
+                    angle: preset.angle ?? current.angle,
+                    setting: preset.setting ?? current.setting,
+                  }))
+                }
+                className={cx(
+                  'rounded-lg border px-2.5 py-1.5 text-[11.5px] transition-colors',
+                  spec.style === preset.style
+                    ? 'border-accent bg-accent-soft text-ink'
+                    : 'border-line bg-panel text-ink-muted hover:border-line-strong hover:text-ink',
+                )}
+              >
+                {preset.title}
+              </button>
+            ))}
           </div>
         </div>
 

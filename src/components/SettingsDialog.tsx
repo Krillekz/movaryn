@@ -4,6 +4,7 @@ import {
   Database,
   Heart,
   Info,
+  Lightbulb,
   Loader2,
   Monitor,
   Moon,
@@ -22,11 +23,12 @@ import { useApp } from '../store/useApp';
 import { cx, downloadJson } from '../lib/utils';
 import { Modal } from './ui/Modal';
 
-type TabId = 'provider' | 'models' | 'appearance' | 'data' | 'credits' | 'about';
+type TabId = 'provider' | 'models' | 'prompts' | 'appearance' | 'data' | 'credits' | 'about';
 
 const TABS: { id: TabId; label: string; icon: typeof Plug }[] = [
   { id: 'provider', label: 'Provider', icon: Plug },
   { id: 'models', label: 'Models', icon: SlidersHorizontal },
+  { id: 'prompts', label: 'Prompts', icon: Lightbulb },
   { id: 'appearance', label: 'Appearance', icon: Palette },
   { id: 'data', label: 'Data & privacy', icon: Database },
   { id: 'credits', label: 'Credits', icon: Heart },
@@ -348,6 +350,71 @@ export function SettingsDialog() {
                   aria-label="Send reference images to the chat model"
                 />
               </section>
+            </div>
+          ) : null}
+
+          {tab === 'prompts' ? (
+            <div className="flex flex-col gap-5">
+              <section>
+                <label className="field-label" htmlFor="settings-house-rules">
+                  House rules sent with every chat
+                </label>
+                <textarea
+                  id="settings-house-rules"
+                  value={settings.houseRules}
+                  onChange={(event) => updateSettings({ houseRules: event.target.value })}
+                  rows={6}
+                  maxLength={4000}
+                  placeholder="For example: always end with a one-line gameplan; prefer one-word names; keep every move buildable with animations and hitboxes only."
+                  className="field resize-y"
+                />
+                <p className="mt-1.5 text-[10.5px] leading-relaxed text-ink-faint">
+                  {settings.houseRules.length}/4000 · Applied on this device alongside the project brief.
+                  Hard constraints and your explicit request still win if they conflict.
+                </p>
+              </section>
+
+              <section>
+                <h3 className="text-[12.5px] font-semibold text-ink">Quick additions</h3>
+                <div className="mt-2 flex flex-wrap gap-1.5">
+                  {[
+                    'Always end a full kit with a one-line gameplan.',
+                    'Prefer one-word move names unless I ask otherwise.',
+                    'Keep every move buildable with animations, hitboxes, sounds and basic effects.',
+                    'No counters, domains or passives unless I ask for them.',
+                    'State counterplay for every move in one short line.',
+                  ].map((rule) => (
+                    <button
+                      key={rule}
+                      type="button"
+                      className="rounded-lg border border-line bg-panel px-2.5 py-1.5 text-left text-[11.5px] text-ink-muted transition-colors hover:border-line-strong hover:text-ink"
+                      onClick={() =>
+                        updateSettings({
+                          houseRules: settings.houseRules.trim()
+                            ? `${settings.houseRules.trimEnd()}\n- ${rule}`
+                            : `- ${rule}`,
+                        })
+                      }
+                    >
+                      + {rule}
+                    </button>
+                  ))}
+                </div>
+              </section>
+
+              <section className="rounded-xl border border-line bg-panel px-3.5 py-3">
+                <h3 className="text-[12px] font-semibold text-ink">Where these go</h3>
+                <p className="mt-1.5 text-[11.5px] leading-relaxed text-ink-muted">
+                  House rules are stored with your settings and sent as a separate section of the system
+                  prompt on each chat request. They are preferences, not a way to override the project brief,
+                  and they never leave the API server except to your configured provider.
+                </p>
+              </section>
+
+              <p className="text-[11px] leading-relaxed text-ink-faint">
+                Looking for prompts rather than rules? Open the idea library from the lightbulb button in
+                the composer, or from the welcome screen.
+              </p>
             </div>
           ) : null}
 

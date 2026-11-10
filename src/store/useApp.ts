@@ -31,6 +31,7 @@ export const DEFAULT_SETTINGS: Settings = {
   contextWindow: 24,
   attachReferences: true,
   lastImageStyle: '',
+  houseRules: '',
 };
 
 export interface Toast {
@@ -64,6 +65,7 @@ interface UiState {
   settingsOpen: boolean;
   projectId: string | null;
   imageBrief: ImageBriefState;
+  ideasOpen: boolean;
 }
 
 export interface AppState {
@@ -118,6 +120,8 @@ export interface AppState {
   closeProject: () => void;
   openImageBrief: (options?: { spec?: ImagePromptSpec; conversationId?: string; messageId?: string }) => void;
   closeImageBrief: () => void;
+  openIdeas: () => void;
+  closeIdeas: () => void;
 
   pushToast: (message: string, tone?: Toast['tone']) => void;
   dismissToast: (id: string) => void;
@@ -171,6 +175,7 @@ export const useApp = create<AppState>()((set, get) => ({
     settingsOpen: false,
     projectId: null,
     imageBrief: { open: false, spec: null, mode: 'new' },
+    ideasOpen: false,
   },
   toasts: [],
   confirm: null,
@@ -493,6 +498,9 @@ export const useApp = create<AppState>()((set, get) => ({
 
   closeImageBrief: () =>
     set((state) => ({ ui: { ...state.ui, imageBrief: { open: false, spec: null, mode: 'new' } } })),
+
+  openIdeas: () => set((state) => ({ ui: { ...state.ui, ideasOpen: true } })),
+  closeIdeas: () => set((state) => ({ ui: { ...state.ui, ideasOpen: false } })),
 
   pushToast: (message, tone = 'default') => {
     const id = uid('toast');

@@ -81,7 +81,26 @@ Plain, direct, specific. No hype, no emoji, no "Sure!" or "Here's what you asked
 You cannot generate or see generated images. If the user wants concept art, tell them to use the image button, or write a ready-to-use image prompt when they ask for one. A moveset and its artwork are separate outputs: never append an image prompt to a moveset unless asked.
 
 ## Build quality
-Prefer the simplest thing that delivers the fantasy. Easy means existing animations, hitboxes, sounds, basic effects, no custom meshes and no scripting. When the user asks for easy or simple, do not smuggle complexity back in through a "small custom rig" or a new system.`;
+Prefer the simplest thing that delivers the fantasy. Easy means existing animations, hitboxes, sounds, basic effects, no custom meshes and no scripting. When the user asks for easy or simple, do not smuggle complexity back in through a "small custom rig" or a new system.
+
+## Kit architecture
+When a full kit is requested, design it as one gameplan rather than five unrelated ideas:
+- One reliable way in, at least one way to extend or convert, and one clear way to finish.
+- Every move needs a job no other move already does. If two moves share a job, merge them or change one.
+- Give the kit a weakness the opponent can exploit. Perfect kits are not fun to fight and usually are not buildable.
+- Match commitment to reward: fast, safe moves deal less; slow, readable moves deal more.
+- Keep a power budget. Four strong moves and one ultimate is a kit; five ultimates is a wish list.
+
+## Self-check before you answer
+Silently verify:
+1. The move count is exactly what was asked, with no extra sections.
+2. Every restriction in the brief still holds.
+3. No name repeats a project name or an avoid-list entry.
+4. Each description names a start, a contact, and an end or recovery.
+5. Anything you could not verify is labelled and paired with a buildable alternative.
+6. Nothing in the reply is filler, praise or a recap of the request.
+
+If a check fails, fix it before writing the answer rather than explaining the failure.`;
 
 function renderProject(project: ProjectContextPayload): string {
   const lines: string[] = ['<project_brief>'];
@@ -111,6 +130,7 @@ export interface SystemPromptOptions {
   project?: ProjectContextPayload;
   summary?: string;
   avoidNames?: string[];
+  houseRules?: string;
 }
 
 export function buildSystemPrompt(options: SystemPromptOptions = {}): string {
@@ -143,6 +163,12 @@ export function buildSystemPrompt(options: SystemPromptOptions = {}): string {
   if (options.summary && options.summary.trim()) {
     parts.push(
       `CONVERSATION MEMORY\nA condensed record of earlier turns in this project. Treat it as prior context, keep its decisions and constraints, and do not contradict it. Recent messages follow verbatim.\n\n${options.summary.trim()}`,
+    );
+  }
+
+  if (options.houseRules && options.houseRules.trim()) {
+    parts.push(
+      `HOUSE RULES (from the user's Settings)\nApply these preferences to every reply: tone, naming habits, default build difficulty and format. They are not permission to ignore the project brief, the user's explicit instructions, or the rules above; if they conflict, the brief and the explicit request win.\n\n${options.houseRules.trim().slice(0, 4000)}`,
     );
   }
 

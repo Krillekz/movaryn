@@ -15,6 +15,12 @@ It is not a generic chatbot with a game skin:
 - **Mechanics are labelled honestly.** The AI must say when it cannot verify that a Skill Builder
   feature exists instead of inventing one.
 - **Names do not repeat.** Every move name in the conversation and project is sent as an avoid-list.
+- **An idea library starts the work.** Twelve moveset sparks, eight constraint packs and ten art
+  presets, searchable, insertable into the composer or the art brief.
+- **A local kit check.** Duplicate names, overused words, described sequences, roles and repeated
+  openings are checked in the app, with no provider request.
+- **House rules.** Preferences set in Settings → Prompts travel with every chat, next to the project
+  brief.
 - **Images are separate outputs** with their own brief, prompt and revisions. Nothing is generated
   automatically after a moveset.
 

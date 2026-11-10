@@ -119,6 +119,7 @@ export function validateChatRequest(body: unknown): ChatRequest {
   });
 
   const summary = optionalString(raw.summary, 'summary', MAX_SUMMARY_CHARS);
+  const houseRules = optionalString(raw.houseRules, 'houseRules', 4_000);
   const model = optionalString(raw.model, 'model', 120);
   if (model && !/^[A-Za-z0-9._:/@+-]+$/.test(model)) fail('Model name contains invalid characters.');
 
@@ -131,7 +132,7 @@ export function validateChatRequest(body: unknown): ChatRequest {
       .filter(Boolean);
   }
 
-  return { messages, summary, project: validateProject(raw.project), avoidNames, model };
+  return { messages, summary, project: validateProject(raw.project), avoidNames, houseRules, model };
 }
 
 export function validateImageRequest(body: unknown): ImageRequest {

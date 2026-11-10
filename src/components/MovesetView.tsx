@@ -1,11 +1,13 @@
-import { useState } from 'react';
-import { Copy, CornerDownRight, LayoutTemplate, Sparkles } from 'lucide-react';
+import { useMemo, useState } from 'react';
+import { ClipboardCheck, Copy, CornerDownRight, LayoutTemplate, ListChecks, Sparkles } from 'lucide-react';
 import type { ParsedMove, ParsedResponse } from '../../shared/moveset';
 import { moveToText } from '../../shared/moveset';
 import { Markdown } from './Markdown';
 import { CopyButton } from './ui/CopyButton';
 import { useApp } from '../store/useApp';
 import { copyText, cx } from '../lib/utils';
+import { auditKit } from '../../shared/kitAudit';
+import { kitReviewPrompt } from '../../shared/promptIdeas';
 import { CharacterCardDialog } from './CharacterCardDialog';
 
 interface MovesetViewProps {
@@ -23,7 +25,16 @@ const META_ROWS: { key: 'character' | 'theme' | 'game'; label: string }[] = [
 export function MovesetView({ parsed, content, conversationId }: MovesetViewProps) {
   const [raw, setRaw] = useState(false);
   const [cardOpen, setCardOpen] = useState(false);
+  const [checkOpen, setCheckOpen] = useState(false);
+  const setDraft = useApp((state) => state.setDraft);
+  const audit = useMemo(() => auditKit(parsed.moves), [parsed.moves]);
   const hasMeta = META_ROWS.some((row) => parsed.meta[row.key]);
+
+  const reviewKit = () => {
+    setDraft(kitReviewPrompt(parsed.moves, parsed.meta.character));
+    useApp.getState().pushToast('Review prompt added to the composer.', 'success');
+    window.requestAnimationFrame(() => document.getElementById('movaryn-composer')?.focus());
+  };
 
   if (raw) {
     return (
@@ -59,6 +70,25 @@ export function MovesetView({ parsed, content, conversationId }: MovesetViewProp
             onClick={() => setRaw(true)}
           >
             Raw text
+          </button>
+          <button
+            type="button"
+            className="btn btn-ghost h-7 px-2 text-[11.5px]"
+            onClick={() => setCheckOpen((value) => !value)}
+            title="Local checks on this kit — no provider request"
+            aria-expanded={checkOpen}
+          >
+            <ListChecks size={12} />
+            Kit check
+          </button>
+          <button
+            type="button"
+            className="btn btn-ghost h-7 px-2 text-[11.5px]"
+            onClick={reviewKit}
+            title="Draft a structured review of this kit"
+          >
+            <ClipboardCheck size={12} />
+            Review kit
           </button>
           <button
             type="button"
@@ -102,6 +132,47 @@ export function MovesetView({ parsed, content, conversationId }: MovesetViewProp
             );
           })}
         </dl>
+      ) : null}
+
+      {checkOpen ? (
+        <div className="mb-4 rounded-xl border border-line bg-panel-2 px-4 py-3">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <span className="inline-flex items-center gap-1.5 text-[10.5px] font-semibold uppercase tracking-[0.16em] text-ink-faint">
+              <ListChecks size={12} className="text-accent" />
+              Kit check
+            </span>
+            <span
+              className={cx(
+                'text-[11px] font-medium tabular-nums',
+                audit.score === 100 ? 'text-ok' : audit.score >= 60 ? 'text-warn' : 'text-danger',
+              )}
+            >
+              {audit.passed}/{audit.items.length} checks · {audit.score}%
+            </span>
+          </div>
+          <ul className="mt-2.5 flex flex-col gap-1.5">
+            {audit.items.map((item) => (
+              <li key={item.label} className="flex items-start gap-2 text-[11.5px] leading-relaxed">
+                <span
+                  className={cx(
+                    'mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full',
+                    item.status === 'pass'
+                      ? 'bg-ok'
+                      : item.status === 'warn'
+                        ? 'bg-warn'
+                        : 'bg-danger',
+                  )}
+                  aria-hidden="true"
+                />
+                <span className="text-ink">{item.label}</span>
+                <span className="min-w-0 text-ink-faint">{item.detail}</span>
+              </li>
+            ))}
+          </ul>
+          <p className="mt-2 text-[10.5px] text-ink-faint">
+            Checked locally in the app. This looks at structure and naming, not whether the idea is fun.
+          </p>
+        </div>
       ) : null}
 
       <div className="flex flex-col gap-3">

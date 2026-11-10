@@ -1,17 +1,20 @@
 import { useState, type FormEvent } from 'react';
 import { Plug, X } from 'lucide-react';
 import { apiBase, isBrowserBuild, setApiBase } from '../lib/apiBase';
+import { useApp } from '../store/useApp';
 
 /**
  * Shown only in the static browser build before a server URL is saved. The page
  * has no API of its own, so this is configured instead of faked.
  */
 export function ApiSetupBanner() {
+  const connected = useApp((state) => Boolean(state.provider));
   const [value, setValue] = useState(apiBase);
   const [error, setError] = useState('');
   const [dismissed, setDismissed] = useState(false);
 
-  if (!isBrowserBuild || apiBase || dismissed) return null;
+  // A same-origin API (dev server or Node host) needs no setup bar.
+  if (!isBrowserBuild || apiBase || connected || dismissed) return null;
 
   const connect = (event: FormEvent) => {
     event.preventDefault();

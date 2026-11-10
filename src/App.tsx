@@ -5,6 +5,7 @@ import { ChatView } from './components/ChatView';
 import { SettingsDialog } from './components/SettingsDialog';
 import { ProjectDrawer } from './components/ProjectDrawer';
 import { ImageBriefDialog } from './components/ImageBriefDialog';
+import { IdeaLibraryDialog } from './components/IdeaLibraryDialog';
 import { ConfirmDialog } from './components/ui/ConfirmDialog';
 import { Toasts } from './components/ui/Toasts';
 import { LogoMark } from './components/Logo';
@@ -37,11 +38,6 @@ export default function App() {
 
   useEffect(() => {
     let cancelled = false;
-    // The static build has no API until a server URL is saved; don't probe the page origin.
-    if (isBrowserBuild && !apiBase) {
-      useApp.getState().setProvider(null, 'Connect this browser build to a Movaryn API to start.');
-      return;
-    }
     const check = async () => {
       // One retry keeps a server restart from flashing a false offline banner.
       for (let attempt = 0; attempt < 2; attempt += 1) {
@@ -55,12 +51,14 @@ export default function App() {
             continue;
           }
           if (!cancelled) {
-            useApp
-              .getState()
-              .setProvider(
-                null,
-                error instanceof Error ? error.message : 'The API is unreachable.',
-              );
+            useApp.getState().setProvider(
+              null,
+              isBrowserBuild && !apiBase
+                ? 'Connect this browser build to a Movaryn API to start.'
+                : error instanceof Error
+                  ? error.message
+                  : 'The API is unreachable.',
+            );
           }
         }
       }
@@ -68,6 +66,8 @@ export default function App() {
     void check();
     const interval = window.setInterval(() => {
       const state = useApp.getState();
+      // A static page with no API configured has nothing to poll for.
+      if (isBrowserBuild && !apiBase) return;
       if (!state.provider || !state.provider.chat.configured) void check();
     }, 15_000);
     return () => {
@@ -118,6 +118,7 @@ export default function App() {
       <SettingsDialog />
       <ProjectDrawer />
       <ImageBriefDialog />
+      <IdeaLibraryDialog />
       <ConfirmDialog />
       <Toasts />
     </div>

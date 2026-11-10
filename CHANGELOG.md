@@ -1,5 +1,25 @@
 # Update log
 
+## 1.5.0 — An idea library, a kit check and house rules
+
+- **Idea library** with three tabs: 12 moveset sparks, 8 constraint packs and 10 art presets. Search
+  it, roll a random spark, send a constraint straight into the composer, or apply an art preset to
+  the concept-art brief. Open it from the welcome screen, the composer's lightbulb button or the art
+  dialog.
+- **Style presets** in the concept-art brief fill style, palette, lighting, camera angle and
+  background in one click, from ink manga to neon cyber and stylised 3D.
+- **Kit check** reviews a reply locally: duplicate names, overused words, how many moves describe a
+  real sequence, whether start/contact/recovery is mentioned, role coverage and repeated opening
+  words. No provider request, no invented score.
+- **Review kit** drafts a structured critique for the current reply — three weak points, one fix
+  each, and only the moves that need rewriting.
+- **House rules** in the new Settings → Prompts tab: preferences such as naming style, build
+  difficulty and required gameplan are sent with every chat, alongside the project brief rather
+  than replacing it.
+- **Stronger prompt core**: kit architecture guidance (one way in, one extension, one finish, a real
+  weakness), a power budget, and a silent self-check before every answer.
+- More starter cards: a rival duo, a buildable rewrite and a boss plus counter-kit.
+
 ## 1.4.6 — Prompts you edit are kept
 
 - Prompt-only text is remembered per project, separately for concept art and the character card.

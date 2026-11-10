@@ -136,6 +136,8 @@ export interface Settings {
   attachReferences: boolean;
   /** Remember the last image style across briefs. */
   lastImageStyle: string;
+  /** Extra instructions the user wants applied to every chat on this device. */
+  houseRules: string;
 }
 
 export interface ProjectMovePayload {
@@ -166,6 +168,8 @@ export interface ChatRequest {
   project?: ProjectContextPayload;
   /** Move names already used anywhere in this project. */
   avoidNames?: string[];
+  /** Device-level preferences from Settings → Prompts. */
+  houseRules?: string;
   model?: string;
 }
 

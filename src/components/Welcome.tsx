@@ -1,4 +1,4 @@
-import { Crown, Image as ImageIcon, Scale, Swords, Wrench } from 'lucide-react';
+import { Crown, Image as ImageIcon, Lightbulb, Scale, Swords, Wrench } from 'lucide-react';
 import { apiBase, isBrowserBuild } from '../lib/apiBase';
 import { useApp } from '../store/useApp';
 import { WelcomeMark } from './Logo';
@@ -45,11 +45,33 @@ const STARTERS: {
     prompt:
       'Make a balanced moveset with four base moves and one ultimate for a mobile-style battleground game. Theme: ',
   },
+  {
+    title: 'Design a rival duo',
+    body: 'Two kits that answer each other.',
+    icon: Swords,
+    prompt:
+      'Design two rival characters for The Strongest Battlegrounds. Give each exactly three moves, then explain in one line how each kit answers the other. Theme: ',
+  },
+  {
+    title: 'Make a kit buildable',
+    body: 'Strip a concept down to animations and hitboxes.',
+    icon: Wrench,
+    prompt:
+      'Here is a kit I like but cannot build yet. Rewrite it using only animations, hitboxes, sounds and basic effects, keeping the same fantasy and move count:\n\n',
+  },
+  {
+    title: 'Boss and counter-kit',
+    body: 'A readable boss plus the tools to beat it.',
+    icon: Crown,
+    prompt:
+      'Design a boss with four telegraphed moves and the three-tool counter-kit a player would need to beat it. Keep both buildable in a Roblox combat game. Theme: ',
+  },
 ];
 
 export function Welcome() {
   const setDraft = useApp((state) => state.setDraft);
   const openImageBrief = useApp((state) => state.openImageBrief);
+  const openIdeas = useApp((state) => state.openIdeas);
   const provider = useApp((state) => state.provider);
   const project = useApp((state) => {
     const conversation = state.activeId ? state.conversations[state.activeId] : null;
@@ -116,6 +138,25 @@ export function Welcome() {
           );
         })}
       </div>
+
+      <button
+        type="button"
+        onClick={openIdeas}
+        className="mt-3 flex items-center justify-between gap-3 rounded-xl border border-dashed border-line bg-panel px-3.5 py-3 text-left transition-colors hover:border-line-strong hover:bg-panel-2"
+      >
+        <span className="flex min-w-0 items-center gap-2.5">
+          <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-accent-soft text-accent">
+            <Lightbulb size={14} />
+          </span>
+          <span className="min-w-0">
+            <span className="block text-[12.5px] font-medium text-ink">Idea library</span>
+            <span className="mt-0.5 block text-[11.5px] leading-relaxed text-ink-muted">
+              12 sparks, 8 constraint packs and 10 art presets, ready to drop into a prompt.
+            </span>
+          </span>
+        </span>
+        <span className="shrink-0 text-[12px] text-accent">Browse</span>
+      </button>
 
       {!provider ? (
         <div className="mt-6 rounded-xl border border-warn/30 bg-panel-2 px-3.5 py-3 text-[12px] leading-relaxed text-ink-muted">

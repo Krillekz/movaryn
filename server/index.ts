@@ -148,6 +148,7 @@ app.post('/api/chat', rateLimit, async (req: Request, res: Response) => {
         project: payload.project,
         summary: payload.summary,
         avoidNames: payload.avoidNames ?? payload.project?.avoidNames,
+        houseRules: payload.houseRules,
       }),
     },
     ...normaliseHistory(payload.messages),

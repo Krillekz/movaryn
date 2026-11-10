@@ -105,6 +105,7 @@ function buildChatRequest(conversationId: string): ChatRequest {
         }
       : undefined,
     avoidNames: Array.from(avoid).slice(0, 120),
+    houseRules: settings.houseRules.trim() || undefined,
     model: settings.chatModel.trim() || undefined,
   };
 }
