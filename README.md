@@ -136,6 +136,7 @@ Movaryn reports the failure instead of pretending it worked.
 | `npm run dev:web` | Vite only |
 | `npm run typecheck` | Strict TypeScript for frontend and server |
 | `npm run build` | Typecheck → Vite build → compile the API to `server-dist/` |
+| `npm run build:app` | Vite build of the browser version into `site/app/` |
 | `npm start` | Serve the built app + API from one Node process |
 | `npm run electron:dev` | Vite + Electron (Electron starts the API itself on :8787) |
 | `npm run electron:start` | Build, then launch the Electron shell |
@@ -280,10 +281,25 @@ from `CHANGELOG.md` by `scripts/build-site.mjs` (`npm run build:site`). It is pl
 no build dependencies, so it can be opened locally or published as-is.
 
 1. Enable Pages → Source: GitHub Actions.
-2. `.github/workflows/deploy-pages.yml` rebuilds `site/changelog.html` and publishes `site/` on pushes
-   that touch the site, the changelog or the generator.
+2. `.github/workflows/deploy-pages.yml` rebuilds `site/changelog.html` and the browser app, then publishes
+   `site/` on pushes that touch the site, the app, the changelog or the generator.
 
-To host the web app itself, deploy the API to any Node host (Render, Railway, Fly.io, a VPS) with
+The browser build is served at `https://<owner>.github.io/movaryn/app/`.
+
+### Browser build
+
+The browser build is the same React app without Electron. It has no server of its own: on first load it
+asks for the URL of a Movaryn API (saved in `localStorage`, or passed once as `?api=https://…`) and sends
+every `/api` request to that server. Provider keys stay on the server, never in the page.
+
+1. Run the API on any Node host: `npm ci && npm run build && HOST=0.0.0.0 PORT=8787 npm start`.
+2. Set `ALLOWED_ORIGINS` to the page's origin, e.g. `https://<owner>.github.io`.
+3. Open the app, paste the API URL and press Connect.
+
+Nothing about this changes the security model: the build contains no keys and no key-handling code.
+Without an API URL the app shows a setup bar instead of pretending chat works.
+
+To host the web app from your own domain instead, deploy the API to any Node host (Render, Railway, Fly.io, a VPS) with
 `HOST=0.0.0.0` and `ALLOWED_ORIGINS` set, build with `VITE_API_BASE_URL=https://your-api.example.com`, and
 serve `dist/` from that host or another static host. `base: './'` keeps the build portable to a
 repository subpath.

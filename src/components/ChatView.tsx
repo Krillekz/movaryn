@@ -15,6 +15,7 @@ import {
 import type { Conversation } from '../../shared/types';
 import { parseMoveset } from '../../shared/moveset';
 import { fetchHealth } from '../lib/api';
+import { apiBase, isBrowserBuild } from '../lib/apiBase';
 import { useActiveConversation, useActiveProject, useApp } from '../store/useApp';
 import { copyText, cx, downloadJson } from '../lib/utils';
 import { Composer } from './Composer';
@@ -146,7 +147,9 @@ export function ChatView() {
   const bannerMessage = providerError
     ? providerError
     : !provider
-      ? 'The Movaryn API is not reachable. Start it with "npm run dev" and the app will reconnect.'
+      ? isBrowserBuild && !apiBase
+        ? 'Connect this browser build to a Movaryn API to start.'
+        : 'The Movaryn API is not reachable. Start it with "npm run dev" and the app will reconnect.'
       : 'The AI provider is not configured. Add AI_API_KEY, AI_BASE_URL and AI_MODEL to .env, then restart the API.';
 
   return (

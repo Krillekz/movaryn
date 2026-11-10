@@ -857,6 +857,20 @@ section[id] {
   color: var(--accent-strong);
 }
 
+.webapp-note {
+  grid-column: 1 / -1;
+  color: var(--ink-muted);
+  font-size: 12.5px;
+  line-height: 1.7;
+}
+
+.webapp-note a,
+.faq-body a {
+  color: var(--accent-strong);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
 .fineprint {
   grid-column: 1 / -1;
   padding-top: 4px;

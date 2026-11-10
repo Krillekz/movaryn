@@ -17,6 +17,7 @@ import {
 import type { ImageQuality, ThemePreference } from '../../shared/types';
 import { ASPECT_RATIOS } from '../../shared/types';
 import { fetchHealth } from '../lib/api';
+import { apiBase, isBrowserBuild, setApiBase } from '../lib/apiBase';
 import { useApp } from '../store/useApp';
 import { cx, downloadJson } from '../lib/utils';
 import { Modal } from './ui/Modal';
@@ -173,6 +174,31 @@ export function SettingsDialog() {
                   {rechecking ? <Loader2 size={13} className="animate-spin" /> : <RefreshCw size={13} />}
                   Recheck connection
                 </button>
+                {isBrowserBuild ? (
+                  <div className="mt-3 rounded-xl border border-line bg-panel px-3.5 py-3">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="min-w-0">
+                        <p className="text-[12px] text-ink">Browser API endpoint</p>
+                        <p className="mt-0.5 break-words font-mono text-[11px] text-ink-faint">
+                          {apiBase || 'Not set — the page shows a setup bar until one is saved.'}
+                        </p>
+                      </div>
+                      <button
+                        type="button"
+                        className="btn btn-secondary h-8 shrink-0 text-[12px]"
+                        onClick={() => {
+                          setApiBase('');
+                          window.location.reload();
+                        }}
+                      >
+                        {apiBase ? 'Change' : 'Set endpoint'}
+                      </button>
+                    </div>
+                    <p className="mt-1.5 text-[11px] leading-relaxed text-ink-muted">
+                      Requests go only to this server. No provider key is stored or sent by the page.
+                    </p>
+                  </div>
+                ) : null}
               </section>
 
               <section>

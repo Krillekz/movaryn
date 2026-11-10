@@ -6,6 +6,7 @@ dist/
 server-dist/
 release/
 out/
+site/app/
 
 # secrets — never commit real credentials
 .env

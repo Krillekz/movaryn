@@ -5,12 +5,10 @@ import type {
   ProviderStatus,
   SummaryRequest,
 } from '../../shared/types';
-
-const rawBase = (import.meta.env.VITE_API_BASE_URL ?? '').trim().replace(/\/+$/, '');
-export const apiBase = rawBase;
+import { apiBase } from './apiBase';
 
 function apiUrl(path: string): string {
-  return `${rawBase}${path}`;
+  return `${apiBase}${path}`;
 }
 
 export class ApiError extends Error {
@@ -44,7 +42,9 @@ export async function fetchHealth(signal?: AbortSignal): Promise<ProviderStatus>
     response = await fetch(apiUrl('/api/health'), { signal, headers: { Accept: 'application/json' } });
   } catch {
     throw new ApiError(
-      'The Movaryn API is not reachable. Start it with "npm run dev", or point VITE_API_BASE_URL at your deployed API.',
+      apiBase
+        ? `The Movaryn API at ${apiBase} is not reachable. Check that it is running, and that its ALLOWED_ORIGINS includes ${window.location.origin}.`
+        : 'The Movaryn API is not reachable. Start it with "npm run dev", or set its URL in Settings.',
       'offline',
     );
   }
@@ -69,7 +69,9 @@ export async function streamChat(body: ChatRequest, handlers: StreamHandlers): P
   } catch (error) {
     if ((error as Error)?.name === 'AbortError') throw error;
     throw new ApiError(
-      'Could not reach the Movaryn API. Make sure the API server is running (npm run dev), then retry.',
+      apiBase
+        ? `Could not reach the Movaryn API at ${apiBase}. Check the server, then retry.`
+        : 'Could not reach the Movaryn API. Make sure the API server is running (npm run dev), then retry.',
       'network',
     );
   }

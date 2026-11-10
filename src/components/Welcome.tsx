@@ -1,4 +1,5 @@
 import { Crown, Image as ImageIcon, Scale, Swords, Wrench } from 'lucide-react';
+import { apiBase, isBrowserBuild } from '../lib/apiBase';
 import { useApp } from '../store/useApp';
 import { WelcomeMark } from './Logo';
 
@@ -118,9 +119,18 @@ export function Welcome() {
 
       {!provider ? (
         <div className="mt-6 rounded-xl border border-warn/30 bg-panel-2 px-3.5 py-3 text-[12px] leading-relaxed text-ink-muted">
-          <span className="font-medium text-ink">The local API is offline.</span> Start it with{' '}
-          <code className="rounded bg-surface px-1 py-0.5 font-mono text-[11px]">npm run dev</code> and this
-          page will connect automatically.
+          {isBrowserBuild && !apiBase ? (
+            <>
+              <span className="font-medium text-ink">No API connected yet.</span> Paste the URL of a
+              Movaryn API you run into the bar above, then press Connect.
+            </>
+          ) : (
+            <>
+              <span className="font-medium text-ink">The local API is offline.</span> Start it with{' '}
+              <code className="rounded bg-surface px-1 py-0.5 font-mono text-[11px]">npm run dev</code>{' '}
+              and this page will connect automatically.
+            </>
+          )}
         </div>
       ) : !provider.chat.configured ? (
         <div className="mt-6 rounded-xl border border-warn/30 bg-panel-2 px-3.5 py-3 text-[12px] leading-relaxed text-ink-muted">

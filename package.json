@@ -21,7 +21,8 @@
     "package:win": "npm run build && npm run icon && electron-builder --win --publish never",
     "package:dir": "npm run build && npm run icon && electron-builder --dir",
     "mock:provider": "node scripts/mock-provider.mjs",
-    "build:site": "node scripts/build-site.mjs"
+    "build:site": "node scripts/build-site.mjs",
+    "build:app": "vite build --base=./ --outDir=site/app --emptyOutDir"
   },
   "engines": {
     "node": ">=20.19"

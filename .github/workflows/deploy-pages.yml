@@ -5,6 +5,13 @@ on:
     branches: [main]
     paths:
       - 'site/**'
+      - 'src/**'
+      - 'shared/**'
+      - 'index.html'
+      - 'public/**'
+      - 'vite.config.mts'
+      - 'package.json'
+      - 'package-lock.json'
       - 'CHANGELOG.md'
       - 'scripts/build-site.mjs'
       - '.github/workflows/deploy-pages.yml'
@@ -55,9 +62,16 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
 
       - name: Build the update log
         run: node scripts/build-site.mjs
+
+      - name: Build the browser app
+        run: npm run build:app
 
       - name: Configure Pages
         uses: actions/configure-pages@v5

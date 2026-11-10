@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import { Sidebar } from './components/Sidebar';
+import { ApiSetupBanner } from './components/ApiSetupBanner';
 import { ChatView } from './components/ChatView';
 import { SettingsDialog } from './components/SettingsDialog';
 import { ProjectDrawer } from './components/ProjectDrawer';
@@ -8,6 +9,7 @@ import { ConfirmDialog } from './components/ui/ConfirmDialog';
 import { Toasts } from './components/ui/Toasts';
 import { LogoMark } from './components/Logo';
 import { fetchHealth } from './lib/api';
+import { apiBase, isBrowserBuild } from './lib/apiBase';
 import { useApp } from './store/useApp';
 
 export default function App() {
@@ -35,6 +37,11 @@ export default function App() {
 
   useEffect(() => {
     let cancelled = false;
+    // The static build has no API until a server URL is saved; don't probe the page origin.
+    if (isBrowserBuild && !apiBase) {
+      useApp.getState().setProvider(null, 'Connect this browser build to a Movaryn API to start.');
+      return;
+    }
     const check = async () => {
       // One retry keeps a server restart from flashing a false offline banner.
       for (let attempt = 0; attempt < 2; attempt += 1) {
@@ -105,6 +112,7 @@ export default function App() {
     <div className="flex h-full w-full overflow-hidden bg-canvas text-ink">
       <Sidebar />
       <main className="flex min-w-0 flex-1 flex-col">
+        <ApiSetupBanner />
         <ChatView />
       </main>
       <SettingsDialog />
