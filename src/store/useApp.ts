@@ -5,6 +5,9 @@ import type {
   GeneratedImage,
   ImageAttachment,
   ImagePromptSpec,
+  Notebook,
+  NotebookMessage,
+  NotebookNote,
   Project,
   ProviderStatus,
   SavedMove,
@@ -13,9 +16,11 @@ import type {
 import {
   clearAllData,
   deleteConversationRecord,
+  deleteNotebookRecord,
   deleteProjectRecord,
   loadState,
   queueConversation,
+  queueNotebook,
   queueProject,
   queueSettings,
   storageAvailable,
@@ -33,6 +38,11 @@ export const DEFAULT_SETTINGS: Settings = {
   lastImageStyle: '',
   houseRules: '',
   quickKit: false,
+  layoutWidth: 'standard',
+  layoutDensity: 'comfortable',
+  responseStyle: 'balanced',
+  responseFormat: 'mixed',
+  explainChoices: false,
 };
 
 export interface Toast {
@@ -61,6 +71,7 @@ export type SettingsTabId =
   | 'provider'
   | 'models'
   | 'prompts'
+  | 'layout'
   | 'appearance'
   | 'data'
   | 'credits'
@@ -83,6 +94,7 @@ interface UiState {
   whatsNewOpen: boolean;
   toolsOpen: boolean;
   toolsTab: ToolsTabId;
+  notebookOpen: boolean;
 }
 
 export interface AppState {
@@ -92,6 +104,9 @@ export interface AppState {
   activeId: string | null;
   projects: Record<string, Project>;
   projectOrder: string[];
+  notebooks: Record<string, Notebook>;
+  notebookOrder: string[];
+  activeNotebookId: string | null;
   settings: Settings;
   provider: ProviderStatus | null;
   providerError: string | null;
@@ -126,6 +141,19 @@ export interface AppState {
   addProjectImages: (projectId: string, images: GeneratedImage[]) => void;
   addProjectReference: (projectId: string, reference: ImageAttachment) => void;
   removeProjectReference: (projectId: string, referenceId: string) => void;
+
+  createNotebook: () => string;
+  updateNotebook: (id: string, patch: Partial<Pick<Notebook, 'title'>>) => void;
+  deleteNotebook: (id: string) => void;
+  setActiveNotebook: (id: string) => void;
+  addNotebookSource: (id: string, source: { title: string; text: string; url?: string }) => void;
+  removeNotebookSource: (id: string, sourceId: string) => void;
+  appendNotebookMessage: (id: string, message: NotebookMessage) => void;
+  patchNotebookMessage: (id: string, messageId: string, patch: Partial<NotebookMessage>) => void;
+  addNotebookNote: (id: string, note: Omit<NotebookNote, 'id' | 'createdAt'>) => void;
+  removeNotebookNote: (id: string, noteId: string) => void;
+  openNotebook: () => void;
+  closeNotebook: () => void;
 
   setSearch: (value: string) => void;
   setDraft: (value: string) => void;
@@ -188,6 +216,9 @@ export const useApp = create<AppState>()((set, get) => ({
   activeId: null,
   projects: {},
   projectOrder: [],
+  notebooks: {},
+  notebookOrder: [],
+  activeNotebookId: null,
   settings: DEFAULT_SETTINGS,
   provider: null,
   providerError: null,
@@ -206,6 +237,7 @@ export const useApp = create<AppState>()((set, get) => ({
     whatsNewOpen: false,
     toolsOpen: false,
     toolsTab: 'brief',
+    notebookOpen: false,
   },
   toasts: [],
   confirm: null,
@@ -232,6 +264,19 @@ export const useApp = create<AppState>()((set, get) => ({
       for (const project of loaded.projects) {
         projects[project.id] = project;
       }
+      const notebooks: Record<string, Notebook> = {};
+      for (const notebook of loaded.notebooks ?? []) {
+        notebooks[notebook.id] = {
+          ...notebook,
+          sources: notebook.sources ?? [],
+          messages: (notebook.messages ?? []).map((message) =>
+            message.status === 'streaming'
+              ? { ...message, status: 'complete' as const }
+              : message,
+          ),
+          notes: notebook.notes ?? [],
+        };
+      }
       // Drop dangling project links from deleted projects.
       for (const conversation of Object.values(conversations)) {
         if (conversation.projectId && !projects[conversation.projectId]) {
@@ -250,6 +295,9 @@ export const useApp = create<AppState>()((set, get) => ({
         order,
         projects,
         projectOrder: sortByUpdated(projects),
+        notebooks,
+        notebookOrder: sortByUpdated(notebooks),
+        activeNotebookId: sortByUpdated(notebooks)[0] ?? null,
         settings: { ...settings, contextWindow: clamp(Number(settings.contextWindow) || 24, 4, 60) },
         activeId: order[0] ?? null,
         hydrated: true,
@@ -503,6 +551,174 @@ export const useApp = create<AppState>()((set, get) => ({
     });
   },
 
+  createNotebook: () => {
+    const now = Date.now();
+    const notebook: Notebook = {
+      id: uid('nb'),
+      title: 'Untitled notebook',
+      sources: [],
+      messages: [],
+      notes: [],
+      createdAt: now,
+      updatedAt: now,
+    };
+    set((state) => ({
+      notebooks: { ...state.notebooks, [notebook.id]: notebook },
+      notebookOrder: [notebook.id, ...state.notebookOrder],
+      activeNotebookId: notebook.id,
+    }));
+    queueNotebook(notebook);
+    return notebook.id;
+  },
+
+  updateNotebook: (id, patch) => {
+    const notebook = get().notebooks[id];
+    if (!notebook) return;
+    const next: Notebook = {
+      ...notebook,
+      ...patch,
+      ...(patch.title !== undefined ? { title: patch.title.trim().slice(0, 90) || 'Untitled notebook' } : {}),
+      updatedAt: Date.now(),
+    };
+    set((state) => ({
+      notebooks: { ...state.notebooks, [id]: next },
+      notebookOrder: [id, ...state.notebookOrder.filter((item) => item !== id)],
+    }));
+    queueNotebook(next);
+  },
+
+  deleteNotebook: (id) => {
+    const state = get();
+    const notebooks = { ...state.notebooks };
+    delete notebooks[id];
+    const notebookOrder = state.notebookOrder.filter((item) => item !== id);
+    set({
+      notebooks,
+      notebookOrder,
+      activeNotebookId:
+        state.activeNotebookId === id ? (notebookOrder[0] ?? null) : state.activeNotebookId,
+    });
+    deleteNotebookRecord(id);
+  },
+
+  setActiveNotebook: (id) => set({ activeNotebookId: id }),
+
+  addNotebookSource: (id, source) => {
+    const notebook = get().notebooks[id];
+    const text = source.text.trim();
+    if (!notebook || !text) return;
+    if (notebook.sources.length >= 12) {
+      get().pushToast('A notebook holds up to 12 sources. Remove one to add another.', 'danger');
+      return;
+    }
+    const existingChars = notebook.sources.reduce((sum, item) => sum + item.text.length, 0);
+    if (existingChars + text.length > 120_000) {
+      get().pushToast('This notebook is full (120,000 characters across its sources).', 'danger');
+      return;
+    }
+    const entry = {
+      id: uid('src'),
+      title: source.title.trim().slice(0, 140) || 'Untitled source',
+      text: text.slice(0, 20_000),
+      url: source.url?.trim().slice(0, 500) || undefined,
+      createdAt: Date.now(),
+    };
+    const current = get().notebooks[id];
+    if (!current) return;
+    const next: Notebook = {
+      ...current,
+      sources: [...current.sources, entry],
+      updatedAt: Date.now(),
+    };
+    set((state) => ({ notebooks: { ...state.notebooks, [id]: next } }));
+    queueNotebook(next);
+  },
+
+  removeNotebookSource: (id, sourceId) => {
+    const notebook = get().notebooks[id];
+    if (!notebook) return;
+    const next: Notebook = {
+      ...notebook,
+      sources: notebook.sources.filter((source) => source.id !== sourceId),
+      updatedAt: Date.now(),
+    };
+    set((state) => ({ notebooks: { ...state.notebooks, [id]: next } }));
+    queueNotebook(next);
+  },
+
+  appendNotebookMessage: (id, message) => {
+    const notebook = get().notebooks[id];
+    if (!notebook) return;
+    const next: Notebook = {
+      ...notebook,
+      messages: [...notebook.messages, message],
+      updatedAt: Date.now(),
+    };
+    set((state) => ({
+      notebooks: { ...state.notebooks, [id]: next },
+      notebookOrder: [id, ...state.notebookOrder.filter((item) => item !== id)],
+    }));
+    queueNotebook(next);
+  },
+
+  patchNotebookMessage: (id, messageId, patch) => {
+    const notebook = get().notebooks[id];
+    if (!notebook) return;
+    let changed = false;
+    const messages = notebook.messages.map((message) => {
+      if (message.id !== messageId) return message;
+      changed = true;
+      return { ...message, ...patch };
+    });
+    if (!changed) return;
+    const next: Notebook = { ...notebook, messages, updatedAt: Date.now() };
+    set((state) => ({ notebooks: { ...state.notebooks, [id]: next } }));
+    queueNotebook(next);
+  },
+
+  addNotebookNote: (id, note) => {
+    const notebook = get().notebooks[id];
+    if (!notebook) return;
+    const next: Notebook = {
+      ...notebook,
+      notes: [
+        { ...note, id: uid('note'), createdAt: Date.now() },
+        ...notebook.notes,
+      ],
+      updatedAt: Date.now(),
+    };
+    set((state) => ({ notebooks: { ...state.notebooks, [id]: next } }));
+    queueNotebook(next);
+  },
+
+  removeNotebookNote: (id, noteId) => {
+    const notebook = get().notebooks[id];
+    if (!notebook) return;
+    const next: Notebook = {
+      ...notebook,
+      notes: notebook.notes.filter((note) => note.id !== noteId),
+      updatedAt: Date.now(),
+    };
+    set((state) => ({ notebooks: { ...state.notebooks, [id]: next } }));
+    queueNotebook(next);
+  },
+
+  openNotebook: () => {
+    const state = get();
+    let id =
+      state.activeNotebookId && state.notebooks[state.activeNotebookId]
+        ? state.activeNotebookId
+        : (state.notebookOrder.find((item) => state.notebooks[item]) ?? null);
+    if (!id) id = get().createNotebook();
+    set((current) => ({
+      activeNotebookId: id,
+      ui: { ...current.ui, notebookOpen: true, mobileSidebar: false },
+    }));
+  },
+
+  closeNotebook: () => set((state) => ({ ui: { ...state.ui, notebookOpen: false } })),
+
+
   setSearch: (value) => set((state) => ({ ui: { ...state.ui, search: value } })),
 
   setDraft: (value) => set((state) => ({ ui: { ...state.ui, draft: value } })),
@@ -584,10 +800,13 @@ export const useApp = create<AppState>()((set, get) => ({
       activeId: null,
       projects: {},
       projectOrder: [],
+      notebooks: {},
+      notebookOrder: [],
+      activeNotebookId: null,
       streaming: null,
       confirm: null,
     });
-    get().pushToast('All local conversations and projects were deleted.', 'success');
+    get().pushToast('All local conversations, projects and notebooks were deleted.', 'success');
   },
 }));
 

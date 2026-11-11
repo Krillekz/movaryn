@@ -153,6 +153,11 @@ export interface Project {
   updatedAt: number;
 }
 
+export type ChatWidth = 'narrow' | 'standard' | 'wide';
+export type ChatDensity = 'compact' | 'comfortable' | 'spacious';
+export type ResponseStyle = 'concise' | 'balanced' | 'detailed';
+export type ResponseFormat = 'prose' | 'mixed' | 'bullets';
+
 export type ThemePreference = 'dark' | 'light' | 'system';
 export type ImageQuality = '' | 'low' | 'medium' | 'high' | 'auto';
 
@@ -173,6 +178,13 @@ export interface Settings {
   houseRules: string;
   /** Draft one coherent pass first instead of opening with an essay. */
   quickKit: boolean;
+  /** Reading layout of the chat area. */
+  layoutWidth: ChatWidth;
+  layoutDensity: ChatDensity;
+  /** How the assistant should shape its replies. */
+  responseStyle: ResponseStyle;
+  responseFormat: ResponseFormat;
+  explainChoices: boolean;
 }
 
 export interface ProjectMovePayload {
@@ -199,10 +211,57 @@ export interface ChatTurnPayload {
   images?: string[];
 }
 
+export interface NotebookSource {
+  id: string;
+  title: string;
+  text: string;
+  url?: string;
+  createdAt: number;
+}
+
+export interface NotebookMessage {
+  id: string;
+  role: 'user' | 'assistant';
+  content: string;
+  createdAt: number;
+  status?: MessageStatus;
+  error?: string;
+  stopped?: boolean;
+}
+
+export type NotebookNoteKind = 'briefing' | 'faq' | 'timeline' | 'guide';
+
+export interface NotebookNote {
+  id: string;
+  title: string;
+  kind: NotebookNoteKind;
+  content: string;
+  createdAt: number;
+}
+
+export interface Notebook {
+  id: string;
+  title: string;
+  sources: NotebookSource[];
+  messages: NotebookMessage[];
+  notes: NotebookNote[];
+  createdAt: number;
+  updatedAt: number;
+}
+
+export interface NotebookContextPayload {
+  title?: string;
+  sources: { title: string; text: string }[];
+}
+
 export interface ChatRequest {
   messages: ChatTurnPayload[];
   summary?: string;
   project?: ProjectContextPayload;
+  notebook?: NotebookContextPayload;
+  responseStyle?: ResponseStyle;
+  responseFormat?: ResponseFormat;
+  explainChoices?: boolean;
   /** Move names already used anywhere in this project. */
   avoidNames?: string[];
   /** Device-level preferences from Settings → Prompts. */

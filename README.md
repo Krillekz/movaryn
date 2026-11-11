@@ -29,6 +29,12 @@ It is not a generic chatbot with a game skin:
 - **Cross-game remapping.** Rewrites range and cooldown language for another game, lists every change
   and flags what does not fit.
 - **Local versions and share links.** Snapshots you can restore, and a read-only kit encoded in a link.
+- **Layout and reply controls.** Settings → Layout & replies sets a Focus, Classic or Studio layout,
+  reading width and message spacing across chat, composer and notebook, plus concise/balanced/detailed
+  replies, prose/mixed/bullet formatting and optional design-choice explanations.
+- **A notebook for your sources.** Paste sources into local notebooks, ask grounded questions that cite
+  them, and generate a briefing, FAQ, timeline or study guide as a saved note. Sources leave the device
+  only when you ask. Open it from the sidebar, palette or `Ctrl/⌘ + Shift + N`.
 - **House rules.** Preferences set in Settings → Prompts travel with every chat, next to the project
   brief.
 - **A command palette.** Ctrl/⌘ K searches chats, projects and saved moves, and runs the app's

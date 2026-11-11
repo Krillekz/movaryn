@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import {
+  BookOpen,
   Download,
   Folder,
   Image as ImageIcon,
@@ -75,6 +76,13 @@ export function CommandPalette() {
         run: () => state.createProject(),
       },
       {
+        id: 'notebook',
+        label: 'Open the notebook',
+        hint: 'Sources, grounded answers and studio notes',
+        icon: BookOpen,
+        run: () => state.openNotebook(),
+      },
+      {
         id: 'ideas',
         label: 'Open the idea library',
         hint: 'Sparks, constraint packs and art presets',
@@ -115,6 +123,13 @@ export function CommandPalette() {
         hint: 'Connection and API setup',
         icon: Settings,
         run: () => state.openSettings('provider'),
+      },
+      {
+        id: 'settings-layout',
+        label: 'Settings · Layout & replies',
+        hint: 'Reading width, spacing and how the AI answers',
+        icon: Settings,
+        run: () => state.openSettings('layout'),
       },
       {
         id: 'settings-prompts',

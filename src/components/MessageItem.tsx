@@ -125,7 +125,7 @@ function UserMessage({
   }
 
   return (
-    <div className="group flex flex-col items-end py-4">
+    <div className="message-row group flex flex-col items-end">
       <div className="max-w-[88%] rounded-2xl rounded-br-md border border-line bg-surface px-4 py-2.5">
         {message.attachments && message.attachments.length > 0 ? (
           <div className="mb-2 flex flex-wrap gap-2">
@@ -266,7 +266,7 @@ function AssistantMessage({
   };
 
   return (
-    <div className="group animate-in py-4">
+    <div className="message-row group animate-in">
       <div className="mb-2 flex items-center gap-2">
         <span className="flex h-5 w-5 items-center justify-center rounded-md bg-accent-soft text-accent">
           <LogoMark className="h-3 w-3" />

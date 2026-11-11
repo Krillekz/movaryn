@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react';
 import {
+  BookOpen,
   Folder,
   MoreHorizontal,
   PanelLeftClose,
@@ -35,6 +36,7 @@ export function Sidebar() {
   const openSettings = useApp((state) => state.openSettings);
   const openProject = useApp((state) => state.openProject);
   const createProject = useApp((state) => state.createProject);
+  const openNotebook = useApp((state) => state.openNotebook);
 
   const projectList = useMemo(
     () =>
@@ -136,8 +138,32 @@ export function Sidebar() {
           </button>
         </div>
 
+        {collapsed ? null : (
+          <div className="px-3 pt-1.5">
+            <button
+              type="button"
+              className="btn btn-secondary w-full justify-start gap-2 px-2 text-[12.5px]"
+              onClick={openNotebook}
+              title="Notebook"
+            >
+              <BookOpen size={15} />
+              <span>Notebook</span>
+              <span className="ml-auto text-[10px] text-ink-faint">⌘⇧N</span>
+            </button>
+          </div>
+        )}
+
         {collapsed ? (
           <div className="flex flex-1 flex-col items-center gap-1 pt-3">
+            <button
+              type="button"
+              className="icon-btn"
+              title="Notebook"
+              aria-label="Notebook"
+              onClick={openNotebook}
+            >
+              <BookOpen size={17} />
+            </button>
             <button
               type="button"
               className="icon-btn"

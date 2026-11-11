@@ -1,5 +1,33 @@
 # Update log
 
+## 2.0.0 — Your layout, your reply style, and a notebook for your sources
+
+- **New Settings → Layout & replies tab.** Choose **Focus** (narrow, compact), **Classic** (standard,
+  comfortable) or **Studio** (wide, spacious), or set reading width and message spacing yourself. The
+  change applies to chat, the composer and the notebook, and is remembered on this device.
+- **Shape how Movaryn answers.** Pick concise, balanced or detailed replies, choose prose, mixed or
+  bullet formatting, and optionally ask for the reason and cost behind each design choice. These travel
+  as a separate response-style section on every chat request; the project brief and your explicit
+  request still win.
+- **Notebook** — a local workspace for sources, opened from the sidebar, the command palette or
+  `Ctrl/⌘ + Shift + N`. Create separate notebooks, paste up to 12 sources (120,000 characters total),
+  and keep an optional reference URL without ever fetching it. Ask questions and the answer is grounded
+  in those sources, citing source titles and saying plainly when the sources do not cover something.
+- **Studio notes.** Generate a briefing, FAQ, timeline or study guide from the current sources. Each
+  output streams into the notebook and is saved as a note with the notebook, alongside its sources and
+  the conversation.
+- **Smaller additions.** Notebooks are included in the JSON export and the Data & privacy list, the
+  command palette has entries for the notebook and Layout & replies, and the About tab documents the
+  new shortcut.
+
+### Notes
+
+- Notebook sources are sent to your configured provider only when you ask a question or generate a
+  studio note. URLs are stored as labels, not fetched.
+- Citations are model output: check the named source before treating a detail as canon.
+- There are still no accounts, no cloud sync and no telemetry. Notebooks are stored in IndexedDB with
+  the rest of your local workspace.
+
 ## 1.9.0 — Sources under the reply, and comparisons that stick
 
 - **Brief sources under the latest reply.** A collapsible card lists the project's saved facts, each

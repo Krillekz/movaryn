@@ -65,7 +65,7 @@ export function Composer() {
 
   return (
     <div
-      className="relative mx-auto w-full max-w-[820px] px-4 pb-4 pt-2 md:px-8"
+      className="chat-content relative mx-auto w-full px-4 pb-4 pt-2 md:px-8"
       onDragOver={(event) => {
         event.preventDefault();
         setDragging(true);

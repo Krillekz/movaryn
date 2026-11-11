@@ -110,6 +110,9 @@ function buildChatRequest(conversationId: string): ChatRequest {
     houseRules: settings.houseRules.trim() || undefined,
     model: settings.chatModel.trim() || undefined,
     quickKit: settings.quickKit || undefined,
+    responseStyle: settings.responseStyle,
+    responseFormat: settings.responseFormat,
+    explainChoices: settings.explainChoices || undefined,
   };
 }
 

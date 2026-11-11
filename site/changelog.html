@@ -65,11 +65,11 @@
     <main id="main">
       <section class="log-hero">
         <div class="shell">
-          <p class="eyebrow"><span class="dot"></span> 22 releases</p>
+          <p class="eyebrow"><span class="dot"></span> 23 releases</p>
           <h1>Update log</h1>
           <p>
             What changed in every Movaryn build, newest first. The newest release is
-            <strong>1.9.0</strong> — Sources under the reply, and comparisons that stick.
+            <strong>2.0.0</strong> — Your layout, your reply style, and a notebook for your sources.
           </p>
         </div>
       </section>
@@ -78,6 +78,12 @@
         <aside class="log-index">
           <p>All releases</p>
           <ol>
+        <li>
+          <a href="#v2.0.0">
+            2.0.0
+            <small>Your layout, your reply style, and a notebook for your sources</small>
+          </a>
+        </li>
         <li>
           <a href="#v1.9.0">
             1.9.0
@@ -214,11 +220,35 @@
         </aside>
 
         <section class="log-entries" aria-label="Release notes">
+      <article class="log-entry" id="v2.0.0">
+        <header class="log-entry-header">
+          <h2>2.0.0</h2>
+          <span class="log-title">Your layout, your reply style, and a notebook for your sources</span>
+          <span class="log-latest">Latest</span>
+        </header>
+        <ul>
+          <li><strong>New Settings → Layout &amp; replies tab.</strong> Choose <strong>Focus</strong> (narrow, compact), <strong>Classic</strong> (standard, comfortable) or <strong>Studio</strong> (wide, spacious), or set reading width and message spacing yourself. The change applies to chat, the composer and the notebook, and is remembered on this device.</li>
+          <li><strong>Shape how Movaryn answers.</strong> Pick concise, balanced or detailed replies, choose prose, mixed or bullet formatting, and optionally ask for the reason and cost behind each design choice. These travel as a separate response-style section on every chat request; the project brief and your explicit request still win.</li>
+          <li><strong>Notebook</strong> — a local workspace for sources, opened from the sidebar, the command palette or <code>Ctrl/⌘ + Shift + N</code>. Create separate notebooks, paste up to 12 sources (120,000 characters total), and keep an optional reference URL without ever fetching it. Ask questions and the answer is grounded in those sources, citing source titles and saying plainly when the sources do not cover something.</li>
+          <li><strong>Studio notes.</strong> Generate a briefing, FAQ, timeline or study guide from the current sources. Each output streams into the notebook and is saved as a note with the notebook, alongside its sources and the conversation.</li>
+          <li><strong>Smaller additions.</strong> Notebooks are included in the JSON export and the Data &amp; privacy list, the command palette has entries for the notebook and Layout &amp; replies, and the About tab documents the new shortcut.</li>
+        </ul>
+        <p>### Notes</p>
+        <ul>
+          <li>Notebook sources are sent to your configured provider only when you ask a question or generate a studio note. URLs are stored as labels, not fetched.</li>
+          <li>Citations are model output: check the named source before treating a detail as canon.</li>
+          <li>There are still no accounts, no cloud sync and no telemetry. Notebooks are stored in IndexedDB with the rest of your local workspace.</li>
+        </ul>
+        <a class="log-release-link" href="https://github.com/Krillekz/movaryn/releases/tag/v2.0.0">
+          Release notes on GitHub <span aria-hidden="true">→</span>
+        </a>
+      </article>
+
       <article class="log-entry" id="v1.9.0">
         <header class="log-entry-header">
           <h2>1.9.0</h2>
           <span class="log-title">Sources under the reply, and comparisons that stick</span>
-          <span class="log-latest">Latest</span>
+          
         </header>
         <ul>
           <li><strong>Brief sources under the latest reply.</strong> A collapsible card lists the project's saved facts, each with its source and whether it came from the brief or from research. It is labelled project-level and says plainly that a reply may not use every fact. Research facts stay marked unverified, and <strong>Review brief</strong> opens the Brief tab.</li>

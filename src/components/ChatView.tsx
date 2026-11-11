@@ -404,7 +404,7 @@ export function ChatView() {
 
       {showBanner ? (
         <div className="shrink-0 border-b border-warn/20 bg-warn/[0.04] px-4 py-2 md:px-6">
-          <div className="mx-auto flex w-full max-w-[820px] flex-wrap items-center gap-x-3 gap-y-1.5">
+          <div className="chat-content mx-auto flex w-full flex-wrap items-center gap-x-3 gap-y-1.5">
             <AlertTriangle size={14} className="shrink-0 text-warn" />
             <p className="min-w-0 flex-1 text-[11.5px] leading-relaxed text-ink-muted">
               {bannerMessage}
@@ -438,7 +438,7 @@ export function ChatView() {
         }}
         className="scroll-thin flex-1 overflow-y-auto"
       >
-        <div className="mx-auto w-full max-w-[820px] px-4 pb-6 md:px-8">
+        <div className="chat-content mx-auto w-full px-4 pb-6 md:px-8">
           {messages.length === 0 ? (
             <Welcome />
           ) : (

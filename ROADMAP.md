@@ -4,16 +4,14 @@ A living document. Scope and order can change, and nothing here is a promise of 
 
 ## Now
 
-- **Source cards in chat** — show where a character lookup got each fact, with a clear way to accept
-  or ignore it before it shapes the kit.
-- **Palette search for saved art** — find a saved image by its prompt without opening the project
-  drawer.
-- **Share a saved comparison** — export a comparison as its own read-only link.
+- **Notebook file import** — add `.txt` and `.md` sources without copying and pasting.
+- **Export a notebook** — download its sources, notes and transcript as one readable document.
+- **Palette search for notebooks** — jump to a notebook or a saved studio note by name.
 
 ## Next
 
 - **Reference library** — reusable outfit and silhouette references shared across projects.
-- **Offline character notebooks** — hand-written canon notes that work without any research provider.
+- **Notebook source attachments** — keep reference images beside a source and send them only when asked.
 - **More games and formats** — templates for battleground games beyond JJS and TSB.
 - **Localisation** — interface and prompt translations that keep constraints intact.
 
@@ -26,6 +24,8 @@ A living document. Scope and order can change, and nothing here is a promise of 
 
 ## Shipped
 
+- **2.0.0** — a Layout & replies settings tab, controllable answer style, and a local notebook with
+  grounded Q&A and studio notes. [Update log](changelog.html#v2.0.0)
 - **1.9.0** — brief sources under the latest reply, comparisons of up to five kits, and comparison
   summaries saved with the project. [Update log](changelog.html#v1.9.0)
 - **1.8.0** — a device-local research cache that reuses sourced lookups, a Compare tab for two kits

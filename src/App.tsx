@@ -10,6 +10,7 @@ import { ImageBriefDialog } from './components/ImageBriefDialog';
 import { IdeaLibraryDialog } from './components/IdeaLibraryDialog';
 import { CommandPalette } from './components/CommandPalette';
 import { WhatsNewDialog } from './components/WhatsNewDialog';
+import { NotebookDialog } from './components/NotebookDialog';
 import { ConfirmDialog } from './components/ui/ConfirmDialog';
 import { Toasts } from './components/ui/Toasts';
 import { LogoMark } from './components/Logo';
@@ -22,6 +23,8 @@ import { sharedKitFromLocation } from '../shared/shareKit';
 export default function App() {
   const hydrated = useApp((state) => state.hydrated);
   const theme = useApp((state) => state.settings.theme);
+  const layoutWidth = useApp((state) => state.settings.layoutWidth);
+  const layoutDensity = useApp((state) => state.settings.layoutDensity);
   // A shared kit opens read-only and never touches the local workspace.
   const [sharedKit] = useState(() =>
     typeof window === 'undefined' ? null : sharedKitFromLocation(window.location.hash),
@@ -45,6 +48,11 @@ export default function App() {
     media.addEventListener('change', apply);
     return () => media.removeEventListener('change', apply);
   }, [theme]);
+
+  useEffect(() => {
+    document.documentElement.dataset.chatWidth = layoutWidth;
+    document.documentElement.dataset.chatDensity = layoutDensity;
+  }, [layoutWidth, layoutDensity]);
 
   useEffect(() => {
     let cancelled = false;
@@ -110,6 +118,9 @@ export default function App() {
         event.preventDefault();
         const state = useApp.getState();
         state.setSidebarCollapsed(!state.ui.sidebarCollapsed);
+      } else if (key === 'n' && event.shiftKey) {
+        event.preventDefault();
+        useApp.getState().openNotebook();
       }
     };
     window.addEventListener('keydown', onKeyDown);
@@ -147,6 +158,7 @@ export default function App() {
       <IdeaLibraryDialog />
       <CommandPalette />
       <WhatsNewDialog />
+      <NotebookDialog />
       <ConfirmDialog />
       <Toasts />
     </div>

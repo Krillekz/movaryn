@@ -4,6 +4,7 @@ import type {
   ChatTurnPayload,
   ImageQuality,
   ImageRequest,
+  NotebookContextPayload,
   ProjectContextPayload,
   ResearchRequest,
   SummaryRequest,
@@ -21,6 +22,11 @@ const MAX_PROJECT_TEXT = 6_000;
 
 const ASPECTS = new Set<string>(ASPECT_RATIOS.map((item) => item.value));
 const QUALITIES = new Set(['', 'low', 'medium', 'high', 'auto']);
+const RESPONSE_STYLES = new Set(['concise', 'balanced', 'detailed']);
+const RESPONSE_FORMATS = new Set(['prose', 'mixed', 'bullets']);
+const MAX_NOTEBOOK_SOURCES = 12;
+const MAX_NOTEBOOK_SOURCE_CHARS = 20_000;
+const MAX_NOTEBOOK_TOTAL_CHARS = 120_000;
 
 function fail(message: string): never {
   throw new AppError(message, 400, 'invalid_request');
@@ -107,6 +113,27 @@ function validateProject(value: unknown): ProjectContextPayload | undefined {
   return project;
 }
 
+function validateNotebook(value: unknown): NotebookContextPayload | undefined {
+  if (value === undefined || value === null) return undefined;
+  const raw = asObject(value, 'notebook');
+  if (!Array.isArray(raw.sources)) fail('notebook.sources must be a list.');
+  if (raw.sources.length > MAX_NOTEBOOK_SOURCES) {
+    fail(`Too many notebook sources (max ${MAX_NOTEBOOK_SOURCES}).`);
+  }
+  let total = 0;
+  const sources = raw.sources.map((entry, index) => {
+    const source = asObject(entry, `notebook.sources[${index}]`);
+    const text = requiredString(source.text, 'Source text', MAX_NOTEBOOK_SOURCE_CHARS);
+    total += text.length;
+    return {
+      title: optionalString(source.title, 'Source title', 140) || `Source ${index + 1}`,
+      text,
+    };
+  });
+  if (total > MAX_NOTEBOOK_TOTAL_CHARS) fail('The notebook sources are too large in total.');
+  return { title: optionalString(raw.title, 'notebook.title', 90), sources };
+}
+
 export function validateChatRequest(body: unknown): ChatRequest {
   const raw = asObject(body, 'Request body');
   if (!Array.isArray(raw.messages) || raw.messages.length === 0) {
@@ -144,14 +171,30 @@ export function validateChatRequest(body: unknown): ChatRequest {
     fail('quickKit must be true or false.');
   }
 
+  const responseStyle = optionalString(raw.responseStyle, 'responseStyle', 20);
+  if (responseStyle && !RESPONSE_STYLES.has(responseStyle)) {
+    fail('responseStyle must be concise, balanced or detailed.');
+  }
+  const responseFormat = optionalString(raw.responseFormat, 'responseFormat', 20);
+  if (responseFormat && !RESPONSE_FORMATS.has(responseFormat)) {
+    fail('responseFormat must be prose, mixed or bullets.');
+  }
+  if (raw.explainChoices !== undefined && typeof raw.explainChoices !== 'boolean') {
+    fail('explainChoices must be true or false.');
+  }
+
   return {
     messages,
     summary,
     project: validateProject(raw.project),
+    notebook: validateNotebook(raw.notebook),
     avoidNames,
     houseRules,
     model,
     quickKit: raw.quickKit === true,
+    responseStyle: responseStyle as ChatRequest['responseStyle'],
+    responseFormat: responseFormat as ChatRequest['responseFormat'],
+    explainChoices: raw.explainChoices === true ? true : undefined,
   };
 }
 

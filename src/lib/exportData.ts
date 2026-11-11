@@ -11,5 +11,6 @@ export function exportAllData(): void {
     settings: state.settings,
     conversations: state.order.map((id) => state.conversations[id]).filter(Boolean),
     projects: state.projectOrder.map((id) => state.projects[id]).filter(Boolean),
+    notebooks: state.notebookOrder.map((id) => state.notebooks[id]).filter(Boolean),
   });
 }

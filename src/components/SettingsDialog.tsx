@@ -4,6 +4,7 @@ import {
   Database,
   Heart,
   Info,
+  LayoutPanelLeft,
   Lightbulb,
   Loader2,
   Monitor,
@@ -30,11 +31,18 @@ const TABS: { id: SettingsTabId; label: string; icon: typeof Plug }[] = [
   { id: 'provider', label: 'Provider', icon: Plug },
   { id: 'models', label: 'Models', icon: SlidersHorizontal },
   { id: 'prompts', label: 'Prompts', icon: Lightbulb },
+  { id: 'layout', label: 'Layout & replies', icon: LayoutPanelLeft },
   { id: 'appearance', label: 'Appearance', icon: Palette },
   { id: 'data', label: 'Data & privacy', icon: Database },
   { id: 'credits', label: 'Credits', icon: Heart },
   { id: 'about', label: 'About', icon: Info },
 ];
+
+const LAYOUT_PRESETS = [
+  { id: 'focus', label: 'Focus', detail: 'Narrow, tight, less to scan', width: 'narrow', density: 'compact' },
+  { id: 'classic', label: 'Classic', detail: 'The default reading rhythm', width: 'standard', density: 'comfortable' },
+  { id: 'studio', label: 'Studio', detail: 'Wide canvas, room to breathe', width: 'wide', density: 'spacious' },
+] as const;
 
 const ENV_SAMPLE = `AI_BASE_URL=https://api.openai.com/v1
 AI_API_KEY=your-key
@@ -413,6 +421,186 @@ export function SettingsDialog() {
             </div>
           ) : null}
 
+          {tab === 'layout' ? (
+            <div className="flex flex-col gap-6">
+              <section>
+                <h3 className="text-[12.5px] font-semibold text-ink">Workspace presets</h3>
+                <p className="mt-1 text-[11px] leading-relaxed text-ink-faint">
+                  Set the reading width and message spacing everywhere: chat, composer and notebook.
+                </p>
+                <div className="mt-2 grid gap-2 sm:grid-cols-3">
+                  {LAYOUT_PRESETS.map((preset) => {
+                    const selected =
+                      settings.layoutWidth === preset.width &&
+                      settings.layoutDensity === preset.density;
+                    return (
+                      <button
+                        key={preset.id}
+                        type="button"
+                        onClick={() =>
+                          updateSettings({
+                            layoutWidth: preset.width,
+                            layoutDensity: preset.density,
+                          })
+                        }
+                        className={cx(
+                          'flex flex-col items-start gap-2 rounded-xl border px-3 py-3 text-left transition-colors',
+                          selected
+                            ? 'border-accent bg-accent-soft'
+                            : 'border-line bg-panel hover:border-line-strong',
+                        )}
+                        aria-pressed={selected}
+                      >
+                        <span className="flex w-full flex-col items-center gap-1 rounded-lg border border-line bg-canvas px-2 py-2">
+                          <span
+                            className={cx(
+                              'h-1.5 rounded-full bg-line-strong',
+                              preset.width === 'narrow' && 'w-8',
+                              preset.width === 'standard' && 'w-12',
+                              preset.width === 'wide' && 'w-full',
+                            )}
+                          />
+                          <span className="h-1 w-10 rounded-full bg-line" />
+                          <span
+                            className={cx(
+                              'h-1.5 rounded-full bg-accent/70',
+                              preset.density === 'compact' ? 'mt-0.5 w-9' : 'mt-1.5 w-9',
+                            )}
+                          />
+                        </span>
+                        <span className="text-[12px] font-medium text-ink">{preset.label}</span>
+                        <span className="text-[10.5px] leading-snug text-ink-faint">
+                          {preset.detail}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </section>
+
+              <section className="grid gap-3 sm:grid-cols-2">
+                <div>
+                  <label className="field-label" htmlFor="settings-layout-width">
+                    Reading width
+                  </label>
+                  <select
+                    id="settings-layout-width"
+                    value={settings.layoutWidth}
+                    onChange={(event) =>
+                      updateSettings({ layoutWidth: event.target.value as typeof settings.layoutWidth })
+                    }
+                    className="field h-9 text-[12.5px]"
+                  >
+                    <option value="narrow">Narrow · 680px</option>
+                    <option value="standard">Standard · 820px</option>
+                    <option value="wide">Wide · 1080px</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="field-label" htmlFor="settings-layout-density">
+                    Message spacing
+                  </label>
+                  <select
+                    id="settings-layout-density"
+                    value={settings.layoutDensity}
+                    onChange={(event) =>
+                      updateSettings({
+                        layoutDensity: event.target.value as typeof settings.layoutDensity,
+                      })
+                    }
+                    className="field h-9 text-[12.5px]"
+                  >
+                    <option value="compact">Compact</option>
+                    <option value="comfortable">Comfortable</option>
+                    <option value="spacious">Spacious</option>
+                  </select>
+                </div>
+              </section>
+
+              <section>
+                <h3 className="text-[12.5px] font-semibold text-ink">How Movaryn answers</h3>
+                <p className="mt-1 text-[11px] leading-relaxed text-ink-faint">
+                  Sent with every chat request. Project briefs and your explicit request still win.
+                </p>
+                <div className="mt-2 grid gap-2 sm:grid-cols-3">
+                  {(
+                    [
+                      { value: 'concise', label: 'Concise', detail: 'Answer first, minimal explanation' },
+                      { value: 'balanced', label: 'Balanced', detail: 'Full answers without filler' },
+                      { value: 'detailed', label: 'Detailed', detail: 'Reasoning and trade-offs included' },
+                    ] as const
+                  ).map((option) => (
+                    <button
+                      key={option.value}
+                      type="button"
+                      onClick={() => updateSettings({ responseStyle: option.value })}
+                      className={cx(
+                        'rounded-xl border px-3 py-2.5 text-left transition-colors',
+                        settings.responseStyle === option.value
+                          ? 'border-accent bg-accent-soft'
+                          : 'border-line bg-panel hover:border-line-strong',
+                      )}
+                      aria-pressed={settings.responseStyle === option.value}
+                    >
+                      <span className="block text-[12px] font-medium text-ink">{option.label}</span>
+                      <span className="mt-0.5 block text-[10.5px] leading-snug text-ink-faint">
+                        {option.detail}
+                      </span>
+                    </button>
+                  ))}
+                </div>
+              </section>
+
+              <section>
+                <label className="field-label" htmlFor="settings-response-format">
+                  Reply format
+                </label>
+                <select
+                  id="settings-response-format"
+                  value={settings.responseFormat}
+                  onChange={(event) =>
+                    updateSettings({
+                      responseFormat: event.target.value as typeof settings.responseFormat,
+                    })
+                  }
+                  className="field h-9 text-[12.5px]"
+                >
+                  <option value="prose">Prose · short paragraphs</option>
+                  <option value="mixed">Mixed · prose with lists where useful</option>
+                  <option value="bullets">Bullets · short scannable points</option>
+                </select>
+              </section>
+
+              <section className="flex items-start justify-between gap-4 rounded-xl border border-line bg-panel px-3.5 py-3">
+                <div>
+                  <p className="text-[12px] font-medium text-ink">Explain design choices</p>
+                  <p className="mt-1 text-[11px] leading-relaxed text-ink-muted">
+                    Ask for a short reason and cost behind significant choices, instead of only the result.
+                  </p>
+                </div>
+                <input
+                  type="checkbox"
+                  checked={settings.explainChoices}
+                  onChange={(event) => updateSettings({ explainChoices: event.target.checked })}
+                  className="mt-0.5 h-4 w-4 shrink-0 accent-[var(--accent)]"
+                  aria-label="Explain design choices"
+                />
+              </section>
+
+              <section className="rounded-xl border border-line bg-panel px-3.5 py-3">
+                <h3 className="text-[12px] font-semibold text-ink">Notebook layout</h3>
+                <p className="mt-1.5 text-[11.5px] leading-relaxed text-ink-muted">
+                  The notebook uses the same width and spacing. Open it from the sidebar, the command
+                  palette, or{' '}
+                  <kbd className="rounded border border-line bg-surface px-1 py-0.5 text-[10px]">
+                    Ctrl/⌘ + Shift + N
+                  </kbd>
+                  .
+                </p>
+              </section>
+            </div>
+          ) : null}
+
           {tab === 'appearance' ? (
             <div className="flex flex-col gap-4">
               <section>
@@ -457,7 +645,10 @@ export function SettingsDialog() {
               <section className="rounded-xl border border-line bg-panel px-3.5 py-3">
                 <h3 className="text-[12.5px] font-semibold text-ink">Stored on this device</h3>
                 <ul className="mt-2 space-y-1.5 text-[11.5px] leading-relaxed text-ink-muted">
-                  <li>Conversations, move text, projects, settings and generated images live in IndexedDB.</li>
+                  <li>
+                    Conversations, move text, projects, notebook sources and generated images live in
+                    IndexedDB.
+                  </li>
                   <li>Nothing is stored on a Movaryn account — there are no accounts.</li>
                   <li>Deleting a chat or project removes its record and its images.</li>
                 </ul>
@@ -465,7 +656,10 @@ export function SettingsDialog() {
               <section className="rounded-xl border border-line bg-panel px-3.5 py-3">
                 <h3 className="text-[12.5px] font-semibold text-ink">Sent to your provider</h3>
                 <ul className="mt-2 space-y-1.5 text-[11.5px] leading-relaxed text-ink-muted">
-                  <li>Your messages, the project brief, and recent reference images you attach.</li>
+                  <li>
+                    Your messages, the project brief, recent reference images you attach, and notebook
+                    sources when you ask the notebook a question.
+                  </li>
                   <li>Image prompts and reference images when you generate concept art.</li>
                   <li>
                     Nothing else. Check your provider&apos;s retention policy — Movaryn does not upload your
@@ -582,6 +776,12 @@ export function SettingsDialog() {
                       Ctrl/⌘ B
                     </kbd>{' '}
                     collapse the sidebar
+                  </li>
+                  <li>
+                    <kbd className="rounded border border-line bg-surface px-1.5 py-0.5 text-[10px]">
+                      Ctrl/⌘ + Shift + N
+                    </kbd>{' '}
+                    open the notebook
                   </li>
                   <li>
                     <kbd className="rounded border border-line bg-surface px-1.5 py-0.5 text-[10px]">

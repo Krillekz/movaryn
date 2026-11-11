@@ -1,11 +1,12 @@
-import type { Conversation, Project, ResearchFact, Settings } from '../../shared/types';
+import type { Conversation, Notebook, Project, ResearchFact, Settings } from '../../shared/types';
 
 const DB_NAME = 'movaryn';
-const DB_VERSION = 3;
+const DB_VERSION = 4;
 const CONVERSATIONS = 'conversations';
 const PROJECTS = 'projects';
 const VERSIONS = 'versions';
 const RESEARCH = 'research';
+const NOTEBOOKS = 'notebooks';
 const KV = 'kv';
 const SETTINGS_KEY = 'settings';
 
@@ -15,17 +16,30 @@ export let storageAvailable = true;
 function openDb(): Promise<IDBDatabase | null> {
   if (dbPromise) return dbPromise;
   dbPromise = new Promise((resolve) => {
+    let settled = false;
+    const finish = (value: IDBDatabase | null) => {
+      if (settled) return;
+      settled = true;
+      resolve(value);
+    };
     if (typeof indexedDB === 'undefined') {
       storageAvailable = false;
-      resolve(null);
+      finish(null);
       return;
     }
+    // A second tab can hold an older database version open and block an upgrade.
+    // Start the app read-only instead of leaving the workspace on its loading screen.
+    const timeout = setTimeout(() => {
+      storageAvailable = false;
+      finish(null);
+    }, 3_000);
     let request: IDBOpenDBRequest;
     try {
       request = indexedDB.open(DB_NAME, DB_VERSION);
     } catch {
+      clearTimeout(timeout);
       storageAvailable = false;
-      resolve(null);
+      finish(null);
       return;
     }
     request.onupgradeneeded = () => {
@@ -37,16 +51,29 @@ function openDb(): Promise<IDBDatabase | null> {
         versions.createIndex('projectId', 'projectId', { unique: false });
       }
       if (!db.objectStoreNames.contains(RESEARCH)) db.createObjectStore(RESEARCH, { keyPath: 'key' });
+      if (!db.objectStoreNames.contains(NOTEBOOKS)) db.createObjectStore(NOTEBOOKS, { keyPath: 'id' });
       if (!db.objectStoreNames.contains(KV)) db.createObjectStore(KV);
     };
-    request.onsuccess = () => resolve(request.result);
+    request.onsuccess = () => {
+      clearTimeout(timeout);
+      const db = request.result;
+      if (settled) {
+        db.close();
+        return;
+      }
+      // Let a future version upgrade proceed instead of blocking it from this tab.
+      db.onversionchange = () => db.close();
+      finish(db);
+    };
     request.onerror = () => {
+      clearTimeout(timeout);
       storageAvailable = false;
-      resolve(null);
+      finish(null);
     };
     request.onblocked = () => {
+      clearTimeout(timeout);
       storageAvailable = false;
-      resolve(null);
+      finish(null);
     };
   });
   return dbPromise;
@@ -126,28 +153,34 @@ async function readSettings(): Promise<Partial<Settings> | null> {
 export interface LoadedState {
   conversations: Conversation[];
   projects: Project[];
+  notebooks: Notebook[];
   settings: Partial<Settings> | null;
   available: boolean;
 }
 
 export async function loadState(): Promise<LoadedState> {
-  const [conversations, projects, settings] = await Promise.all([
+  const [conversations, projects, notebooks, settings] = await Promise.all([
     readAll<Conversation>(CONVERSATIONS),
     readAll<Project>(PROJECTS),
+    readAll<Notebook>(NOTEBOOKS),
     readSettings(),
   ]);
-  return { conversations, projects, settings, available: storageAvailable };
+  return { conversations, projects, notebooks, settings, available: storageAvailable };
 }
 
 export async function clearAllData(): Promise<void> {
   const db = await openDb();
   if (!db) return;
   try {
-    const transaction = db.transaction([CONVERSATIONS, PROJECTS, VERSIONS, RESEARCH, KV], 'readwrite');
+    const transaction = db.transaction(
+      [CONVERSATIONS, PROJECTS, VERSIONS, RESEARCH, NOTEBOOKS, KV],
+      'readwrite',
+    );
     transaction.objectStore(CONVERSATIONS).clear();
     transaction.objectStore(PROJECTS).clear();
     transaction.objectStore(VERSIONS).clear();
     transaction.objectStore(RESEARCH).clear();
+    transaction.objectStore(NOTEBOOKS).clear();
     transaction.objectStore(KV).clear();
   } catch {
     // ignored
@@ -157,6 +190,7 @@ export async function clearAllData(): Promise<void> {
 // ── Debounced write queue ────────────────────────────────────
 const pendingConversations = new Map<string, Conversation>();
 const pendingProjects = new Map<string, Project>();
+const pendingNotebooks = new Map<string, Notebook>();
 let pendingSettings: Settings | null = null;
 let timer: ReturnType<typeof setTimeout> | null = null;
 
@@ -183,6 +217,11 @@ export function queueSettings(settings: Settings): void {
   schedule();
 }
 
+export function queueNotebook(notebook: Notebook): void {
+  pendingNotebooks.set(notebook.id, notebook);
+  schedule();
+}
+
 export async function flushPersistence(): Promise<void> {
   if (timer) {
     clearTimeout(timer);
@@ -190,14 +229,17 @@ export async function flushPersistence(): Promise<void> {
   }
   const conversations = Array.from(pendingConversations.values());
   const projects = Array.from(pendingProjects.values());
+  const notebooks = Array.from(pendingNotebooks.values());
   const settings = pendingSettings;
   pendingConversations.clear();
   pendingProjects.clear();
+  pendingNotebooks.clear();
   pendingSettings = null;
 
   await Promise.all([
     ...conversations.map((conversation) => write(CONVERSATIONS, conversation)),
     ...projects.map((project) => write(PROJECTS, project)),
+    ...notebooks.map((notebook) => write(NOTEBOOKS, notebook)),
     settings ? write(KV, settings, SETTINGS_KEY) : Promise.resolve(),
   ]);
 }
@@ -205,6 +247,11 @@ export async function flushPersistence(): Promise<void> {
 export function deleteConversationRecord(id: string): void {
   pendingConversations.delete(id);
   void remove(CONVERSATIONS, id);
+}
+
+export function deleteNotebookRecord(id: string): void {
+  pendingNotebooks.delete(id);
+  void remove(NOTEBOOKS, id);
 }
 
 export function deleteProjectRecord(id: string): void {
