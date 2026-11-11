@@ -1,10 +1,11 @@
-import type { Conversation, Project, Settings } from '../../shared/types';
+import type { Conversation, Project, ResearchFact, Settings } from '../../shared/types';
 
 const DB_NAME = 'movaryn';
-const DB_VERSION = 2;
+const DB_VERSION = 3;
 const CONVERSATIONS = 'conversations';
 const PROJECTS = 'projects';
 const VERSIONS = 'versions';
+const RESEARCH = 'research';
 const KV = 'kv';
 const SETTINGS_KEY = 'settings';
 
@@ -35,6 +36,7 @@ function openDb(): Promise<IDBDatabase | null> {
         const versions = db.createObjectStore(VERSIONS, { keyPath: 'id' });
         versions.createIndex('projectId', 'projectId', { unique: false });
       }
+      if (!db.objectStoreNames.contains(RESEARCH)) db.createObjectStore(RESEARCH, { keyPath: 'key' });
       if (!db.objectStoreNames.contains(KV)) db.createObjectStore(KV);
     };
     request.onsuccess = () => resolve(request.result);
@@ -141,10 +143,11 @@ export async function clearAllData(): Promise<void> {
   const db = await openDb();
   if (!db) return;
   try {
-    const transaction = db.transaction([CONVERSATIONS, PROJECTS, VERSIONS, KV], 'readwrite');
+    const transaction = db.transaction([CONVERSATIONS, PROJECTS, VERSIONS, RESEARCH, KV], 'readwrite');
     transaction.objectStore(CONVERSATIONS).clear();
     transaction.objectStore(PROJECTS).clear();
     transaction.objectStore(VERSIONS).clear();
+    transaction.objectStore(RESEARCH).clear();
     transaction.objectStore(KV).clear();
   } catch {
     // ignored
@@ -258,6 +261,34 @@ export async function clearProjectVersions(projectId: string): Promise<void> {
   for (const version of all.filter((entry) => entry.projectId === projectId)) {
     await remove(VERSIONS, version.id);
   }
+}
+
+// ── Local research cache ────────────────────────────────────
+export interface ResearchCacheEntry {
+  key: string;
+  character: string;
+  series?: string;
+  version?: string;
+  game?: string;
+  facts: ResearchFact[];
+  createdAt: number;
+}
+
+/** Cached lookups stay on this device; nothing is uploaded or shared. */
+export async function getResearchCache(key: string): Promise<ResearchCacheEntry | null> {
+  const db = await openDb();
+  if (!db) return null;
+  try {
+    const transaction = db.transaction(RESEARCH, 'readonly');
+    const result = await requestToPromise(transaction.objectStore(RESEARCH).get(key));
+    return (result as ResearchCacheEntry | null) ?? null;
+  } catch {
+    return null;
+  }
+}
+
+export async function putResearchCache(entry: ResearchCacheEntry): Promise<void> {
+  await write(RESEARCH, entry);
 }
 
 if (typeof window !== 'undefined') {

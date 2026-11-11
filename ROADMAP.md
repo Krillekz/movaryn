@@ -6,17 +6,14 @@ A living document. Scope and order can change, and nothing here is a promise of 
 
 - **Source cards in chat** — show where a character lookup got each fact, with a clear way to accept
   or ignore it before it shapes the kit.
-- **Research cache** — reuse a project's lookups so repeat questions are instant and cheap.
-- **Side-by-side kits** — put two replies next to each other to compare roles, cooldowns and
-  counterplay.
-- **Provider presets** — pick OpenAI, OpenRouter, Ollama or the Freebuff API from Settings instead of
-  typing endpoints.
 - **Palette search for saved art** — find a saved image by its prompt without opening the project
   drawer.
+- **Source cards in chat** — show the brief facts and sources a reply leaned on, right where the reply
+  is read.
 
 ## Next
 
-- **Deeper balance scorecards** — compare two kits on the same axes, not just one kit against itself.
+- **Multi-kit comparisons** — compare three or more kits, and save a comparison with a project.
 - **Reference library** — reusable outfit and silhouette references shared across projects.
 - **Offline character notebooks** — hand-written canon notes that work without any research provider.
 - **More games and formats** — templates for battleground games beyond JJS and TSB.
@@ -31,6 +28,9 @@ A living document. Scope and order can change, and nothing here is a promise of 
 
 ## Shipped
 
+- **1.8.0** — a device-local research cache that reuses sourced lookups, a Compare tab for two kits
+  under one preset, and a read-only share link in the project export menu.
+  [Update log](changelog.html#v1.8.0)
 - **1.7.0** — character briefs and opt-in research, Quick kit, the local kit sandbox, cross-game
   remap, local version history, read-only share links, frame-data export and printable sheets.
   [Update log](changelog.html#v1.7.0)

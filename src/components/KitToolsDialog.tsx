@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import {
   AlertTriangle,
+  ArrowLeftRight,
   BookOpen,
   Check,
   Download,
@@ -16,7 +17,8 @@ import {
   X,
 } from 'lucide-react';
 import type { CharacterBrief, CharacterFact, Project } from '../../shared/types';
-import { BRIEF_MODES, emptyBrief, mergeResearch } from '../../shared/brief';
+import { BRIEF_MODES, emptyBrief, mergeResearch, researchCacheKey } from '../../shared/brief';
+import { compareKits } from '../../shared/compare';
 import {
   SANDBOX_PRESETS,
   frameTableCsv,
@@ -31,9 +33,12 @@ import { encodeSharedKit, sharedKitUrl } from '../../shared/shareKit';
 import { requestResearch } from '../lib/api';
 import {
   deleteProjectVersion,
+  getResearchCache,
   listProjectVersions,
+  putResearchCache,
   saveProjectVersion,
   type ProjectVersion,
+  type ResearchCacheEntry,
 } from '../lib/db';
 import { useApp, type ToolsTabId } from '../store/useApp';
 import { copyText, cx, downloadText, relativeTime, slugify, uid } from '../lib/utils';
@@ -44,6 +49,7 @@ const TABS: { id: ToolsTabId; label: string; icon: typeof BookOpen }[] = [
   { id: 'sandbox', label: 'Sandbox', icon: Gauge },
   { id: 'remap', label: 'Remap', icon: Shuffle },
   { id: 'history', label: 'History', icon: History },
+  { id: 'compare', label: 'Compare', icon: ArrowLeftRight },
 ];
 
 export function KitToolsDialog() {
@@ -61,7 +67,7 @@ export function KitToolsDialog() {
       open
       onClose={close}
       title="Kit tools"
-      description="Research the character, run the kit, remap it, and keep local versions."
+      description="Research the character, run and compare the kit, remap it, and keep local versions."
       width="max-w-3xl"
       footer={
         <div className="flex items-center justify-between gap-2">
@@ -104,6 +110,7 @@ export function KitToolsDialog() {
           {tab === 'sandbox' ? <SandboxTab project={project} /> : null}
           {tab === 'remap' ? <RemapTab project={project} /> : null}
           {tab === 'history' ? <HistoryTab project={project} /> : null}
+          {tab === 'compare' ? <CompareTab project={project} /> : null}
         </div>
       </div>
     </Modal>
@@ -119,8 +126,30 @@ function BriefTab({ project }: { project: Project }) {
   const [character, setCharacter] = useState(project.name);
   const [researching, setResearching] = useState(false);
   const [researchNote, setResearchNote] = useState<string | null>(null);
+  const [cached, setCached] = useState<ResearchCacheEntry | null>(null);
+  const [forceFresh, setForceFresh] = useState(false);
   const [factText, setFactText] = useState('');
   const [factSource, setFactSource] = useState('');
+
+  const cacheKey = researchCacheKey({
+    character: character.trim(),
+    series: brief.series,
+    game: project.game,
+  });
+
+  useEffect(() => {
+    let alive = true;
+    setForceFresh(false);
+    const timer = window.setTimeout(() => {
+      void getResearchCache(cacheKey).then((entry) => {
+        if (alive) setCached(entry);
+      });
+    }, 250);
+    return () => {
+      alive = false;
+      window.clearTimeout(timer);
+    };
+  }, [cacheKey]);
 
   const updateBrief = (patch: Partial<CharacterBrief>) => {
     updateProject(project.id, { brief: { ...brief, ...patch, updatedAt: Date.now() } });
@@ -128,6 +157,22 @@ function BriefTab({ project }: { project: Project }) {
 
   const runResearch = async () => {
     if (!character.trim()) return;
+    if (!forceFresh && cached) {
+      updateProject(project.id, {
+        brief: mergeResearch(brief, {
+          character: cached.character,
+          series: cached.series,
+          version: cached.version,
+          facts: cached.facts,
+          uncertain: false,
+        }),
+      });
+      setResearchNote(
+        `Used the cached lookup from ${relativeTime(cached.createdAt)}. Press Research again to refresh it from the provider.`,
+      );
+      setForceFresh(true);
+      return;
+    }
     setResearching(true);
     setResearchNote(null);
     try {
@@ -136,14 +181,27 @@ function BriefTab({ project }: { project: Project }) {
         series: brief.series,
         game: project.game,
       });
-      if (result.uncertain) {
+      if (result.uncertain || result.facts.length === 0) {
         setResearchNote(
           result.message ??
             'No sourced facts came back. Add the series or a short description instead.',
         );
+        setForceFresh(true);
         return;
       }
       updateProject(project.id, { brief: mergeResearch(brief, result) });
+      const entry: ResearchCacheEntry = {
+        key: cacheKey,
+        character: result.character || character.trim(),
+        series: result.series ?? brief.series,
+        version: result.version ?? brief.version,
+        game: project.game,
+        facts: result.facts,
+        createdAt: Date.now(),
+      };
+      await putResearchCache(entry);
+      setCached(entry);
+      setForceFresh(false);
       setResearchNote(result.message ?? null);
       pushToast(`Added ${result.facts.length} sourced fact${result.facts.length === 1 ? '' : 's'}.`, 'success');
     } catch (error) {
@@ -180,7 +238,7 @@ function BriefTab({ project }: { project: Project }) {
               brief.verified ? 'border-accent/40 text-accent' : 'text-ink-faint',
             )}
           >
-            {brief.verified ? 'Sourced facts kept' : 'No lookup yet'}
+            {brief.verified ? 'Sourced facts kept' : cached ? 'Cached lookup' : 'No lookup yet'}
           </span>
         </div>
         <p className="mt-1 text-[11.5px] leading-relaxed text-ink-muted">
@@ -282,16 +340,26 @@ function BriefTab({ project }: { project: Project }) {
           <button
             type="button"
             className="btn btn-ghost h-9 gap-1.5"
-            disabled={researching || !provider?.chat.configured || !character.trim()}
+            disabled={
+              researching || !character.trim() || (!cached && !provider?.chat.configured)
+            }
             onClick={() => void runResearch()}
             title={
-              provider?.chat.configured
-                ? 'Ask the configured provider for sourced facts'
-                : 'Configure a chat provider first'
+              cached && !forceFresh
+                ? 'Use the lookup already saved on this device'
+                : provider?.chat.configured
+                  ? 'Ask the configured provider for sourced facts'
+                  : 'Configure a chat provider first'
             }
           >
             {researching ? <Loader2 size={14} className="animate-spin" /> : <Sparkle />}
-            {researching ? 'Checking series and abilities…' : 'Research character'}
+            {researching
+              ? 'Checking series and abilities…'
+              : cached && !forceFresh
+                ? 'Use cached lookup'
+                : forceFresh && cached
+                  ? 'Refresh research'
+                  : 'Research character'}
           </button>
         </div>
         <p className="mt-2 text-[10.5px] leading-relaxed text-ink-faint">
@@ -299,6 +367,12 @@ function BriefTab({ project }: { project: Project }) {
           says so and leaves the brief alone. Sources come from the model, so open them before
           treating a detail as canon.
         </p>
+        {cached ? (
+          <p className="mt-2 text-[10.5px] leading-relaxed text-ink-faint">
+            Cached on this device: {cached.facts.length} sourced fact
+            {cached.facts.length === 1 ? '' : 's'} from {relativeTime(cached.createdAt)}.
+          </p>
+        ) : null}
         {researchNote ? (
           <p
             className={cx(
@@ -733,6 +807,147 @@ function RemapTab({ project }: { project: Project }) {
               Export remap
             </button>
           </div>
+        </>
+      )}
+    </div>
+  );
+}
+
+function CompareTab({ project }: { project: Project }) {
+  const projects = useApp((state) => state.projects);
+  const order = useApp((state) => state.projectOrder);
+  const others = order
+    .map((id) => projects[id])
+    .filter((entry): entry is Project => Boolean(entry) && entry.id !== project.id);
+  const [selectedId, setSelectedId] = useState('');
+  const other = others.find((entry) => entry.id === selectedId) ?? others[0];
+  const presetId = ((project.sandboxPreset as SandboxPresetId | undefined) ??
+    presetForGame(project.game)) as SandboxPresetId;
+
+  const comparison = useMemo(
+    () =>
+      other
+        ? compareKits(
+            { name: project.name, moves: project.moves },
+            { name: other.name, moves: other.moves },
+            presetId,
+          )
+        : null,
+    [project.name, project.moves, other, presetId],
+  );
+
+  return (
+    <div className="flex flex-col gap-4">
+      <div className="flex flex-wrap items-end justify-between gap-2">
+        <div>
+          <h3 className="text-[11px] font-semibold uppercase tracking-[0.14em] text-ink-faint">
+            Compare kits
+          </h3>
+          <p className="mt-1 text-[11.5px] leading-relaxed text-ink-muted">
+            Two saved kits read with the same preset. Frame windows and scores are estimates, not a
+            balance verdict.
+          </p>
+        </div>
+        {others.length > 0 ? (
+          <div className="min-w-[200px]">
+            <label className="field-label" htmlFor="compare-project">
+              Compare with
+            </label>
+            <select
+              id="compare-project"
+              className="field h-8 text-[12px]"
+              value={other?.id ?? ''}
+              onChange={(event) => setSelectedId(event.target.value)}
+            >
+              {others.map((entry) => (
+                <option key={entry.id} value={entry.id}>
+                  {entry.name}
+                </option>
+              ))}
+            </select>
+          </div>
+        ) : null}
+      </div>
+
+      {!comparison ? (
+        <p className="rounded-lg border border-dashed border-line px-3 py-3 text-[11.5px] text-ink-faint">
+          Save a second project to compare this kit against it. Nothing is uploaded; both kits stay on
+          this device.
+        </p>
+      ) : (
+        <>
+          <div className="grid gap-2 sm:grid-cols-2">
+            {[comparison.a, comparison.b].map((side, index) => (
+              <div
+                key={`${side.name}-${index}`}
+                className="rounded-lg border border-line bg-panel-2 px-3 py-2"
+              >
+                <p className="truncate text-[12px] font-medium text-ink">
+                  {side.name}
+                  {index === 0 ? <span className="text-ink-faint"> · this project</span> : null}
+                </p>
+                <p className="mt-0.5 text-[10.5px] leading-relaxed text-ink-faint">
+                  {side.moveCount} moves · ≈{side.totalFrames} frames · avg start-up{' '}
+                  {side.averageStartup}f · recovery {side.averageRecovery}f
+                </p>
+              </div>
+            ))}
+          </div>
+
+          <div className="overflow-hidden rounded-lg border border-line">
+            <table className="w-full text-[11.5px]">
+              <thead className="bg-surface text-ink-faint">
+                <tr>
+                  <th className="px-2 py-1.5 text-left font-medium">Axis</th>
+                  <th className="px-2 py-1.5 text-right font-medium">This kit</th>
+                  <th className="px-2 py-1.5 text-right font-medium">Other kit</th>
+                </tr>
+              </thead>
+              <tbody>
+                {comparison.a.scores.map((axis) => {
+                  const otherAxis = comparison.b.scores.find((entry) => entry.id === axis.id);
+                  return (
+                    <tr key={axis.id} className="border-t border-line">
+                      <td className="px-2 py-1.5 text-ink-muted">{axis.label}</td>
+                      <td className="px-2 py-1.5 text-right text-ink">{axis.score}</td>
+                      <td className="px-2 py-1.5 text-right text-ink">{otherAxis?.score ?? '—'}</td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+
+          <div className="grid gap-2 sm:grid-cols-3">
+            {[
+              { label: 'In both', items: comparison.sharedNames },
+              { label: `Only ${comparison.a.name}`, items: comparison.onlyA },
+              { label: `Only ${comparison.b.name}`, items: comparison.onlyB },
+            ].map((group) => (
+              <div
+                key={group.label}
+                className="rounded-lg border border-line bg-panel-2 px-3 py-2"
+              >
+                <p className="text-[10px] uppercase tracking-wide text-ink-faint">{group.label}</p>
+                <p className="mt-1 text-[11.5px] leading-relaxed text-ink-muted">
+                  {group.items.length > 0 ? group.items.join(', ') : 'None'}
+                </p>
+              </div>
+            ))}
+          </div>
+
+          {comparison.notes.length > 0 ? (
+            <ul className="space-y-1 text-[11.5px] leading-relaxed text-ink-muted">
+              {comparison.notes.map((note) => (
+                <li key={note}>• {note}</li>
+              ))}
+            </ul>
+          ) : null}
+
+          <p className="text-[10px] leading-relaxed text-ink-faint">
+            Both sides use the {comparison.presetName} preset. Estimated from the written moves, never
+            measured in the game.
+          </p>
         </>
       )}
     </div>

@@ -21,9 +21,10 @@ It is not a generic chatbot with a game skin:
   openings are checked in the app, with no provider request.
 - **A character brief and opt-in research.** Series, version, abilities to keep or avoid, and a stated
   canon/original/mixed mode travel with the project. Research keeps only facts with a named source and
-  says so when it finds none.
-- **A local kit sandbox.** Estimated start-up, active and recovery windows, a counterplay read and a
-  transparent scorecard, with frame-data export.
+  says so when it finds none; successful lookups are cached on this device for reuse.
+- **A local kit sandbox and comparison.** Estimated start-up, active and recovery windows, a
+  counterplay read and a transparent scorecard, plus a side-by-side comparison of two saved kits under
+  one preset.
 - **Cross-game remapping.** Rewrites range and cooldown language for another game, lists every change
   and flags what does not fit.
 - **Local versions and share links.** Snapshots you can restore, and a read-only kit encoded in a link.
@@ -206,11 +207,14 @@ as raw text. The same parser powers "Save moves" and the name avoid-list.
 Each project has a **Kit tools** panel with four tabs:
 
 - **Brief** — series, version, abilities to keep or avoid, a canon/original/mixed mode, and opt-in
-  research that keeps only facts with a named source.
+  research that keeps only facts with a named source. Successful lookups are cached locally and can be
+  reused before asking the provider again.
 - **Sandbox** — estimated start-up, active and recovery windows from the saved moves and a per-game
   preset, a counterplay read, a scorecard and matchup notes.
 - **Remap** — a transparent conversion of range and cooldown language to another game, with every
   change listed and a new project created rather than overwriting the original.
+- **Compare** — two saved kits read under one preset: frame totals, score axes, and shared or unique
+  move names. Estimates only.
 - **History** — local snapshots with restore, and a read-only share link encoded in the URL fragment.
 
 Nothing in Kit tools is uploaded, and the sandbox never presents an estimate as measured frame data.
@@ -428,6 +432,9 @@ model quality.
   the web, and a source it names may be wrong. Facts stay labelled unverified until you check them.
 - **Share links are snapshots.** A shared kit is encoded in the URL fragment; it is not a live document
   and it is not synced.
+- **The research cache is local.** It is keyed by character, series and game and lives in this device's
+  storage; clearing site data or the app's data removes it. Only lookups that returned a sourced fact
+  are cached.
 - **Image prompts cannot guarantee perfect anatomy.** Revisions, prompt editing and reference images are
   the practical controls; no provider is perfect.
 

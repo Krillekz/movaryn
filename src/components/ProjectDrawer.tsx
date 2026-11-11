@@ -9,6 +9,7 @@ import {
   Plus,
   Printer,
   Search,
+  Share2,
   Table,
   Trash2,
   Upload,
@@ -39,6 +40,7 @@ import {
   type SandboxPresetId,
 } from '../../shared/sandbox';
 import { projectSheetHtml } from '../lib/printSheet';
+import { encodeSharedKit, sharedKitUrl } from '../../shared/shareKit';
 import { Modal } from './ui/Modal';
 import { CopyButton } from './ui/CopyButton';
 import { Dropdown, DropdownItem } from './ui/Dropdown';
@@ -103,6 +105,21 @@ export function ProjectDrawer() {
     if (!artQueryText) return true;
     return `${image.prompt} ${image.aspect}`.toLowerCase().includes(artQueryText);
   });
+
+  const shareKit = async () => {
+    const code = encodeSharedKit(project);
+    if (code.length > 90_000) {
+      pushToast('This kit is too large for a share link. Export JSON instead.', 'danger');
+      return;
+    }
+    const ok = await copyText(sharedKitUrl(code));
+    pushToast(
+      ok
+        ? 'Read-only kit link copied. The kit travels in the link, not a server.'
+        : 'Copy failed. Your browser blocked clipboard access.',
+      ok ? 'success' : 'danger',
+    );
+  };
 
   const exportProject = (format: 'markdown' | 'csv' | 'json' | 'frames' | 'sheet') => {
     if (format === 'frames' || format === 'sheet') {
@@ -280,13 +297,22 @@ export function ProjectDrawer() {
                     <Printer size={13} />
                     Printable sheet (HTML)
                   </DropdownItem>
+                  <DropdownItem
+                    onClick={() => {
+                      closeExport();
+                      void shareKit();
+                    }}
+                  >
+                    <Share2 size={13} />
+                    Read-only share link
+                  </DropdownItem>
                 </>
               )}
             </Dropdown>
             <button
               type="button"
               className="icon-btn"
-              title="Kit tools: brief, sandbox, remap, history"
+              title="Kit tools: brief, sandbox, remap, history, compare"
               aria-label="Kit tools"
               onClick={() => openTools('brief')}
             >

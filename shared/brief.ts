@@ -18,6 +18,17 @@ export const BRIEF_MODES: { value: BriefMode; label: string; hint: string }[] = 
   },
 ];
 
+/** Stable key for the local research cache; the same lookup is reused across projects. */
+export function researchCacheKey(input: {
+  character: string;
+  series?: string;
+  game?: string;
+}): string {
+  return [input.character, input.series, input.game]
+    .map((value) => (value ?? '').trim().toLowerCase().replace(/\s+/g, ' '))
+    .join('|');
+}
+
 export function emptyBrief(): CharacterBrief {
   return { mode: 'canon', facts: [], verified: false, updatedAt: Date.now() };
 }

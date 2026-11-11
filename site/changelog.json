@@ -1,5 +1,10 @@
 [
   {
+    "version": "1.8.0",
+    "title": "A local research cache and a kit comparison",
+    "summary": "Local research cache. A successful sourced lookup is kept on this device by character, series and game. Reopening that brief offers Use cached lookup…"
+  },
+  {
     "version": "1.7.0",
     "title": "Character research, a kit sandbox, remapping and local history",
     "summary": "Character brief per project: series, which version, abilities to keep and avoid, and a stated Follow canon / Original kit / Mixed mode. The brief is…"

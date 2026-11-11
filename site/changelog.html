@@ -65,11 +65,11 @@
     <main id="main">
       <section class="log-hero">
         <div class="shell">
-          <p class="eyebrow"><span class="dot"></span> 20 releases</p>
+          <p class="eyebrow"><span class="dot"></span> 21 releases</p>
           <h1>Update log</h1>
           <p>
             What changed in every Movaryn build, newest first. The newest release is
-            <strong>1.7.0</strong> — Character research, a kit sandbox, remapping and local history.
+            <strong>1.8.0</strong> — A local research cache and a kit comparison.
           </p>
         </div>
       </section>
@@ -78,6 +78,12 @@
         <aside class="log-index">
           <p>All releases</p>
           <ol>
+        <li>
+          <a href="#v1.8.0">
+            1.8.0
+            <small>A local research cache and a kit comparison</small>
+          </a>
+        </li>
         <li>
           <a href="#v1.7.0">
             1.7.0
@@ -202,11 +208,32 @@
         </aside>
 
         <section class="log-entries" aria-label="Release notes">
+      <article class="log-entry" id="v1.8.0">
+        <header class="log-entry-header">
+          <h2>1.8.0</h2>
+          <span class="log-title">A local research cache and a kit comparison</span>
+          <span class="log-latest">Latest</span>
+        </header>
+        <ul>
+          <li><strong>Local research cache.</strong> A successful sourced lookup is kept on this device by character, series and game. Reopening that brief offers <strong>Use cached lookup</strong> first; pressing Research again refreshes it from the provider. Uncertain lookups are not cached, nothing is uploaded, and clearing local data removes the cache.</li>
+          <li><strong>Compare tab</strong> in Kit tools. Two saved projects are read under one sandbox preset: move count, estimated total frames, average start-up and recovery, the five score axes, and which move names are shared or unique. Every number is an estimate from the written moves, not a balance verdict.</li>
+          <li><strong>Read-only share link</strong> in the project export menu, so a kit can be shared without opening History.</li>
+        </ul>
+        <p>### Notes</p>
+        <ul>
+          <li>There are still <strong>no accounts and no cloud sync</strong>. The cache and comparisons are local.</li>
+          <li>Cached facts keep their named source and stay labelled unverified. The cache never invents a source.</li>
+        </ul>
+        <a class="log-release-link" href="https://github.com/Krillekz/movaryn/releases/tag/v1.8.0">
+          Release notes on GitHub <span aria-hidden="true">→</span>
+        </a>
+      </article>
+
       <article class="log-entry" id="v1.7.0">
         <header class="log-entry-header">
           <h2>1.7.0</h2>
           <span class="log-title">Character research, a kit sandbox, remapping and local history</span>
-          <span class="log-latest">Latest</span>
+          
         </header>
         <ul>
           <li><strong>Character brief</strong> per project: series, which version, abilities to keep and avoid, and a stated <strong>Follow canon / Original kit / Mixed</strong> mode. The brief is sent with every chat in the project, so a restart or a new chat keeps the same understanding of the character.</li>

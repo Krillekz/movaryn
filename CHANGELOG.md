@@ -1,5 +1,21 @@
 # Update log
 
+## 1.8.0 — A local research cache and a kit comparison
+
+- **Local research cache.** A successful sourced lookup is kept on this device by character, series
+  and game. Reopening that brief offers **Use cached lookup** first; pressing Research again refreshes
+  it from the provider. Uncertain lookups are not cached, nothing is uploaded, and clearing local data
+  removes the cache.
+- **Compare tab** in Kit tools. Two saved projects are read under one sandbox preset: move count,
+  estimated total frames, average start-up and recovery, the five score axes, and which move names are
+  shared or unique. Every number is an estimate from the written moves, not a balance verdict.
+- **Read-only share link** in the project export menu, so a kit can be shared without opening History.
+
+### Notes
+
+- There are still **no accounts and no cloud sync**. The cache and comparisons are local.
+- Cached facts keep their named source and stay labelled unverified. The cache never invents a source.
+
 ## 1.7.0 — Character research, a kit sandbox, remapping and local history
 
 - **Character brief** per project: series, which version, abilities to keep and avoid, and a stated

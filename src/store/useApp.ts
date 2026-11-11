@@ -66,7 +66,7 @@ export type SettingsTabId =
   | 'credits'
   | 'about';
 
-export type ToolsTabId = 'brief' | 'sandbox' | 'remap' | 'history';
+export type ToolsTabId = 'brief' | 'sandbox' | 'remap' | 'history' | 'compare';
 
 interface UiState {
   sidebarCollapsed: boolean;
