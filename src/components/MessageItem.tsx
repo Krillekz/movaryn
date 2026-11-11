@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import {
   AlertTriangle,
+  BookOpen,
   BookmarkPlus,
   Download,
   ExternalLink,
@@ -9,7 +10,7 @@ import {
   SlidersHorizontal,
   X,
 } from 'lucide-react';
-import type { ChatMessage, GeneratedImage } from '../../shared/types';
+import type { ChatMessage, GeneratedImage, Project } from '../../shared/types';
 import { parseMoveset } from '../../shared/moveset';
 import { describeImageBrief, resolveImagePrompt } from '../../shared/imagePrompt';
 import { useApp } from '../store/useApp';
@@ -193,6 +194,18 @@ function AssistantMessage({
     [message.content, message.kind, message.status],
   );
   const toast = useApp.getState().pushToast;
+  const conversation = useApp((state) => state.conversations[conversationId]);
+  const project = useApp((state) => {
+    const id = state.conversations[conversationId]?.projectId;
+    return id ? (state.projects[id] ?? null) : null;
+  });
+  const latestReplyId = useMemo(() => {
+    const messages = conversation?.messages ?? [];
+    for (let index = messages.length - 1; index >= 0; index -= 1) {
+      if (messages[index].role === 'assistant') return messages[index].id;
+    }
+    return null;
+  }, [conversation?.messages]);
 
   const imagePrompt = useMemo(() => imagePromptFor(message), [message]);
 
@@ -447,7 +460,65 @@ function AssistantMessage({
           </button>
         </div>
       ) : null}
+
+      {project && message.id === latestReplyId && message.status !== 'streaming' ? (
+        <BriefSources project={project} />
+      ) : null}
     </div>
+  );
+}
+
+/**
+ * Project-level facts shown under the latest reply, so a source can be checked
+ * where the kit is read. These are saved brief facts, not a claim about what
+ * the model used.
+ */
+function BriefSources({ project }: { project: Project }) {
+  const facts = project.brief?.facts ?? [];
+  if (facts.length === 0) return null;
+
+  return (
+    <details className="mt-2 rounded-xl border border-line bg-panel px-3 py-2">
+      <summary className="flex cursor-pointer list-none items-center gap-1.5 text-[11px] font-medium text-ink-faint hover:text-ink-muted">
+        <BookOpen size={12} />
+        Brief sources ({facts.length})
+        <span className="ml-auto text-[10px] font-normal text-ink-faint">project-level</span>
+      </summary>
+      <ul className="mt-2 space-y-1.5">
+        {facts.map((fact) => (
+          <li key={fact.id} className="text-[11.5px] leading-relaxed text-ink-muted">
+            {fact.text}
+            <span className="text-ink-faint">
+              {' — '}
+              {fact.source ? fact.source : 'no source given'}
+              {' · '}
+              {fact.origin === 'lookup'
+                ? 'research, unverified'
+                : fact.origin === 'invented'
+                  ? 'invented earlier'
+                  : 'from the brief'}
+            </span>
+          </li>
+        ))}
+      </ul>
+      <div className="mt-2 flex flex-wrap items-center justify-between gap-2">
+        <p className="text-[10px] leading-relaxed text-ink-faint">
+          Saved with this project. A reply may not use every fact, and research facts are unverified
+          until you check the source.
+        </p>
+        <button
+          type="button"
+          className="btn btn-ghost h-6 px-2 text-[10.5px]"
+          onClick={() => {
+            const state = useApp.getState();
+            state.openProject(project.id);
+            state.openTools('brief');
+          }}
+        >
+          Review brief
+        </button>
+      </div>
+    </details>
   );
 }
 

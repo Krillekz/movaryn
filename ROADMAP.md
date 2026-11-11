@@ -8,12 +8,10 @@ A living document. Scope and order can change, and nothing here is a promise of 
   or ignore it before it shapes the kit.
 - **Palette search for saved art** — find a saved image by its prompt without opening the project
   drawer.
-- **Source cards in chat** — show the brief facts and sources a reply leaned on, right where the reply
-  is read.
+- **Share a saved comparison** — export a comparison as its own read-only link.
 
 ## Next
 
-- **Multi-kit comparisons** — compare three or more kits, and save a comparison with a project.
 - **Reference library** — reusable outfit and silhouette references shared across projects.
 - **Offline character notebooks** — hand-written canon notes that work without any research provider.
 - **More games and formats** — templates for battleground games beyond JJS and TSB.
@@ -28,6 +26,8 @@ A living document. Scope and order can change, and nothing here is a promise of 
 
 ## Shipped
 
+- **1.9.0** — brief sources under the latest reply, comparisons of up to five kits, and comparison
+  summaries saved with the project. [Update log](changelog.html#v1.9.0)
 - **1.8.0** — a device-local research cache that reuses sourced lookups, a Compare tab for two kits
   under one preset, and a read-only share link in the project export menu.
   [Update log](changelog.html#v1.8.0)

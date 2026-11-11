@@ -65,11 +65,11 @@
     <main id="main">
       <section class="log-hero">
         <div class="shell">
-          <p class="eyebrow"><span class="dot"></span> 21 releases</p>
+          <p class="eyebrow"><span class="dot"></span> 22 releases</p>
           <h1>Update log</h1>
           <p>
             What changed in every Movaryn build, newest first. The newest release is
-            <strong>1.8.0</strong> — A local research cache and a kit comparison.
+            <strong>1.9.0</strong> — Sources under the reply, and comparisons that stick.
           </p>
         </div>
       </section>
@@ -78,6 +78,12 @@
         <aside class="log-index">
           <p>All releases</p>
           <ol>
+        <li>
+          <a href="#v1.9.0">
+            1.9.0
+            <small>Sources under the reply, and comparisons that stick</small>
+          </a>
+        </li>
         <li>
           <a href="#v1.8.0">
             1.8.0
@@ -208,11 +214,33 @@
         </aside>
 
         <section class="log-entries" aria-label="Release notes">
+      <article class="log-entry" id="v1.9.0">
+        <header class="log-entry-header">
+          <h2>1.9.0</h2>
+          <span class="log-title">Sources under the reply, and comparisons that stick</span>
+          <span class="log-latest">Latest</span>
+        </header>
+        <ul>
+          <li><strong>Brief sources under the latest reply.</strong> A collapsible card lists the project's saved facts, each with its source and whether it came from the brief or from research. It is labelled project-level and says plainly that a reply may not use every fact. Research facts stay marked unverified, and <strong>Review brief</strong> opens the Brief tab.</li>
+          <li><strong>Compare up to five kits.</strong> The Compare tab now takes this project plus up to four others under one preset, with per-kit totals, score axes, names shared by every kit and names unique to each one.</li>
+          <li><strong>Saved comparisons.</strong> <strong>Save comparison</strong> stores a readable Markdown summary with the project, so the result survives closing the dialog; it can be removed again from the same tab.</li>
+        </ul>
+        <p>### Notes</p>
+        <ul>
+          <li>Every comparison is still an estimate from the written moves under one preset, not a balance verdict.</li>
+          <li>Source cards show saved brief facts, not a claim about what the model actually used.</li>
+          <li>Nothing here is uploaded, and there are still no accounts or cloud sync.</li>
+        </ul>
+        <a class="log-release-link" href="https://github.com/Krillekz/movaryn/releases/tag/v1.9.0">
+          Release notes on GitHub <span aria-hidden="true">→</span>
+        </a>
+      </article>
+
       <article class="log-entry" id="v1.8.0">
         <header class="log-entry-header">
           <h2>1.8.0</h2>
           <span class="log-title">A local research cache and a kit comparison</span>
-          <span class="log-latest">Latest</span>
+          
         </header>
         <ul>
           <li><strong>Local research cache.</strong> A successful sourced lookup is kept on this device by character, series and game. Reopening that brief offers <strong>Use cached lookup</strong> first; pressing Research again refreshes it from the provider. Uncertain lookups are not cached, nothing is uploaded, and clearing local data removes the cache.</li>

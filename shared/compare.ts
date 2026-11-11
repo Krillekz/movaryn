@@ -109,3 +109,124 @@ export function compareKits(
     notes,
   };
 }
+
+export interface CompareUnique {
+  name: string;
+  moves: string[];
+}
+
+export interface ManyKitComparison {
+  presetName: string;
+  sides: CompareSideSummary[];
+  /** Move names that appear in every compared kit. */
+  sharedByAll: string[];
+  /** Move names that appear in exactly one kit. */
+  uniqueTo: CompareUnique[];
+  notes: string[];
+}
+
+/** Compares three or more kits under one preset. */
+export function compareManyKits(kits: CompareKitInput[], presetId: SandboxPresetId): ManyKitComparison {
+  const sides = kits.map((kit) => summarise(kit, presetId));
+  const counts = new Map<string, { name: string; count: number }>();
+
+  for (const kit of kits) {
+    const seen = new Set<string>();
+    for (const move of kit.moves) {
+      const key = normaliseName(move.name);
+      if (!key || seen.has(key)) continue;
+      seen.add(key);
+      const entry = counts.get(key) ?? { name: move.name, count: 0 };
+      entry.count += 1;
+      counts.set(key, entry);
+    }
+  }
+
+  const sharedByAll = [...counts.values()]
+    .filter((entry) => entry.count === kits.length && kits.length > 1)
+    .map((entry) => entry.name);
+  const uniqueTo = kits.map((kit) => ({
+    name: kit.name,
+    moves: kit.moves
+      .filter((move) => counts.get(normaliseName(move.name))?.count === 1)
+      .map((move) => move.name)
+      .filter((name, index, names) => names.indexOf(name) === index),
+  }));
+
+  const notes: string[] = [];
+  if (kits.length < 2) {
+    notes.push('Select at least one other kit to compare.');
+  }
+  for (const side of sides) {
+    if (side.moveCount === 0) {
+      notes.push(`${side.name} has no saved moves, so it contributes nothing to the comparison.`);
+    }
+  }
+  if (sharedByAll.length > 0) {
+    notes.push(
+      `${sharedByAll.length} move name${sharedByAll.length === 1 ? ' is' : 's are'} used by every kit: ${sharedByAll.join(', ')}.`,
+    );
+  }
+  const populated = sides.filter((side) => side.moveCount > 0);
+  if (populated.length > 1) {
+    const longest = populated.reduce((worst, side) => (side.totalFrames > worst.totalFrames ? side : worst));
+    const shortest = populated.reduce((best, side) => (side.totalFrames < best.totalFrames ? side : best));
+    if (longest.totalFrames !== shortest.totalFrames) {
+      notes.push(
+        `${longest.name} commits about ${longest.totalFrames - shortest.totalFrames} more estimated frames than ${shortest.name}.`,
+      );
+    }
+  }
+  if (presetId === 'arena') {
+    notes.push('No game preset is set, so every kit uses the general arena defaults.');
+  }
+
+  return { presetName: sides[0]?.report.presetName ?? 'General arena fighter', sides, sharedByAll, uniqueTo, notes };
+}
+
+function mdCell(value: string): string {
+  return value.replace(/\|/g, '\|').replace(/\r?\n/g, ' ').trim();
+}
+
+/** A plain-text record saved with the project; no hidden scoring. */
+export function comparisonMarkdown(comparison: ManyKitComparison): string {
+  const lines: string[] = [
+    `# Kit comparison — ${comparison.presetName}`,
+    '',
+    '_Estimated from the written moves and one game preset. Not measured frame data and not a balance verdict._',
+    '',
+    `| Kit | Moves | Total frames | Avg start-up | Avg recovery |`,
+    `| --- | --- | --- | --- | --- |`,
+    ...comparison.sides.map(
+      (side) =>
+        `| ${mdCell(side.name)} | ${side.moveCount} | ${side.totalFrames} | ${side.averageStartup} | ${side.averageRecovery} |`,
+    ),
+    '',
+  ];
+
+  const firstScores = comparison.sides[0]?.scores ?? [];
+  if (firstScores.length > 0) {
+    lines.push(
+      `| Axis | ${comparison.sides.map((side) => mdCell(side.name)).join(' | ')} |`,
+      `| --- | ${comparison.sides.map(() => '---').join(' | ')} |`,
+      ...firstScores.map(
+        (axis) =>
+          `| ${axis.label} | ${comparison.sides
+            .map((side) => String(side.scores.find((entry) => entry.id === axis.id)?.score ?? '—'))
+            .join(' | ')} |`,
+      ),
+      '',
+    );
+  }
+
+  if (comparison.sharedByAll.length > 0) {
+    lines.push(`**In every kit:** ${comparison.sharedByAll.join(', ')}`, '');
+  }
+  for (const group of comparison.uniqueTo) {
+    if (group.moves.length > 0) lines.push(`**Only in ${group.name}:** ${group.moves.join(', ')}`, '');
+  }
+  if (comparison.notes.length > 0) {
+    lines.push('## Notes', '', ...comparison.notes.map((note) => `- ${note}`), '');
+  }
+  return lines.join('\n');
+}

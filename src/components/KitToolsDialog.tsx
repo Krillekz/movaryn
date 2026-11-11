@@ -18,7 +18,7 @@ import {
 } from 'lucide-react';
 import type { CharacterBrief, CharacterFact, Project } from '../../shared/types';
 import { BRIEF_MODES, emptyBrief, mergeResearch, researchCacheKey } from '../../shared/brief';
-import { compareKits } from '../../shared/compare';
+import { compareManyKits, comparisonMarkdown } from '../../shared/compare';
 import {
   SANDBOX_PRESETS,
   frameTableCsv,
@@ -816,25 +816,59 @@ function RemapTab({ project }: { project: Project }) {
 function CompareTab({ project }: { project: Project }) {
   const projects = useApp((state) => state.projects);
   const order = useApp((state) => state.projectOrder);
+  const updateProject = useApp((state) => state.updateProject);
+  const pushToast = useApp((state) => state.pushToast);
   const others = order
     .map((id) => projects[id])
     .filter((entry): entry is Project => Boolean(entry) && entry.id !== project.id);
-  const [selectedId, setSelectedId] = useState('');
-  const other = others.find((entry) => entry.id === selectedId) ?? others[0];
+  const otherIds = others.map((entry) => entry.id).join('|');
+  const firstId = others[0]?.id ?? '';
+  const [selectedIds, setSelectedIds] = useState<string[]>(() => (firstId ? [firstId] : []));
+
+  useEffect(() => {
+    setSelectedIds((previous) => {
+      const available = otherIds ? otherIds.split('|') : [];
+      const valid = previous.filter((id) => available.includes(id));
+      if (valid.length === previous.length) return previous;
+      return valid.length > 0 ? valid : firstId ? [firstId] : [];
+    });
+  }, [otherIds, firstId]);
+
+  const chosen = others.filter((entry) => selectedIds.includes(entry.id));
   const presetId = ((project.sandboxPreset as SandboxPresetId | undefined) ??
     presetForGame(project.game)) as SandboxPresetId;
 
-  const comparison = useMemo(
-    () =>
-      other
-        ? compareKits(
+  const comparison =
+    chosen.length > 0
+      ? compareManyKits(
+          [
             { name: project.name, moves: project.moves },
-            { name: other.name, moves: other.moves },
-            presetId,
-          )
-        : null,
-    [project.name, project.moves, other, presetId],
-  );
+            ...chosen.map((entry) => ({ name: entry.name, moves: entry.moves })),
+          ],
+          presetId,
+        )
+      : null;
+
+  const toggle = (id: string) => {
+    setSelectedIds((previous) =>
+      previous.includes(id)
+        ? previous.filter((entry) => entry !== id)
+        : [...previous, id].slice(0, 4),
+    );
+  };
+
+  const save = () => {
+    if (!comparison) return;
+    updateProject(project.id, {
+      comparison: {
+        createdAt: Date.now(),
+        presetName: comparison.presetName,
+        kitNames: comparison.sides.map((side) => side.name),
+        summary: comparisonMarkdown(comparison),
+      },
+    });
+    pushToast('Comparison saved with this project.', 'success');
+  };
 
   return (
     <div className="flex flex-col gap-4">
@@ -844,40 +878,51 @@ function CompareTab({ project }: { project: Project }) {
             Compare kits
           </h3>
           <p className="mt-1 text-[11.5px] leading-relaxed text-ink-muted">
-            Two saved kits read with the same preset. Frame windows and scores are estimates, not a
-            balance verdict.
+            This kit plus up to four others, read under one preset. Frame windows and scores are
+            estimates, not a balance verdict.
           </p>
         </div>
-        {others.length > 0 ? (
-          <div className="min-w-[200px]">
-            <label className="field-label" htmlFor="compare-project">
-              Compare with
-            </label>
-            <select
-              id="compare-project"
-              className="field h-8 text-[12px]"
-              value={other?.id ?? ''}
-              onChange={(event) => setSelectedId(event.target.value)}
-            >
-              {others.map((entry) => (
-                <option key={entry.id} value={entry.id}>
-                  {entry.name}
-                </option>
-              ))}
-            </select>
-          </div>
-        ) : null}
       </div>
+
+      {others.length > 0 ? (
+        <div>
+          <p className="field-label">Kits to compare</p>
+          <div className="scroll-thin mt-1 flex max-h-28 flex-wrap gap-1.5 overflow-y-auto rounded-lg border border-line bg-panel-2 p-2">
+            {others.map((entry) => {
+              const active = selectedIds.includes(entry.id);
+              return (
+                <button
+                  key={entry.id}
+                  type="button"
+                  aria-pressed={active}
+                  onClick={() => toggle(entry.id)}
+                  className={cx(
+                    'chip h-6 max-w-full truncate',
+                    active
+                      ? 'border-accent/50 bg-accent-soft text-accent'
+                      : 'text-ink-muted hover:border-line-strong hover:text-ink',
+                  )}
+                >
+                  {entry.name}
+                </button>
+              );
+            })}
+          </div>
+          <p className="mt-1 text-[10.5px] text-ink-faint">
+            Up to four other projects. Selected {chosen.length + 1} of {others.length + 1} kits.
+          </p>
+        </div>
+      ) : null}
 
       {!comparison ? (
         <p className="rounded-lg border border-dashed border-line px-3 py-3 text-[11.5px] text-ink-faint">
-          Save a second project to compare this kit against it. Nothing is uploaded; both kits stay on
-          this device.
+          Save a second project and select it above to compare kits. Nothing is uploaded; every kit
+          stays on this device.
         </p>
       ) : (
         <>
-          <div className="grid gap-2 sm:grid-cols-2">
-            {[comparison.a, comparison.b].map((side, index) => (
+          <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+            {comparison.sides.map((side, index) => (
               <div
                 key={`${side.name}-${index}`}
                 className="rounded-lg border border-line bg-panel-2 px-3 py-2"
@@ -894,47 +939,64 @@ function CompareTab({ project }: { project: Project }) {
             ))}
           </div>
 
-          <div className="overflow-hidden rounded-lg border border-line">
-            <table className="w-full text-[11.5px]">
+          <div className="scroll-thin overflow-x-auto rounded-lg border border-line">
+            <table className="w-full min-w-[420px] text-[11.5px]">
               <thead className="bg-surface text-ink-faint">
                 <tr>
                   <th className="px-2 py-1.5 text-left font-medium">Axis</th>
-                  <th className="px-2 py-1.5 text-right font-medium">This kit</th>
-                  <th className="px-2 py-1.5 text-right font-medium">Other kit</th>
+                  {comparison.sides.map((side) => (
+                    <th
+                      key={side.name}
+                      className="max-w-[130px] truncate px-2 py-1.5 text-right font-medium"
+                    >
+                      {side.name}
+                    </th>
+                  ))}
                 </tr>
               </thead>
               <tbody>
-                {comparison.a.scores.map((axis) => {
-                  const otherAxis = comparison.b.scores.find((entry) => entry.id === axis.id);
-                  return (
-                    <tr key={axis.id} className="border-t border-line">
-                      <td className="px-2 py-1.5 text-ink-muted">{axis.label}</td>
-                      <td className="px-2 py-1.5 text-right text-ink">{axis.score}</td>
-                      <td className="px-2 py-1.5 text-right text-ink">{otherAxis?.score ?? '—'}</td>
-                    </tr>
-                  );
-                })}
+                {comparison.sides[0].scores.map((axis) => (
+                  <tr key={axis.id} className="border-t border-line">
+                    <td className="px-2 py-1.5 text-ink-muted">{axis.label}</td>
+                    {comparison.sides.map((side) => (
+                      <td key={side.name} className="px-2 py-1.5 text-right text-ink">
+                        {side.scores.find((entry) => entry.id === axis.id)?.score ?? '—'}
+                      </td>
+                    ))}
+                  </tr>
+                ))}
               </tbody>
             </table>
           </div>
 
-          <div className="grid gap-2 sm:grid-cols-3">
-            {[
-              { label: 'In both', items: comparison.sharedNames },
-              { label: `Only ${comparison.a.name}`, items: comparison.onlyA },
-              { label: `Only ${comparison.b.name}`, items: comparison.onlyB },
-            ].map((group) => (
-              <div
-                key={group.label}
-                className="rounded-lg border border-line bg-panel-2 px-3 py-2"
-              >
-                <p className="text-[10px] uppercase tracking-wide text-ink-faint">{group.label}</p>
-                <p className="mt-1 text-[11.5px] leading-relaxed text-ink-muted">
-                  {group.items.length > 0 ? group.items.join(', ') : 'None'}
-                </p>
-              </div>
-            ))}
-          </div>
+          {comparison.sharedByAll.length > 0 ||
+          comparison.uniqueTo.some((group) => group.moves.length > 0) ? (
+            <div className="grid gap-2 sm:grid-cols-2">
+              {comparison.sharedByAll.length > 0 ? (
+                <div className="rounded-lg border border-line bg-panel-2 px-3 py-2">
+                  <p className="text-[10px] uppercase tracking-wide text-ink-faint">In every kit</p>
+                  <p className="mt-1 text-[11.5px] leading-relaxed text-ink-muted">
+                    {comparison.sharedByAll.join(', ')}
+                  </p>
+                </div>
+              ) : null}
+              {comparison.uniqueTo
+                .filter((group) => group.moves.length > 0)
+                .map((group) => (
+                  <div
+                    key={group.name}
+                    className="rounded-lg border border-line bg-panel-2 px-3 py-2"
+                  >
+                    <p className="truncate text-[10px] uppercase tracking-wide text-ink-faint">
+                      Only {group.name}
+                    </p>
+                    <p className="mt-1 text-[11.5px] leading-relaxed text-ink-muted">
+                      {group.moves.join(', ')}
+                    </p>
+                  </div>
+                ))}
+            </div>
+          ) : null}
 
           {comparison.notes.length > 0 ? (
             <ul className="space-y-1 text-[11.5px] leading-relaxed text-ink-muted">
@@ -944,12 +1006,41 @@ function CompareTab({ project }: { project: Project }) {
             </ul>
           ) : null}
 
+          <div className="flex flex-wrap items-center gap-2">
+            <button type="button" className="btn btn-primary h-8 gap-1 text-[11.5px]" onClick={save}>
+              <Save size={12} />
+              Save comparison
+            </button>
+            <p className="text-[10.5px] text-ink-faint">
+              Saves the readable summary with this project. Nothing is uploaded.
+            </p>
+          </div>
+
           <p className="text-[10px] leading-relaxed text-ink-faint">
-            Both sides use the {comparison.presetName} preset. Estimated from the written moves, never
-            measured in the game.
+            Every side uses the {comparison.presetName} preset. Estimated from the written moves,
+            never measured in the game.
           </p>
         </>
       )}
+
+      {project.comparison ? (
+        <details className="rounded-lg border border-line bg-panel-2 px-3 py-2">
+          <summary className="cursor-pointer list-none text-[11.5px] font-medium text-ink-muted">
+            Saved comparison · {project.comparison.kitNames.length} kits ·{' '}
+            {relativeTime(project.comparison.createdAt)}
+          </summary>
+          <pre className="scroll-thin mt-2 max-h-52 overflow-auto whitespace-pre-wrap font-sans text-[10.5px] leading-relaxed text-ink-muted">
+            {project.comparison.summary}
+          </pre>
+          <button
+            type="button"
+            className="btn btn-ghost mt-2 h-7 text-[11px]"
+            onClick={() => updateProject(project.id, { comparison: undefined })}
+          >
+            Remove saved comparison
+          </button>
+        </details>
+      ) : null}
     </div>
   );
 }

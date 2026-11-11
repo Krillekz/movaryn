@@ -1,5 +1,22 @@
 # Update log
 
+## 1.9.0 — Sources under the reply, and comparisons that stick
+
+- **Brief sources under the latest reply.** A collapsible card lists the project's saved facts, each
+  with its source and whether it came from the brief or from research. It is labelled project-level and
+  says plainly that a reply may not use every fact. Research facts stay marked unverified, and **Review
+  brief** opens the Brief tab.
+- **Compare up to five kits.** The Compare tab now takes this project plus up to four others under one
+  preset, with per-kit totals, score axes, names shared by every kit and names unique to each one.
+- **Saved comparisons.** **Save comparison** stores a readable Markdown summary with the project, so the
+  result survives closing the dialog; it can be removed again from the same tab.
+
+### Notes
+
+- Every comparison is still an estimate from the written moves under one preset, not a balance verdict.
+- Source cards show saved brief facts, not a claim about what the model actually used.
+- Nothing here is uploaded, and there are still no accounts or cloud sync.
+
 ## 1.8.0 — A local research cache and a kit comparison
 
 - **Local research cache.** A successful sourced lookup is kept on this device by character, series

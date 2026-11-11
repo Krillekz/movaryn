@@ -134,6 +134,13 @@ export interface Project {
   brief?: CharacterBrief;
   matchupNotes?: string;
   sandboxPreset?: string;
+  /** Last kit comparison saved with this project; local only. */
+  comparison?: {
+    createdAt: number;
+    presetName: string;
+    kitNames: string[];
+    summary: string;
+  };
   moves: SavedMove[];
   references: ImageAttachment[];
   images: GeneratedImage[];

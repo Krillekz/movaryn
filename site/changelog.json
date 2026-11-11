@@ -1,5 +1,10 @@
 [
   {
+    "version": "1.9.0",
+    "title": "Sources under the reply, and comparisons that stick",
+    "summary": "Brief sources under the latest reply. A collapsible card lists the project's saved facts, each with its source and whether it came from the brief or…"
+  },
+  {
     "version": "1.8.0",
     "title": "A local research cache and a kit comparison",
     "summary": "Local research cache. A successful sourced lookup is kept on this device by character, series and game. Reopening that brief offers Use cached lookup…"

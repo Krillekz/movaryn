@@ -21,10 +21,11 @@ It is not a generic chatbot with a game skin:
   openings are checked in the app, with no provider request.
 - **A character brief and opt-in research.** Series, version, abilities to keep or avoid, and a stated
   canon/original/mixed mode travel with the project. Research keeps only facts with a named source and
-  says so when it finds none; successful lookups are cached on this device for reuse.
+  says so when it finds none; successful lookups are cached on this device for reuse, and the latest
+  reply shows the brief's facts with their sources.
 - **A local kit sandbox and comparison.** Estimated start-up, active and recovery windows, a
-  counterplay read and a transparent scorecard, plus a side-by-side comparison of two saved kits under
-  one preset.
+  counterplay read and a transparent scorecard, plus a comparison of up to five saved kits under one
+  preset that can be saved with the project.
 - **Cross-game remapping.** Rewrites range and cooldown language for another game, lists every change
   and flags what does not fit.
 - **Local versions and share links.** Snapshots you can restore, and a read-only kit encoded in a link.
@@ -213,8 +214,8 @@ Each project has a **Kit tools** panel with four tabs:
   preset, a counterplay read, a scorecard and matchup notes.
 - **Remap** — a transparent conversion of range and cooldown language to another game, with every
   change listed and a new project created rather than overwriting the original.
-- **Compare** — two saved kits read under one preset: frame totals, score axes, and shared or unique
-  move names. Estimates only.
+- **Compare** — this kit plus up to four others read under one preset: frame totals, score axes, and
+  shared or unique move names. The readable summary can be saved with the project. Estimates only.
 - **History** — local snapshots with restore, and a read-only share link encoded in the URL fragment.
 
 Nothing in Kit tools is uploaded, and the sandbox never presents an estimate as measured frame data.
