@@ -10,6 +10,16 @@ import type {
 } from '../shared/types';
 import { buildSystemPrompt, SUMMARY_INSTRUCTION, SUMMARIZER_SYSTEM_PROMPT } from '../shared/systemPrompt';
 import { config, endpointHost, setupChecklist } from './config';
+import {
+  authenticateAccount,
+  changeAccountPassword,
+  deleteAccount,
+  getAccountStatus,
+  loginAccount,
+  logoutAccount,
+  registerAccount,
+  updateAccountProfile,
+} from './accounts';
 import { AppError, toErrorPayload } from './errors';
 import { complete, streamCompletion, type ContentPart, type ProviderMessage } from './providers/openai';
 import { generateImage } from './providers/images';
@@ -63,8 +73,8 @@ app.use((req, res, next) => {
   }
 
   if (req.method === 'OPTIONS') {
-    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PATCH, DELETE, OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
     res.setHeader('Access-Control-Max-Age', '600');
     res.status(204).end();
     return;
@@ -99,6 +109,47 @@ function rateLimit(req: Request, res: Response, next: NextFunction): void {
     }
   }
   next();
+}
+
+const authHits = new Map<string, number[]>();
+function authRateLimit(req: Request, res: Response, next: NextFunction): void {
+  const key = req.ip ?? 'local';
+  const now = Date.now();
+  const recent = (authHits.get(key) ?? []).filter((stamp) => stamp > now - 60_000);
+  if (recent.length >= 15) {
+    res.status(429).json({
+      error: {
+        message: 'Too many account requests. Wait a minute and try again.',
+        code: 'rate_limited',
+        status: 429,
+      },
+    });
+    return;
+  }
+  recent.push(now);
+  authHits.set(key, recent);
+  if (authHits.size > 200) {
+    for (const [client, stamps] of authHits) {
+      if (!stamps.some((stamp) => stamp > now - 60_000)) authHits.delete(client);
+    }
+  }
+  next();
+}
+
+function bearerToken(req: Request): string | undefined {
+  const header = req.headers.authorization;
+  if (!header || !header.startsWith('Bearer ')) return undefined;
+  const token = header.slice(7).trim();
+  return token || undefined;
+}
+
+async function requireAccount(req: Request): Promise<{ token: string; user: Awaited<ReturnType<typeof authenticateAccount>> }> {
+  const token = bearerToken(req);
+  const user = await authenticateAccount(token);
+  if (!token || !user) {
+    throw new AppError('Sign in to continue.', 401, 'unauthorized');
+  }
+  return { token, user };
 }
 
 function requireChat(): void {
@@ -159,6 +210,59 @@ app.get('/api/health', (_req, res) => {
   };
   res.setHeader('Cache-Control', 'no-store');
   res.json(status);
+});
+
+// ── Local accounts ───────────────────────────────────────────
+app.get('/api/auth/status', async (req: Request, res: Response) => {
+  res.setHeader('Cache-Control', 'no-store');
+  res.json(await getAccountStatus(bearerToken(req)));
+});
+
+app.post('/api/auth/register', authRateLimit, async (req: Request, res: Response) => {
+  const session = await registerAccount({
+    username: req.body?.username,
+    password: req.body?.password,
+    displayName: req.body?.displayName,
+  });
+  res.setHeader('Cache-Control', 'no-store');
+  res.status(201).json(session);
+});
+
+app.post('/api/auth/login', authRateLimit, async (req: Request, res: Response) => {
+  const session = await loginAccount({
+    username: req.body?.username,
+    password: req.body?.password,
+  });
+  res.setHeader('Cache-Control', 'no-store');
+  res.json(session);
+});
+
+app.post('/api/auth/logout', authRateLimit, async (req: Request, res: Response) => {
+  await logoutAccount(bearerToken(req));
+  res.status(204).end();
+});
+
+app.patch('/api/account', authRateLimit, async (req: Request, res: Response) => {
+  const { token } = await requireAccount(req);
+  const user = await updateAccountProfile(token, { displayName: req.body?.displayName });
+  res.setHeader('Cache-Control', 'no-store');
+  res.json({ user });
+});
+
+app.post('/api/account/password', authRateLimit, async (req: Request, res: Response) => {
+  const { token } = await requireAccount(req);
+  const session = await changeAccountPassword(token, {
+    currentPassword: req.body?.currentPassword,
+    newPassword: req.body?.newPassword,
+  });
+  res.setHeader('Cache-Control', 'no-store');
+  res.json(session);
+});
+
+app.delete('/api/account', authRateLimit, async (req: Request, res: Response) => {
+  const { token } = await requireAccount(req);
+  await deleteAccount(token, { password: req.body?.password });
+  res.status(204).end();
 });
 
 // ── Chat (streaming SSE) ─────────────────────────────────────

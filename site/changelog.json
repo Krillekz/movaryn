@@ -1,5 +1,10 @@
 [
   {
+    "version": "2.1.0",
+    "title": "Local accounts, and a studio that looks like yours",
+    "summary": "Local accounts. Create a username and password for this installation, sign in, edit your display name, change your password, sign out, or delete the…"
+  },
+  {
     "version": "2.0.0",
     "title": "Your layout, your reply style, and a notebook for your sources",
     "summary": "New Settings → Layout & replies tab. Choose Focus (narrow, compact), Classic (standard, comfortable) or Studio (wide, spacious), or set reading width…"

@@ -1,5 +1,33 @@
 # Update log
 
+## 2.1.0 — Local accounts, and a studio that looks like yours
+
+- **Local accounts.** Create a username and password for this installation, sign in, edit your display
+  name, change your password, sign out, or delete the account. Passwords are stored only as salted scrypt
+  hashes and sessions as SHA-256 token hashes, in `accounts.json` inside Movaryn's user-data folder —
+  outside the install directory, so the same credentials keep working after updates.
+- **A 30-day session that survives restarts.** The app remembers your local session (the token is in
+  local storage), and password changes rotate every existing session. Signing out or deleting the
+  account does not delete conversations, projects or notebooks.
+- **Account entry points.** A profile chip at the bottom of the sidebar, a Settings → Account tab, and
+  command-palette actions. Register or sign in without an email address.
+- **Design system in Settings → Appearance.** Six accent palettes (Violet, Emerald, Amber, Rose, Sky,
+  Mono), three background atmospheres (Plain, Grid, Glow), Sharp/Soft/Round corners, a sans or serif
+  reading face, and a Reduce motion switch. Quick looks apply a coordinated set in one click, and a
+  live preview shows the result before you close Settings.
+- **Design is consistent.** Accent, atmosphere, corners and reading font apply across chat, composer,
+  notebook and dialogs; the choices are stored with the local workspace and survive relaunches.
+- **Smaller changes.** The sidebar shows the signed-in identity, account and design tabs appear in the
+  command palette, and the Data & privacy copy now explains what a local account does and does not do.
+
+### Notes
+
+- A local account is an identity layer in this release: it does **not** sync work between devices and
+  does **not** partition one local workspace from another yet. Account-scoped workspaces are next.
+- There is no email recovery. If the password is lost, the account can be deleted and recreated, but the
+  old password cannot be recovered.
+- Account files stay on this machine. No analytics, no telemetry and no cloud upload.
+
 ## 2.0.0 — Your layout, your reply style, and a notebook for your sources
 
 - **New Settings → Layout & replies tab.** Choose **Focus** (narrow, compact), **Classic** (standard,

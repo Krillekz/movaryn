@@ -11,10 +11,12 @@ import { IdeaLibraryDialog } from './components/IdeaLibraryDialog';
 import { CommandPalette } from './components/CommandPalette';
 import { WhatsNewDialog } from './components/WhatsNewDialog';
 import { NotebookDialog } from './components/NotebookDialog';
+import { AccountDialog } from './components/AccountDialog';
 import { ConfirmDialog } from './components/ui/ConfirmDialog';
 import { Toasts } from './components/ui/Toasts';
 import { LogoMark } from './components/Logo';
 import { fetchHealth } from './lib/api';
+import { loadAccountStatus } from './lib/account';
 import { apiBase, isBrowserBuild } from './lib/apiBase';
 import { APP_VERSION, WHATS_NEW_KEY } from './lib/appVersion';
 import { useApp } from './store/useApp';
@@ -25,6 +27,11 @@ export default function App() {
   const theme = useApp((state) => state.settings.theme);
   const layoutWidth = useApp((state) => state.settings.layoutWidth);
   const layoutDensity = useApp((state) => state.settings.layoutDensity);
+  const accent = useApp((state) => state.settings.accent);
+  const ambience = useApp((state) => state.settings.ambience);
+  const corners = useApp((state) => state.settings.corners);
+  const readingFont = useApp((state) => state.settings.readingFont);
+  const reduceMotion = useApp((state) => state.settings.reduceMotion);
   // A shared kit opens read-only and never touches the local workspace.
   const [sharedKit] = useState(() =>
     typeof window === 'undefined' ? null : sharedKitFromLocation(window.location.hash),
@@ -50,9 +57,32 @@ export default function App() {
   }, [theme]);
 
   useEffect(() => {
-    document.documentElement.dataset.chatWidth = layoutWidth;
-    document.documentElement.dataset.chatDensity = layoutDensity;
-  }, [layoutWidth, layoutDensity]);
+    const root = document.documentElement;
+    root.dataset.chatWidth = layoutWidth;
+    root.dataset.chatDensity = layoutDensity;
+    root.dataset.accent = accent;
+    root.dataset.ambience = ambience;
+    root.dataset.corners = corners;
+    root.dataset.readingFont = readingFont;
+    root.dataset.reduceMotion = reduceMotion ? 'true' : 'false';
+  }, [layoutWidth, layoutDensity, accent, ambience, corners, readingFont, reduceMotion]);
+
+  useEffect(() => {
+    let cancelled = false;
+    void loadAccountStatus()
+      .then((status) => {
+        if (cancelled) return;
+        useApp.getState().setAccount(status.user);
+        useApp.getState().setHasLocalAccounts(status.hasAccounts);
+        useApp.getState().setAccountState('ready');
+      })
+      .catch(() => {
+        if (!cancelled) useApp.getState().setAccountState('offline');
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -147,7 +177,7 @@ export default function App() {
   return (
     <div className="flex h-full w-full overflow-hidden bg-canvas text-ink">
       <Sidebar />
-      <main className="flex min-w-0 flex-1 flex-col">
+      <main className="app-ambience flex min-w-0 flex-1 flex-col">
         <ApiSetupBanner />
         <ChatView />
       </main>
@@ -159,6 +189,7 @@ export default function App() {
       <CommandPalette />
       <WhatsNewDialog />
       <NotebookDialog />
+      <AccountDialog />
       <ConfirmDialog />
       <Toasts />
     </div>

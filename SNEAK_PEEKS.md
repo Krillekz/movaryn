@@ -102,7 +102,7 @@ Phase 4 treats a good kit as portable: the idea should survive a change of game.
 First pass shipped in 1.7.0 · still evolving
 
 Phase 5 changes where the workshop lives. The 1.7.0 first pass adds local version history and
-read-only share links; accounts and sync are still ahead.
+read-only share links; cloud accounts and cross-device sync are still ahead.
 
 ### The big change: an optional synced workspace
 

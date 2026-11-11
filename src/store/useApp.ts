@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import type {
+  AccountUser,
   ChatMessage,
   Conversation,
   GeneratedImage,
@@ -43,6 +44,11 @@ export const DEFAULT_SETTINGS: Settings = {
   responseStyle: 'balanced',
   responseFormat: 'mixed',
   explainChoices: false,
+  accent: 'violet',
+  ambience: 'glow',
+  corners: 'soft',
+  readingFont: 'sans',
+  reduceMotion: false,
 };
 
 export interface Toast {
@@ -68,6 +74,7 @@ export interface ImageBriefState {
 }
 
 export type SettingsTabId =
+  | 'account'
   | 'provider'
   | 'models'
   | 'prompts'
@@ -95,6 +102,7 @@ interface UiState {
   toolsOpen: boolean;
   toolsTab: ToolsTabId;
   notebookOpen: boolean;
+  accountOpen: boolean;
 }
 
 export interface AppState {
@@ -108,6 +116,9 @@ export interface AppState {
   notebookOrder: string[];
   activeNotebookId: string | null;
   settings: Settings;
+  account: AccountUser | null;
+  accountState: 'loading' | 'ready' | 'offline';
+  hasLocalAccounts: boolean;
   provider: ProviderStatus | null;
   providerError: string | null;
   streaming: { conversationId: string; messageId: string } | null;
@@ -129,6 +140,11 @@ export interface AppState {
   setStreaming: (value: AppState['streaming']) => void;
 
   updateSettings: (patch: Partial<Settings>) => void;
+  setAccount: (account: AccountUser | null) => void;
+  setAccountState: (state: AppState['accountState']) => void;
+  setHasLocalAccounts: (value: boolean) => void;
+  openAccount: () => void;
+  closeAccount: () => void;
 
   createProject: (
     seed?: Partial<Pick<Project, 'name' | 'game' | 'theme' | 'description'>>,
@@ -220,6 +236,9 @@ export const useApp = create<AppState>()((set, get) => ({
   notebookOrder: [],
   activeNotebookId: null,
   settings: DEFAULT_SETTINGS,
+  account: null,
+  accountState: 'loading',
+  hasLocalAccounts: false,
   provider: null,
   providerError: null,
   streaming: null,
@@ -238,6 +257,7 @@ export const useApp = create<AppState>()((set, get) => ({
     toolsOpen: false,
     toolsTab: 'brief',
     notebookOpen: false,
+    accountOpen: false,
   },
   toasts: [],
   confirm: null,
@@ -443,6 +463,15 @@ export const useApp = create<AppState>()((set, get) => ({
     set({ settings: next });
     queueSettings(next);
   },
+
+  setAccount: (account) => set({ account }),
+  setAccountState: (accountState) => set({ accountState }),
+  setHasLocalAccounts: (hasLocalAccounts) => set({ hasLocalAccounts }),
+  openAccount: () =>
+    set((state) => ({
+      ui: { ...state.ui, accountOpen: true, settingsOpen: false, mobileSidebar: false },
+    })),
+  closeAccount: () => set((state) => ({ ui: { ...state.ui, accountOpen: false } })),
 
   createProject: (seed, options) => {
     const now = Date.now();

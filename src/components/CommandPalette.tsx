@@ -15,6 +15,7 @@ import {
   Settings,
   Sparkles,
   Sun,
+  UserRound,
 } from 'lucide-react';
 import type { Conversation, Project } from '../../shared/types';
 import { useApp } from '../store/useApp';
@@ -76,6 +77,13 @@ export function CommandPalette() {
         run: () => state.createProject(),
       },
       {
+        id: 'account',
+        label: state.account ? `Account · ${state.account.displayName}` : 'Sign in or create an account',
+        hint: 'Local identity that survives app updates',
+        icon: UserRound,
+        run: () => state.openAccount(),
+      },
+      {
         id: 'notebook',
         label: 'Open the notebook',
         hint: 'Sources, grounded answers and studio notes',
@@ -123,6 +131,13 @@ export function CommandPalette() {
         hint: 'Connection and API setup',
         icon: Settings,
         run: () => state.openSettings('provider'),
+      },
+      {
+        id: 'settings-account',
+        label: 'Settings · Account',
+        hint: 'Profile, password and local identity',
+        icon: UserRound,
+        run: () => state.openSettings('account'),
       },
       {
         id: 'settings-layout',

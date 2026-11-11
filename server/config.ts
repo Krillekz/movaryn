@@ -1,4 +1,5 @@
 import fs from 'node:fs';
+import os from 'node:os';
 import path from 'node:path';
 import dotenv from 'dotenv';
 
@@ -105,8 +106,20 @@ function readPackageVersion(): string {
   return '0.0.0';
 }
 
+/**
+ * Durable app data lives outside the install directory, so accounts survive
+ * in-place upgrades and fresh installs into the same Windows user profile.
+ */
+function resolveDataDir(): string {
+  const explicit = text(process.env.MOVARYN_DATA_DIR);
+  if (explicit) return path.resolve(explicit);
+  if (process.env.APPDATA) return path.join(process.env.APPDATA, 'Movaryn');
+  return path.join(os.homedir(), '.movaryn');
+}
+
 export const config = {
   version: readPackageVersion(),
+  dataDir: resolveDataDir(),
   host: text(process.env.HOST) || '127.0.0.1',
   port: resolvePort(),
   ai: {

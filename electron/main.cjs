@@ -61,6 +61,7 @@ function startApi() {
       PORT: isDev ? '8787' : '0',
       MOVARYN_RANDOM_PORT: isDev ? '0' : '1',
       MOVARYN_ENV_FILE: envFile ?? '',
+      MOVARYN_DATA_DIR: app.getPath('userData'),
       MOVARYN_STATIC_DIR: path.join(app.getAppPath(), 'dist'),
     },
     stdio: ['ignore', 'pipe', 'pipe', 'ipc'],

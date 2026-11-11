@@ -29,6 +29,14 @@ It is not a generic chatbot with a game skin:
 - **Cross-game remapping.** Rewrites range and cooldown language for another game, lists every change
   and flags what does not fit.
 - **Local versions and share links.** Snapshots you can restore, and a read-only kit encoded in a link.
+- **Local accounts that survive updates.** Create a username and password for this installation; the
+  account lives in Movaryn's user-data folder, outside the install directory. Sign in after an update,
+  change the display name or password, and sign out. Passwords are scrypt-hashed and sessions are stored
+  as hashes. This is not cloud sync, not per-account workspace separation yet, and there is no email
+  recovery.
+- **A design system, not just a theme toggle.** Six accent palettes, plain/grid/glow atmospheres, three
+  corner styles, a serif or sans reading face and a reduced-motion switch — with live preview and
+  quick looks in Settings → Appearance.
 - **Layout and reply controls.** Settings → Layout & replies sets a Focus, Classic or Studio layout,
   reading width and message spacing across chat, composer and notebook, plus concise/balanced/detailed
   replies, prose/mixed/bullet formatting and optional design-choice explanations.
@@ -111,6 +119,7 @@ All values are read by the API server (`server/config.ts`) and never exposed to 
 | Variable | Default | Purpose |
 | --- | --- | --- |
 | `PORT` | `8787` | API port. Vite proxies `/api` here in development. |
+| `MOVARYN_DATA_DIR` | Electron user-data folder, else `%APPDATA%/Movaryn` or `~/.movaryn` | Where local accounts (`accounts.json`) are stored, outside the install directory. |
 | `HOST` | `127.0.0.1` | Bind address. Use `0.0.0.0` on a container host. |
 | `AI_BASE_URL` | `https://api.openai.com/v1` | OpenAI-compatible base URL, without trailing slash. |
 | `AI_API_KEY` | — | Chat key. Required for chat. |
@@ -426,8 +435,10 @@ model quality.
 
 ## Limitations (stated plainly)
 
-- **No accounts or sync.** Data is local to the browser profile or Electron user-data folder. Export
-  provides a JSON escape hatch.
+- **Accounts are local, not cloud.** Usernames and password hashes live in the Electron user-data
+  folder or the API's data directory, so they survive updates. They do not sync conversations or sign
+  you in on another device, and there is no password recovery. Export provides a JSON escape hatch for
+  workspace data.
 - **The Windows builds are unsigned.** SmartScreen will warn on first launch until you sign them.
 - **Model quality is the provider's.** The system prompt is strong, but a weak model can still produce
   generic or unbuildable moves. Switching models is a setting, not a rebuild.
@@ -449,12 +460,15 @@ model quality.
 
 ## Privacy
 
-- Stored locally: conversations, projects, saved moves, settings, uploaded references, generated images
-  (IndexedDB, plus `localStorage` for the sidebar preference).
-- Sent to your provider: the messages you send, the project brief, recent reference images, and image
-  prompts. Nothing else.
-- Delete a chat or project to remove its records and images; Settings → Data deletes everything.
-- No analytics, no telemetry, no accounts.
+- Stored locally: conversations, projects, saved moves, notebooks, settings, uploaded references and
+  generated images (IndexedDB, plus `localStorage` for the sidebar preference and account session).
+- Stored in the app data folder: local account records (salted scrypt password hashes) and hashed
+  session tokens in `accounts.json`; provider credentials stay in the server's env file.
+- Sent to your provider: the messages you send, the project brief, recent reference images, image
+  prompts, and notebook sources when you ask the notebook. Nothing else.
+- Delete a chat or project to remove its records and images; Settings → Data deletes the workspace.
+  Deleting an account removes only the local sign-in, not your conversations.
+- No analytics, no telemetry and no cloud sync.
 
 ---
 

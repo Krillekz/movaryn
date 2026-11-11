@@ -65,11 +65,11 @@
     <main id="main">
       <section class="log-hero">
         <div class="shell">
-          <p class="eyebrow"><span class="dot"></span> 23 releases</p>
+          <p class="eyebrow"><span class="dot"></span> 24 releases</p>
           <h1>Update log</h1>
           <p>
             What changed in every Movaryn build, newest first. The newest release is
-            <strong>2.0.0</strong> — Your layout, your reply style, and a notebook for your sources.
+            <strong>2.1.0</strong> — Local accounts, and a studio that looks like yours.
           </p>
         </div>
       </section>
@@ -78,6 +78,12 @@
         <aside class="log-index">
           <p>All releases</p>
           <ol>
+        <li>
+          <a href="#v2.1.0">
+            2.1.0
+            <small>Local accounts, and a studio that looks like yours</small>
+          </a>
+        </li>
         <li>
           <a href="#v2.0.0">
             2.0.0
@@ -220,11 +226,36 @@
         </aside>
 
         <section class="log-entries" aria-label="Release notes">
+      <article class="log-entry" id="v2.1.0">
+        <header class="log-entry-header">
+          <h2>2.1.0</h2>
+          <span class="log-title">Local accounts, and a studio that looks like yours</span>
+          <span class="log-latest">Latest</span>
+        </header>
+        <ul>
+          <li><strong>Local accounts.</strong> Create a username and password for this installation, sign in, edit your display name, change your password, sign out, or delete the account. Passwords are stored only as salted scrypt hashes and sessions as SHA-256 token hashes, in <code>accounts.json</code> inside Movaryn's user-data folder — outside the install directory, so the same credentials keep working after updates.</li>
+          <li><strong>A 30-day session that survives restarts.</strong> The app remembers your local session (the token is in local storage), and password changes rotate every existing session. Signing out or deleting the account does not delete conversations, projects or notebooks.</li>
+          <li><strong>Account entry points.</strong> A profile chip at the bottom of the sidebar, a Settings → Account tab, and command-palette actions. Register or sign in without an email address.</li>
+          <li><strong>Design system in Settings → Appearance.</strong> Six accent palettes (Violet, Emerald, Amber, Rose, Sky, Mono), three background atmospheres (Plain, Grid, Glow), Sharp/Soft/Round corners, a sans or serif reading face, and a Reduce motion switch. Quick looks apply a coordinated set in one click, and a live preview shows the result before you close Settings.</li>
+          <li><strong>Design is consistent.</strong> Accent, atmosphere, corners and reading font apply across chat, composer, notebook and dialogs; the choices are stored with the local workspace and survive relaunches.</li>
+          <li><strong>Smaller changes.</strong> The sidebar shows the signed-in identity, account and design tabs appear in the command palette, and the Data &amp; privacy copy now explains what a local account does and does not do.</li>
+        </ul>
+        <p>### Notes</p>
+        <ul>
+          <li>A local account is an identity layer in this release: it does <strong>not</strong> sync work between devices and does <strong>not</strong> partition one local workspace from another yet. Account-scoped workspaces are next.</li>
+          <li>There is no email recovery. If the password is lost, the account can be deleted and recreated, but the old password cannot be recovered.</li>
+          <li>Account files stay on this machine. No analytics, no telemetry and no cloud upload.</li>
+        </ul>
+        <a class="log-release-link" href="https://github.com/Krillekz/movaryn/releases/tag/v2.1.0">
+          Release notes on GitHub <span aria-hidden="true">→</span>
+        </a>
+      </article>
+
       <article class="log-entry" id="v2.0.0">
         <header class="log-entry-header">
           <h2>2.0.0</h2>
           <span class="log-title">Your layout, your reply style, and a notebook for your sources</span>
-          <span class="log-latest">Latest</span>
+          
         </header>
         <ul>
           <li><strong>New Settings → Layout &amp; replies tab.</strong> Choose <strong>Focus</strong> (narrow, compact), <strong>Classic</strong> (standard, comfortable) or <strong>Studio</strong> (wide, spacious), or set reading width and message spacing yourself. The change applies to chat, the composer and the notebook, and is remembered on this device.</li>

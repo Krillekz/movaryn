@@ -4,26 +4,30 @@ A living document. Scope and order can change, and nothing here is a promise of 
 
 ## Now
 
+- **Account-scoped workspaces** — keep each local account's chats and projects separate.
 - **Notebook file import** — add `.txt` and `.md` sources without copying and pasting.
 - **Export a notebook** — download its sources, notes and transcript as one readable document.
-- **Palette search for notebooks** — jump to a notebook or a saved studio note by name.
 
 ## Next
 
 - **Reference library** — reusable outfit and silhouette references shared across projects.
-- **Notebook source attachments** — keep reference images beside a source and send them only when asked.
+- **Optional cloud sync** — sign in across devices while keeping a local-only mode.
+- **Account data export** — move a local account and workspace between machines deliberately.
 - **More games and formats** — templates for battleground games beyond JJS and TSB.
 - **Localisation** — interface and prompt translations that keep constraints intact.
 
 ## Later
 
-- **Optional synced workspace** — accounts, cross-device projects and comments. Local-first stays the
-  default, and nothing moves to a server without an explicit choice.
+- **Optional cloud-synced workspace** — cross-device projects and comments on top of local accounts.
+  Local-first stays the default, and nothing moves to a server without an explicit choice.
 - **Team projects** — shared house rules and read-only review links for a group.
 - **Browser-first reading layout** — a phone-friendly view for reading and commenting.
 
 ## Shipped
 
+- **2.1.0** — durable local accounts with password sign-in, profile and security controls, plus a
+  design system with accent palettes, atmospheres, corners and reading options.
+  [Update log](changelog.html#v2.1.0)
 - **2.0.0** — a Layout & replies settings tab, controllable answer style, and a local notebook with
   grounded Q&A and studio notes. [Update log](changelog.html#v2.0.0)
 - **1.9.0** — brief sources under the latest reply, comparisons of up to five kits, and comparison

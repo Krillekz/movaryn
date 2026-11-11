@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import {
+  Check,
   CheckCircle2,
   Database,
   Heart,
@@ -14,9 +15,17 @@ import {
   RefreshCw,
   SlidersHorizontal,
   Sun,
+  UserRound,
   XCircle,
 } from 'lucide-react';
-import type { ImageQuality, ThemePreference } from '../../shared/types';
+import type {
+  AccentId,
+  AmbienceId,
+  CornerStyle,
+  ImageQuality,
+  ReadingFont,
+  ThemePreference,
+} from '../../shared/types';
 import { ASPECT_RATIOS } from '../../shared/types';
 import { fetchHealth } from '../lib/api';
 import { apiBase, isBrowserBuild, setApiBase } from '../lib/apiBase';
@@ -28,6 +37,7 @@ import { cx } from '../lib/utils';
 import { Modal } from './ui/Modal';
 
 const TABS: { id: SettingsTabId; label: string; icon: typeof Plug }[] = [
+  { id: 'account', label: 'Account', icon: UserRound },
   { id: 'provider', label: 'Provider', icon: Plug },
   { id: 'models', label: 'Models', icon: SlidersHorizontal },
   { id: 'prompts', label: 'Prompts', icon: Lightbulb },
@@ -43,6 +53,38 @@ const LAYOUT_PRESETS = [
   { id: 'classic', label: 'Classic', detail: 'The default reading rhythm', width: 'standard', density: 'comfortable' },
   { id: 'studio', label: 'Studio', detail: 'Wide canvas, room to breathe', width: 'wide', density: 'spacious' },
 ] as const;
+
+const ACCENTS: { value: AccentId; label: string; color: string }[] = [
+  { value: 'violet', label: 'Violet', color: '#9b8afa' },
+  { value: 'emerald', label: 'Emerald', color: '#35c39a' },
+  { value: 'amber', label: 'Amber', color: '#e8b35c' },
+  { value: 'rose', label: 'Rose', color: '#f27c9c' },
+  { value: 'sky', label: 'Sky', color: '#64b5f6' },
+  { value: 'mono', label: 'Mono', color: '#c3c4cf' },
+];
+
+const AMBIENCES: { value: AmbienceId; label: string; detail: string }[] = [
+  { value: 'plain', label: 'Plain', detail: 'Clean, flat surfaces' },
+  { value: 'grid', label: 'Grid', detail: 'Faint studio grid' },
+  { value: 'glow', label: 'Glow', detail: 'Soft accent light' },
+];
+
+const CORNERS: { value: CornerStyle; label: string; radius: string }[] = [
+  { value: 'sharp', label: 'Sharp', radius: '2px' },
+  { value: 'soft', label: 'Soft', radius: '8px' },
+  { value: 'round', label: 'Round', radius: '16px' },
+];
+
+const READING_FONTS: { value: ReadingFont; label: string; detail: string; className: string }[] = [
+  { value: 'sans', label: 'Sans', detail: 'Inter, crisp and neutral', className: 'font-sans' },
+  { value: 'serif', label: 'Serif', detail: 'Warmer long-form reading', className: 'font-serif' },
+];
+
+const LOOKS: { label: string; accent: AccentId; ambience: AmbienceId; corners: CornerStyle }[] = [
+  { label: 'Signature', accent: 'violet', ambience: 'glow', corners: 'soft' },
+  { label: 'Arcade', accent: 'rose', ambience: 'grid', corners: 'sharp' },
+  { label: 'Quiet', accent: 'mono', ambience: 'plain', corners: 'round' },
+];
 
 const ENV_SAMPLE = `AI_BASE_URL=https://api.openai.com/v1
 AI_API_KEY=your-key
@@ -65,6 +107,10 @@ export function SettingsDialog() {
   const requestConfirm = useApp((state) => state.requestConfirm);
   const resetAllData = useApp((state) => state.resetAllData);
   const pushToast = useApp((state) => state.pushToast);
+  const account = useApp((state) => state.account);
+  const accountState = useApp((state) => state.accountState);
+  const hasLocalAccounts = useApp((state) => state.hasLocalAccounts);
+  const openAccount = useApp((state) => state.openAccount);
 
   const tab = useApp((state) => state.ui.settingsTab);
   const setTab = useApp((state) => state.setSettingsTab);
@@ -99,7 +145,7 @@ export function SettingsDialog() {
       open={open}
       onClose={close}
       title="Settings"
-      description="Provider connection, models, appearance and local data."
+      description="Account, provider connection, models, design and local data."
       width="max-w-3xl"
       bodyClassName="px-0 py-0"
     >
@@ -130,6 +176,82 @@ export function SettingsDialog() {
         </nav>
 
         <div className="scroll-thin min-w-0 flex-1 p-5">
+          {tab === 'account' ? (
+            <div className="flex flex-col gap-4">
+              {account ? (
+                <section className="flex items-center gap-3 rounded-xl border border-line bg-panel px-4 py-4">
+                  <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-accent-soft text-[18px] font-semibold text-accent">
+                    {(account.displayName || account.username).charAt(0).toUpperCase()}
+                  </span>
+                  <div className="min-w-0">
+                    <h3 className="truncate text-[15px] font-semibold tracking-tight text-ink">
+                      {account.displayName}
+                    </h3>
+                    <p className="mt-0.5 truncate text-[11.5px] text-ink-muted">
+                      @{account.username}
+                    </p>
+                    <p className="mt-0.5 text-[10.5px] text-ink-faint">
+                      Signed in on this installation
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    className="btn btn-secondary ml-auto h-8 shrink-0 text-[12px]"
+                    onClick={openAccount}
+                  >
+                    Manage
+                  </button>
+                </section>
+              ) : (
+                <section className="rounded-xl border border-line bg-panel px-4 py-5 text-center">
+                  <span className="mx-auto flex h-11 w-11 items-center justify-center rounded-full bg-accent-soft text-accent">
+                    <UserRound size={20} />
+                  </span>
+                  <h3 className="mt-2.5 text-[14px] font-semibold text-ink">
+                    {accountState === 'offline' ? 'Account service offline' : 'No local account yet'}
+                  </h3>
+                  <p className="mx-auto mt-1 max-w-sm text-[11.5px] leading-relaxed text-ink-muted">
+                    {accountState === 'offline'
+                      ? 'Start the Movaryn API to create or sign in to an account.'
+                      : hasLocalAccounts
+                        ? 'Sign in with an account already stored on this installation, or create another.'
+                        : 'Create a username and password for this installation. It keeps working across updates.'}
+                  </p>
+                  <button
+                    type="button"
+                    className="btn btn-primary mt-3 h-8 text-[12px]"
+                    onClick={openAccount}
+                  >
+                    {accountState === 'offline'
+                      ? 'Open account'
+                      : hasLocalAccounts
+                        ? 'Sign in or create account'
+                        : 'Create the first account'}
+                  </button>
+                </section>
+              )}
+
+              <section className="rounded-xl border border-line bg-panel px-3.5 py-3">
+                <h3 className="text-[12px] font-semibold text-ink">Local by design</h3>
+                <p className="mt-1.5 text-[11.5px] leading-relaxed text-ink-muted">
+                  Accounts live in Movaryn&apos;s data folder, outside the install directory, so the same
+                  username and password survive app updates. Passwords are stored only as salted scrypt
+                  hashes. There is no cloud sync, no email sign-in, and no password recovery — keep the
+                  password somewhere safe.
+                </p>
+              </section>
+
+              <section className="rounded-xl border border-line bg-panel px-3.5 py-3">
+                <h3 className="text-[12px] font-semibold text-ink">What an account does not do</h3>
+                <p className="mt-1.5 text-[11.5px] leading-relaxed text-ink-muted">
+                  It does not upload conversations, projects, notebooks or provider keys, and it does not
+                  share your workspace with another device. Accounts do not partition the local workspace
+                  yet. This release is an identity layer over the local-first app, not a cloud account.
+                </p>
+              </section>
+            </div>
+          ) : null}
+
           {tab === 'provider' ? (
             <div className="flex flex-col gap-5">
               <section>
@@ -602,7 +724,7 @@ export function SettingsDialog() {
           ) : null}
 
           {tab === 'appearance' ? (
-            <div className="flex flex-col gap-4">
+            <div className="flex flex-col gap-6">
               <section>
                 <h3 className="text-[12.5px] font-semibold text-ink">Theme</h3>
                 <div className="mt-2 grid gap-2 sm:grid-cols-3">
@@ -625,6 +747,7 @@ export function SettingsDialog() {
                             ? 'border-accent bg-accent-soft text-ink'
                             : 'border-line bg-panel text-ink-muted hover:border-line-strong hover:text-ink',
                         )}
+                        aria-pressed={settings.theme === option.value}
                       >
                         <Icon size={15} />
                         {option.label}
@@ -633,9 +756,183 @@ export function SettingsDialog() {
                   })}
                 </div>
               </section>
-              <p className="text-[11.5px] leading-relaxed text-ink-muted">
-                Movaryn defaults to the dark interface. The layout, contrast and focus states are the same in
-                both themes.
+
+              <section>
+                <div className="flex items-center justify-between gap-2">
+                  <h3 className="text-[12.5px] font-semibold text-ink">Quick looks</h3>
+                  <span className="text-[10px] text-ink-faint">Accent + atmosphere + corners</span>
+                </div>
+                <div className="mt-2 grid grid-cols-3 gap-2">
+                  {LOOKS.map((look) => (
+                    <button
+                      key={look.label}
+                      type="button"
+                      className="rounded-lg border border-line bg-panel px-2 py-2 text-[11.5px] text-ink-muted transition-colors hover:border-line-strong hover:text-ink"
+                      onClick={() =>
+                        updateSettings({
+                          accent: look.accent,
+                          ambience: look.ambience,
+                          corners: look.corners,
+                        })
+                      }
+                    >
+                      {look.label}
+                    </button>
+                  ))}
+                </div>
+              </section>
+
+              <section>
+                <h3 className="text-[12.5px] font-semibold text-ink">Accent</h3>
+                <p className="mt-1 text-[11px] text-ink-faint">
+                  Buttons, links, focus rings and the active selection follow this colour.
+                </p>
+                <div className="mt-2 flex flex-wrap gap-2">
+                  {ACCENTS.map((option) => (
+                    <button
+                      key={option.value}
+                      type="button"
+                      onClick={() => updateSettings({ accent: option.value })}
+                      className={cx(
+                        'flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-[11.5px] transition-colors',
+                        settings.accent === option.value
+                          ? 'border-accent bg-accent-soft text-ink'
+                          : 'border-line bg-panel text-ink-muted hover:border-line-strong',
+                      )}
+                      aria-pressed={settings.accent === option.value}
+                    >
+                      <span
+                        className="flex h-4 w-4 items-center justify-center rounded-full"
+                        style={{ backgroundColor: option.color }}
+                      >
+                        {settings.accent === option.value ? (
+                          <Check size={10} className="text-[#0b0b10]" />
+                        ) : null}
+                      </span>
+                      {option.label}
+                    </button>
+                  ))}
+                </div>
+              </section>
+
+              <section>
+                <h3 className="text-[12.5px] font-semibold text-ink">Atmosphere</h3>
+                <div className="mt-2 grid gap-2 sm:grid-cols-3">
+                  {AMBIENCES.map((option) => (
+                    <button
+                      key={option.value}
+                      type="button"
+                      onClick={() => updateSettings({ ambience: option.value })}
+                      className={cx(
+                        'rounded-xl border px-3 py-2.5 text-left transition-colors',
+                        settings.ambience === option.value
+                          ? 'border-accent bg-accent-soft'
+                          : 'border-line bg-panel hover:border-line-strong',
+                      )}
+                      aria-pressed={settings.ambience === option.value}
+                    >
+                      <span
+                        className={cx(
+                          'mb-2 block h-7 rounded-md border border-line bg-canvas',
+                          option.value === 'grid' && 'site-preview-grid',
+                          option.value === 'glow' && 'site-preview-glow',
+                        )}
+                      />
+                      <span className="block text-[11.5px] font-medium text-ink">{option.label}</span>
+                      <span className="mt-0.5 block text-[10px] text-ink-faint">{option.detail}</span>
+                    </button>
+                  ))}
+                </div>
+              </section>
+
+              <section className="grid gap-4 sm:grid-cols-2">
+                <div>
+                  <h3 className="text-[12.5px] font-semibold text-ink">Corners</h3>
+                  <div className="mt-2 grid grid-cols-3 gap-1.5">
+                    {CORNERS.map((option) => (
+                      <button
+                        key={option.value}
+                        type="button"
+                        onClick={() => updateSettings({ corners: option.value })}
+                        className={cx(
+                          'border px-1 py-2 text-[10.5px] transition-colors',
+                          settings.corners === option.value
+                            ? 'border-accent bg-accent-soft text-ink'
+                            : 'border-line bg-panel text-ink-muted hover:border-line-strong',
+                        )}
+                        style={{ borderRadius: option.radius }}
+                        aria-pressed={settings.corners === option.value}
+                      >
+                        {option.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                <div>
+                  <h3 className="text-[12.5px] font-semibold text-ink">Reading font</h3>
+                  <div className="mt-2 grid grid-cols-2 gap-1.5">
+                    {READING_FONTS.map((option) => (
+                      <button
+                        key={option.value}
+                        type="button"
+                        onClick={() => updateSettings({ readingFont: option.value })}
+                        className={cx(
+                          'rounded-lg border px-2 py-1.5 text-left transition-colors',
+                          settings.readingFont === option.value
+                            ? 'border-accent bg-accent-soft'
+                            : 'border-line bg-panel hover:border-line-strong',
+                        )}
+                        aria-pressed={settings.readingFont === option.value}
+                      >
+                        <span className={cx('block text-[15px] text-ink', option.className)}>Aa</span>
+                        <span className="block text-[10px] text-ink-faint">{option.label}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </section>
+
+              <section className="flex items-start justify-between gap-4 rounded-xl border border-line bg-panel px-3.5 py-3">
+                <div>
+                  <p className="text-[12px] font-medium text-ink">Reduce motion</p>
+                  <p className="mt-1 text-[11px] leading-relaxed text-ink-muted">
+                    Turn off fade and caret animations across the interface.
+                  </p>
+                </div>
+                <input
+                  type="checkbox"
+                  checked={settings.reduceMotion}
+                  onChange={(event) => updateSettings({ reduceMotion: event.target.checked })}
+                  className="mt-0.5 h-4 w-4 shrink-0 accent-[var(--accent)]"
+                  aria-label="Reduce motion"
+                />
+              </section>
+
+              <section>
+                <h3 className="text-[12.5px] font-semibold text-ink">Preview</h3>
+                <div className="mt-2 rounded-xl border border-line bg-canvas p-3.5">
+                  <div className="flex items-start gap-2.5">
+                    <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-accent-soft text-[11px] font-semibold text-accent">
+                      M
+                    </span>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-[11px] font-medium text-ink">Movaryn</p>
+                      <p className="prose-movaryn mt-1 text-[12.5px]">
+                        The kit reads cleanly: one way in, one extension, one finish. This preview follows
+                        your accent, corners and reading font.
+                      </p>
+                    </div>
+                  </div>
+                  <div className="mt-3 flex items-center gap-2">
+                    <span className="btn btn-primary h-7 px-2.5 text-[11px]">Primary</span>
+                    <span className="btn btn-secondary h-7 px-2.5 text-[11px]">Secondary</span>
+                    <span className="chip">Chip</span>
+                  </div>
+                </div>
+              </section>
+
+              <p className="text-[11px] leading-relaxed text-ink-faint">
+                Design settings are stored with your local workspace and do not leave this device.
               </p>
             </div>
           ) : null}
@@ -649,7 +946,10 @@ export function SettingsDialog() {
                     Conversations, move text, projects, notebook sources and generated images live in
                     IndexedDB.
                   </li>
-                  <li>Nothing is stored on a Movaryn account — there are no accounts.</li>
+                  <li>
+                    Accounts are local sign-ins. They do not sync conversations, projects or notebooks
+                    between devices.
+                  </li>
                   <li>Deleting a chat or project removes its record and its images.</li>
                 </ul>
               </section>

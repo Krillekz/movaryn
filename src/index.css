@@ -46,6 +46,76 @@
   color-scheme: dark;
 }
 
+[data-accent="emerald"] {
+  --accent: #35c39a;
+  --accent-strong: #6ee7c1;
+  --accent-soft: rgba(53, 195, 154, 0.14);
+  --accent-contrast: #04140f;
+}
+
+[data-theme="light"][data-accent="emerald"] {
+  --accent: #138a68;
+  --accent-strong: #0f6f55;
+  --accent-soft: rgba(19, 138, 104, 0.1);
+  --accent-contrast: #ffffff;
+}
+
+[data-accent="amber"] {
+  --accent: #e8b35c;
+  --accent-strong: #f4ce8a;
+  --accent-soft: rgba(232, 179, 92, 0.14);
+  --accent-contrast: #1a1204;
+}
+
+[data-theme="light"][data-accent="amber"] {
+  --accent: #9a5b0a;
+  --accent-strong: #7c4805;
+  --accent-soft: rgba(154, 91, 10, 0.1);
+  --accent-contrast: #ffffff;
+}
+
+[data-accent="rose"] {
+  --accent: #f27c9c;
+  --accent-strong: #f7a5bb;
+  --accent-soft: rgba(242, 124, 156, 0.14);
+  --accent-contrast: #1c0910;
+}
+
+[data-theme="light"][data-accent="rose"] {
+  --accent: #b8325a;
+  --accent-strong: #982547;
+  --accent-soft: rgba(184, 50, 90, 0.1);
+  --accent-contrast: #ffffff;
+}
+
+[data-accent="sky"] {
+  --accent: #64b5f6;
+  --accent-strong: #92cbf9;
+  --accent-soft: rgba(100, 181, 246, 0.14);
+  --accent-contrast: #04121f;
+}
+
+[data-theme="light"][data-accent="sky"] {
+  --accent: #1d6fbf;
+  --accent-strong: #185b9d;
+  --accent-soft: rgba(29, 111, 191, 0.1);
+  --accent-contrast: #ffffff;
+}
+
+[data-accent="mono"] {
+  --accent: #c3c4cf;
+  --accent-strong: #e2e3ea;
+  --accent-soft: rgba(195, 196, 207, 0.12);
+  --accent-contrast: #101014;
+}
+
+[data-theme="light"][data-accent="mono"] {
+  --accent: #474753;
+  --accent-strong: #34343e;
+  --accent-soft: rgba(71, 71, 83, 0.1);
+  --accent-contrast: #ffffff;
+}
+
 [data-theme="light"] {
   --canvas: #f4f4f7;
   --panel: #fbfbfd;
@@ -118,7 +188,7 @@
     justify-content: center;
     gap: 0.45rem;
     border: 1px solid transparent;
-    border-radius: 0.6rem;
+    border-radius: var(--radius-ui);
     padding: 0.45rem 0.8rem;
     font-size: 0.8125rem;
     font-weight: 500;
@@ -181,7 +251,7 @@
     justify-content: center;
     width: 2rem;
     height: 2rem;
-    border-radius: 0.5rem;
+    border-radius: calc(var(--radius-ui) * 0.85);
     color: var(--ink-muted);
     transition:
       background-color 140ms ease,
@@ -201,7 +271,7 @@
   .field {
     width: 100%;
     border: 1px solid var(--line);
-    border-radius: 0.6rem;
+    border-radius: var(--radius-ui);
     background: var(--panel);
     padding: 0.5rem 0.7rem;
     font-size: 0.875rem;
@@ -374,6 +444,81 @@
 :root {
   --content-max: 820px;
   --message-gap: 1rem;
+  --radius-ui: 0.6rem;
+  --reading-font: var(--font-sans);
+}
+
+[data-corners="sharp"] {
+  --radius-ui: 0.2rem;
+}
+
+[data-corners="round"] {
+  --radius-ui: 1rem;
+}
+
+[data-reading-font="serif"] {
+  --reading-font: Georgia, "Iowan Old Style", "Palatino Linotype", "Book Antiqua", serif;
+}
+
+[data-reading-font="serif"] .prose-movaryn {
+  font-family: var(--reading-font);
+}
+
+.app-ambience {
+  position: relative;
+  isolation: isolate;
+}
+
+.app-ambience::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background: none;
+}
+
+[data-ambience="grid"] .app-ambience::before {
+  background-image:
+    linear-gradient(var(--line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--line) 1px, transparent 1px);
+  background-size: 28px 28px;
+  opacity: 0.3;
+  mask-image: linear-gradient(to bottom, black, transparent 82%);
+}
+
+[data-ambience="glow"] .app-ambience::before {
+  background:
+    radial-gradient(circle at 76% 0%, var(--accent-soft), transparent 46%),
+    radial-gradient(circle at 4% 96%, var(--accent-soft), transparent 38%);
+  opacity: 0.9;
+}
+
+.chat-bubble {
+  border-radius: var(--radius-ui);
+  border-bottom-right-radius: calc(var(--radius-ui) * 0.45);
+}
+
+.site-preview-grid {
+  background-image:
+    linear-gradient(var(--line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--line) 1px, transparent 1px);
+  background-size: 10px 10px;
+}
+
+.site-preview-glow {
+  background:
+    radial-gradient(circle at 70% 20%, var(--accent-soft), transparent 60%),
+    var(--canvas);
+}
+
+[data-reduce-motion="true"] *,
+[data-reduce-motion="true"] *::before,
+[data-reduce-motion="true"] *::after {
+  animation-duration: 0.001ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.001ms !important;
+  scroll-behavior: auto !important;
 }
 
 [data-chat-width="narrow"] {

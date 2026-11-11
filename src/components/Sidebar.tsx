@@ -9,6 +9,7 @@ import {
   Search,
   Settings,
   Trash2,
+  UserRound,
   X,
 } from 'lucide-react';
 import type { Conversation } from '../../shared/types';
@@ -27,6 +28,8 @@ export function Sidebar() {
   const projects = useApp((state) => state.projects);
   const projectOrder = useApp((state) => state.projectOrder);
   const provider = useApp((state) => state.provider);
+  const account = useApp((state) => state.account);
+  const accountState = useApp((state) => state.accountState);
 
   const setSearch = useApp((state) => state.setSearch);
   const setSidebarCollapsed = useApp((state) => state.setSidebarCollapsed);
@@ -37,6 +40,7 @@ export function Sidebar() {
   const openProject = useApp((state) => state.openProject);
   const createProject = useApp((state) => state.createProject);
   const openNotebook = useApp((state) => state.openNotebook);
+  const openAccount = useApp((state) => state.openAccount);
 
   const projectList = useMemo(
     () =>
@@ -275,7 +279,39 @@ export function Sidebar() {
           </>
         )}
 
-        <div className={cx('shrink-0 border-t border-line p-2', collapsed && 'flex justify-center')}>
+        <div
+          className={cx(
+            'shrink-0 border-t border-line p-2',
+            collapsed && 'flex flex-col items-center',
+          )}
+        >
+          <button
+            type="button"
+            className={cx(
+              'btn btn-ghost w-full gap-2 px-2 text-[12.5px]',
+              collapsed ? 'h-9 w-9 justify-center p-0' : 'justify-start',
+            )}
+            onClick={openAccount}
+            title={account ? `@${account.username}` : 'Sign in or create a local account'}
+          >
+            {account ? (
+              <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-accent-soft text-[10px] font-semibold text-accent">
+                {(account.displayName || account.username).charAt(0).toUpperCase()}
+              </span>
+            ) : (
+              <UserRound size={15} />
+            )}
+            {collapsed ? null : account ? (
+              <span className="min-w-0 flex-1 text-left">
+                <span className="block truncate text-ink">{account.displayName}</span>
+                <span className="block truncate text-[10px] text-ink-faint">@{account.username}</span>
+              </span>
+            ) : (
+              <span className="text-left">
+                {accountState === 'loading' ? 'Checking account…' : 'Sign in'}
+              </span>
+            )}
+          </button>
           <button
             type="button"
             className={cx(
@@ -301,7 +337,7 @@ export function Sidebar() {
           </button>
           {collapsed ? null : (
             <p className="px-2 pb-1 pt-1.5 text-[10px] leading-relaxed text-ink-faint">
-              Keys stay on your server. Chats stay on this device.
+              Accounts are local. Keys stay on your server.
             </p>
           )}
         </div>

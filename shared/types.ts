@@ -159,6 +159,10 @@ export type ResponseStyle = 'concise' | 'balanced' | 'detailed';
 export type ResponseFormat = 'prose' | 'mixed' | 'bullets';
 
 export type ThemePreference = 'dark' | 'light' | 'system';
+export type AccentId = 'violet' | 'emerald' | 'amber' | 'rose' | 'sky' | 'mono';
+export type AmbienceId = 'plain' | 'grid' | 'glow';
+export type CornerStyle = 'sharp' | 'soft' | 'round';
+export type ReadingFont = 'sans' | 'serif';
 export type ImageQuality = '' | 'low' | 'medium' | 'high' | 'auto';
 
 export interface Settings {
@@ -185,6 +189,31 @@ export interface Settings {
   responseStyle: ResponseStyle;
   responseFormat: ResponseFormat;
   explainChoices: boolean;
+  /** Design system: accent palette, background atmosphere and interface shape. */
+  accent: AccentId;
+  ambience: AmbienceId;
+  corners: CornerStyle;
+  readingFont: ReadingFont;
+  reduceMotion: boolean;
+}
+
+export interface AccountUser {
+  id: string;
+  username: string;
+  displayName: string;
+  createdAt: number;
+  updatedAt: number;
+}
+
+export interface AccountSession {
+  token: string;
+  user: AccountUser;
+}
+
+export interface AccountStatus {
+  enabled: true;
+  hasAccounts: boolean;
+  user: AccountUser | null;
 }
 
 export interface ProjectMovePayload {
