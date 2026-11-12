@@ -1229,6 +1229,11 @@ export function SettingsDialog() {
                         <p className="mt-0.5 text-ink-muted">
                           You are running {APP_VERSION}. Download the latest installer from GitHub.
                         </p>
+                        {updateResult.release.notes ? (
+                          <p className="mt-1.5 border-t border-accent/20 pt-1.5 text-[10.5px] leading-relaxed text-ink-muted">
+                            {updateResult.release.notes}
+                          </p>
+                        ) : null}
                         <button
                           type="button"
                           className="mt-1.5 inline-flex items-center gap-1 font-medium text-accent underline decoration-accent/40 underline-offset-2 hover:decoration-accent"

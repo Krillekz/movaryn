@@ -65,11 +65,11 @@
     <main id="main">
       <section class="log-hero">
         <div class="shell">
-          <p class="eyebrow"><span class="dot"></span> 30 releases</p>
+          <p class="eyebrow"><span class="dot"></span> 31 releases</p>
           <h1>Update log</h1>
           <p>
             What changed in every Movaryn build, newest first. The newest release is
-            <strong>2.2.5</strong> — Check for updates from About.
+            <strong>2.2.6</strong> — Read the release notes before updating.
           </p>
         </div>
       </section>
@@ -78,6 +78,12 @@
         <aside class="log-index">
           <p>All releases</p>
           <ol>
+        <li>
+          <a href="#v2.2.6">
+            2.2.6
+            <small>Read the release notes before updating</small>
+          </a>
+        </li>
         <li>
           <a href="#v2.2.5">
             2.2.5
@@ -262,11 +268,32 @@
         </aside>
 
         <section class="log-entries" aria-label="Release notes">
+      <article class="log-entry" id="v2.2.6">
+        <header class="log-entry-header">
+          <h2>2.2.6</h2>
+          <span class="log-title">Read the release notes before updating</span>
+          <span class="log-latest">Latest</span>
+        </header>
+        <ul>
+          <li><strong>Release notes in the update card.</strong> When a newer release is available, Settings → About now shows a short plain-text excerpt of what changed instead of only a version number.</li>
+          <li><strong>Markdown stays readable.</strong> Headings, bullets and link syntax are stripped before the excerpt is trimmed to a few sentences, so release-note formatting never leaks into the dialog.</li>
+          <li><strong>Fallback for releases without a body.</strong> If the GitHub release has no notes, the card reads the title and summary for that version from the published Movaryn update log.</li>
+          <li><strong>No dead end.</strong> If neither source has notes, the card still shows the version, the running build and <strong>Open release</strong>.</li>
+        </ul>
+        <p>### Notes</p>
+        <ul>
+          <li>The excerpt is capped at 320 characters. <strong>Open release</strong> shows the complete notes on GitHub.</li>
+          <li>The notes lookup adds one optional request to the public Movaryn site only when GitHub has no release body. No account or workspace data is involved.</li>
+        </ul>
+        <a class="log-release-link" href="https://github.com/Krillekz/movaryn/releases/tag/v2.2.6">
+          Release notes on GitHub <span aria-hidden="true">→</span>
+        </a>
+      </article>
+
       <article class="log-entry" id="v2.2.5">
         <header class="log-entry-header">
           <h2>2.2.5</h2>
           <span class="log-title">Check for updates from About</span>
-          <span class="log-latest">Latest</span>
         </header>
         <ul>
           <li><strong>A manual update check.</strong> Settings → About now has a <strong>Check for updates</strong> action. It reads the latest published GitHub release and compares its version with the running build.</li>

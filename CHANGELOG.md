@@ -1,5 +1,22 @@
 # Update log
 
+## 2.2.6 — Read the release notes before updating
+
+- **Release notes in the update card.** When a newer release is available, Settings → About now shows
+  a short plain-text excerpt of what changed instead of only a version number.
+- **Markdown stays readable.** Headings, bullets and link syntax are stripped before the excerpt is
+  trimmed to a few sentences, so release-note formatting never leaks into the dialog.
+- **Fallback for releases without a body.** If the GitHub release has no notes, the card reads the
+  title and summary for that version from the published Movaryn update log.
+- **No dead end.** If neither source has notes, the card still shows the version, the running build and
+  **Open release**.
+
+### Notes
+
+- The excerpt is capped at 320 characters. **Open release** shows the complete notes on GitHub.
+- The notes lookup adds one optional request to the public Movaryn site only when GitHub has no release
+  body. No account or workspace data is involved.
+
 ## 2.2.5 — Check for updates from About
 
 - **A manual update check.** Settings → About now has a **Check for updates** action. It reads the

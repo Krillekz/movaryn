@@ -1,5 +1,10 @@
 [
   {
+    "version": "2.2.6",
+    "title": "Read the release notes before updating",
+    "summary": "Release notes in the update card. When a newer release is available, Settings → About now shows a short plain-text excerpt of what changed instead of…"
+  },
+  {
     "version": "2.2.5",
     "title": "Check for updates from About",
     "summary": "A manual update check. Settings → About now has a Check for updates action. It reads the latest published GitHub release and compares its version wit…"
