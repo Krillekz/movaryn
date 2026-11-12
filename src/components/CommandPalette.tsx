@@ -182,8 +182,8 @@ export function CommandPalette() {
       },
       {
         id: 'export',
-        label: 'Export all data',
-        hint: 'Download a JSON backup',
+        label: 'Export this workspace',
+        hint: 'Download a read-only JSON copy',
         icon: Download,
         run: () => exportAllData(),
       },

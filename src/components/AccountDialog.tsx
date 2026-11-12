@@ -1,5 +1,14 @@
 import { useEffect, useMemo, useState } from 'react';
-import { KeyRound, Loader2, LogOut, ShieldCheck, Trash2, UserRound } from 'lucide-react';
+import {
+  Download,
+  KeyRound,
+  Loader2,
+  LogOut,
+  ShieldCheck,
+  Trash2,
+  Upload,
+  UserRound,
+} from 'lucide-react';
 import {
   changeLocalPassword,
   deleteLocalAccount,
@@ -10,8 +19,15 @@ import {
   updateLocalAccount,
 } from '../lib/account';
 import { useApp } from '../store/useApp';
+import {
+  copyGuestWorkspaceToAccount,
+  deleteWorkspaceDb,
+  workspaceSummary,
+  type WorkspaceSummary,
+} from '../lib/db';
 import { cx } from '../lib/utils';
 import { Modal } from './ui/Modal';
+import { AccountBackupDialog } from './AccountBackupDialog';
 
 export function AccountDialog() {
   const open = useApp((state) => state.ui.accountOpen);
@@ -22,6 +38,8 @@ export function AccountDialog() {
   const setAccount = useApp((state) => state.setAccount);
   const setAccountState = useApp((state) => state.setAccountState);
   const setHasLocalAccounts = useApp((state) => state.setHasLocalAccounts);
+  const switchWorkspace = useApp((state) => state.switchWorkspace);
+  const streaming = useApp((state) => state.streaming);
   const pushToast = useApp((state) => state.pushToast);
   const requestConfirm = useApp((state) => state.requestConfirm);
 
@@ -43,6 +61,12 @@ export function AccountDialog() {
   const [deletePassword, setDeletePassword] = useState('');
   const [deleteBusy, setDeleteBusy] = useState(false);
   const [deleteError, setDeleteError] = useState<string | null>(null);
+  const [workspaceInfo, setWorkspaceInfo] = useState<{
+    guest: WorkspaceSummary;
+    current: WorkspaceSummary;
+  } | null>(null);
+  const [copyingWorkspace, setCopyingWorkspace] = useState(false);
+  const [backupMode, setBackupMode] = useState<'export' | 'import' | null>(null);
 
   useEffect(() => {
     if (!open) return;
@@ -58,11 +82,30 @@ export function AccountDialog() {
     setPasswordMessage(null);
     setDeletePassword('');
     setDeleteError(null);
-  }, [open, hasLocalAccounts]);
+    setBackupMode(null);
+  }, [open]);
 
   useEffect(() => {
     setProfileName(account?.displayName ?? '');
   }, [account?.displayName]);
+
+  useEffect(() => {
+    if (!open || !account) {
+      setWorkspaceInfo(null);
+      return;
+    }
+    let active = true;
+    void Promise.all([workspaceSummary(null), workspaceSummary(account.id)])
+      .then(([guest, current]) => {
+        if (active) setWorkspaceInfo({ guest, current });
+      })
+      .catch(() => {
+        if (active) setWorkspaceInfo(null);
+      });
+    return () => {
+      active = false;
+    };
+  }, [open, account?.id]);
 
   const initials = useMemo(
     () => (account?.displayName || account?.username || '?').trim().charAt(0).toUpperCase(),
@@ -73,6 +116,10 @@ export function AccountDialog() {
 
   const submitAuth = async () => {
     if (busy) return;
+    if (streaming) {
+      setError('Stop the current reply before switching accounts.');
+      return;
+    }
     setError(null);
     if (!username.trim() || !password) {
       setError('Enter a username and password.');
@@ -95,6 +142,7 @@ export function AccountDialog() {
       setAccount(session.user);
       setAccountState('ready');
       if (mode === 'register') setHasLocalAccounts(true);
+      await switchWorkspace(session.user.id);
       setPassword('');
       setConfirm('');
       pushToast(
@@ -150,30 +198,70 @@ export function AccountDialog() {
   };
 
   const signOut = async () => {
+    if (streaming) {
+      pushToast('Stop the current reply before signing out.', 'danger');
+      return;
+    }
     await logoutLocalAccount().catch(() => undefined);
     setAccount(null);
     setMode('login');
-    pushToast('Signed out on this device.', 'success');
+    await switchWorkspace(null);
+    pushToast('Signed out. The guest workspace is open.', 'success');
+  };
+
+  const copyWorkspace = async () => {
+    if (!account || copyingWorkspace) return;
+    setCopyingWorkspace(true);
+    try {
+      const result = await copyGuestWorkspaceToAccount(account.id);
+      if (!result.copied) {
+        pushToast(
+          result.reason === 'not-empty'
+            ? 'This account already has a workspace, so nothing was copied.'
+            : 'The guest workspace could not be read.',
+          'danger',
+        );
+        return;
+      }
+      await switchWorkspace(account.id, true);
+      const [guest, current] = await Promise.all([
+        workspaceSummary(null),
+        workspaceSummary(account.id),
+      ]);
+      setWorkspaceInfo({ guest, current });
+      pushToast('Guest workspace copied. The guest copy is still available.', 'success');
+    } catch {
+      pushToast('The guest workspace could not be copied.', 'danger');
+    } finally {
+      setCopyingWorkspace(false);
+    }
   };
 
   const removeAccount = () => {
     if (!account || deleteBusy || !deletePassword) return;
+    if (streaming) {
+      pushToast('Stop the current reply before deleting the account.', 'danger');
+      return;
+    }
+    const removedId = account.id;
     setDeleteError(null);
     requestConfirm({
       title: 'Delete this local account?',
-      body: `The account @${account.username} and its saved sessions will be removed. Your conversations, projects and notebooks stay on this device.`,
-      confirmLabel: 'Delete account',
+      body: `The account @${account.username}, its saved sessions and its workspace (chats, projects, notebooks, versions and images) will be removed. The guest workspace and other accounts are untouched. Back up first if you want to keep a copy.`,
+      confirmLabel: 'Delete account and workspace',
       danger: true,
       onConfirm: () => {
         setDeleteBusy(true);
         void deleteLocalAccount(deletePassword)
-          .then(() => {
+          .then(async () => {
             setAccount(null);
             setDeletePassword('');
+            await switchWorkspace(null);
+            await deleteWorkspaceDb(removedId);
             void loadAccountStatus()
               .then((status) => setHasLocalAccounts(status.hasAccounts))
               .catch(() => undefined);
-            pushToast('Account deleted. Your local workspace is untouched.', 'success');
+            pushToast('Account and its workspace deleted.', 'success');
             close();
           })
           .catch((caught) => {
@@ -185,8 +273,9 @@ export function AccountDialog() {
   };
 
   return (
+    <>
     <Modal
-      open={open}
+      open={open && !backupMode}
       onClose={close}
       title={signedIn ? 'Your account' : 'Local account'}
       description={
@@ -319,11 +408,20 @@ export function AccountDialog() {
             <h3 className="text-[12px] font-semibold text-ink">What this account is</h3>
             <p className="mt-1.5 text-[11.5px] leading-relaxed text-ink-muted">
               A local identity stored in Movaryn&apos;s data folder, outside the install directory. Your
-              username and password keep working after app updates. There is no email recovery and no
-              cloud sync. Accounts are an identity layer for now: they do not yet separate one local
-              workspace from another, and they do not move your work between devices.
+              username and password keep working after app updates. Each account opens its own local
+              workspace, and guest work stays separate until you copy it. There is no email recovery and
+              no cloud sync; use an encrypted account backup to move work between devices.
             </p>
           </section>
+
+          <button
+            type="button"
+            className="btn btn-secondary h-9"
+            onClick={() => setBackupMode('import')}
+          >
+            <Upload size={14} />
+            Restore an account backup
+          </button>
         </div>
       ) : (
         <div className="flex flex-col gap-5">
@@ -342,6 +440,31 @@ export function AccountDialog() {
             </div>
             <ShieldCheck size={18} className="ml-auto shrink-0 text-ok" />
           </section>
+
+          {workspaceInfo && workspaceInfo.guest.total > 0 && workspaceInfo.current.total === 0 ? (
+            <section className="rounded-xl border border-accent/35 bg-accent-soft px-3.5 py-3">
+              <h3 className="text-[12.5px] font-semibold text-ink">Bring your existing workspace</h3>
+              <p className="mt-1 text-[11.5px] leading-relaxed text-ink-muted">
+                This device has{' '}
+                <strong className="text-ink">{workspaceInfo.guest.conversations}</strong> chat
+                {workspaceInfo.guest.conversations === 1 ? '' : 's'},{' '}
+                <strong className="text-ink">{workspaceInfo.guest.projects}</strong> project
+                {workspaceInfo.guest.projects === 1 ? '' : 's'} and{' '}
+                <strong className="text-ink">{workspaceInfo.guest.notebooks}</strong> notebook
+                {workspaceInfo.guest.notebooks === 1 ? '' : 's'} in the guest workspace. Copy them into
+                @{account?.username}? The guest copy stays untouched.
+              </p>
+              <button
+                type="button"
+                className="btn btn-primary mt-2.5 h-8 text-[12px]"
+                onClick={() => void copyWorkspace()}
+                disabled={copyingWorkspace}
+              >
+                {copyingWorkspace ? <Loader2 size={13} className="animate-spin" /> : null}
+                Copy guest workspace
+              </button>
+            </section>
+          ) : null}
 
           <section>
             <h3 className="text-[12.5px] font-semibold text-ink">Profile</h3>
@@ -366,6 +489,34 @@ export function AccountDialog() {
             <p className="mt-1 text-[10.5px] text-ink-faint">
               Your username is fixed; the display name can change.
             </p>
+          </section>
+
+          <section className="border-t border-line pt-4">
+            <div className="flex items-center gap-2">
+              <Download size={14} className="text-ink-faint" />
+              <h3 className="text-[12.5px] font-semibold text-ink">Backup & restore</h3>
+            </div>
+            <p className="mt-1 text-[10.5px] leading-relaxed text-ink-faint">
+              Encrypt this account and its workspace into one file for another installation.
+            </p>
+            <div className="mt-2 flex flex-wrap gap-2">
+              <button
+                type="button"
+                className="btn btn-secondary h-8 text-[12px]"
+                onClick={() => setBackupMode('export')}
+              >
+                <Download size={13} />
+                Back up account
+              </button>
+              <button
+                type="button"
+                className="btn btn-ghost h-8 text-[12px]"
+                onClick={() => setBackupMode('import')}
+              >
+                <Upload size={13} />
+                Restore a backup
+              </button>
+            </div>
           </section>
 
           <section className="border-t border-line pt-4">
@@ -443,7 +594,8 @@ export function AccountDialog() {
               <h3 className="text-[12.5px] font-semibold text-ink">Delete this account</h3>
             </div>
             <p className="mt-1 text-[10.5px] leading-relaxed text-ink-faint">
-              Removes only the local sign-in. Your workspace stays on this device.
+              Removes the local sign-in and this account&apos;s workspace. The guest workspace and other
+              accounts stay on this device. Back up first if you want to keep a copy.
             </p>
             <div className="mt-2 flex gap-2">
               <input
@@ -470,5 +622,11 @@ export function AccountDialog() {
         </div>
       )}
     </Modal>
+    <AccountBackupDialog
+      open={open && backupMode !== null}
+      initialMode={backupMode ?? 'import'}
+      onClose={() => setBackupMode(null)}
+    />
+    </>
   );
 }

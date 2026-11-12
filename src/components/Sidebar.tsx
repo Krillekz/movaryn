@@ -20,6 +20,7 @@ import { Logo, LogoMark } from './Logo';
 
 export function Sidebar() {
   const collapsed = useApp((state) => state.ui.sidebarCollapsed);
+  const compact = useApp((state) => state.settings.sidebarCompact);
   const mobileOpen = useApp((state) => state.ui.mobileSidebar);
   const search = useApp((state) => state.ui.search);
   const conversations = useApp((state) => state.conversations);
@@ -80,7 +81,7 @@ export function Sidebar() {
       <aside
         className={cx(
           'z-40 flex h-full shrink-0 flex-col border-r border-line bg-panel transition-[width,transform] duration-200',
-          collapsed ? 'w-[68px]' : 'w-[276px]',
+          collapsed ? 'w-[68px]' : compact ? 'w-[236px]' : 'w-[276px]',
           'fixed inset-y-0 left-0 md:static',
           mobileOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0',
         )}

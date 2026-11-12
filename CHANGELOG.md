@@ -1,5 +1,35 @@
 # Update log
 
+## 2.2.0 — Account workspaces, encrypted backups, more looks
+
+- **Each account gets its own workspace.** Conversations, projects, notebooks, versions, research and
+  design settings now live in a separate local database per account. Guest work stays in the guest
+  workspace, so signing in no longer mixes one person's chats with another's on the same installation.
+- **Bring existing work with you.** When an account's workspace is empty, the account dialog offers to
+  copy the guest workspace into it. The copy is deliberate and the guest workspace is left untouched.
+- **Encrypted account backups.** Sign in, open Account → Backup & restore, and create one file holding
+  the account credential and its workspace. The file is encrypted in the browser with AES-GCM using a
+  passphrase strengthened with PBKDF2; the passphrase is separate from the account password and has no
+  recovery path.
+- **Restore on another installation.** Restore a backup from the signed-out account dialog. Movaryn
+  recreates the local account, signs it in and opens the backed-up workspace. Existing accounts with
+  the same username are reported instead of overwritten.
+- **More curated looks.** Signature, Arcade, Quiet, Atlas, Ember and Mint combine theme, accent,
+  atmosphere, corners and reading face in one click. A new **Compact sidebar** setting narrows the
+  conversation rail without collapsing it.
+- **Clearer data boundaries.** Settings → Data now says it deletes the current workspace only, and the
+  export is labelled as this workspace's data. The account and privacy copy describes per-account
+  workspaces, local-only storage and the encrypted backup path.
+
+### Notes
+
+- Workspaces are still local-first. Accounts do not sync between devices; encrypted backups are the
+  supported way to move one deliberately.
+- Deleting an account removes its local sign-in and its workspace database. The guest workspace and
+  other accounts are untouched. Create an encrypted backup first if you want to keep a copy.
+- The account backup contains a password hash, not the password itself, but the encrypted file is only
+  as strong as the backup passphrase. Keep it somewhere safe.
+
 ## 2.1.0 — Local accounts, and a studio that looks like yours
 
 - **Local accounts.** Create a username and password for this installation, sign in, edit your display
@@ -23,7 +53,7 @@
 ### Notes
 
 - A local account is an identity layer in this release: it does **not** sync work between devices and
-  does **not** partition one local workspace from another yet. Account-scoped workspaces are next.
+  does **not** partition one local workspace from another. Account-scoped workspaces arrived in 2.2.0.
 - There is no email recovery. If the password is lost, the account can be deleted and recreated, but the
   old password cannot be recovered.
 - Account files stay on this machine. No analytics, no telemetry and no cloud upload.

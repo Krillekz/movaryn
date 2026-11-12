@@ -195,6 +195,7 @@ export interface Settings {
   corners: CornerStyle;
   readingFont: ReadingFont;
   reduceMotion: boolean;
+  sidebarCompact: boolean;
 }
 
 export interface AccountUser {
@@ -208,6 +209,15 @@ export interface AccountUser {
 export interface AccountSession {
   token: string;
   user: AccountUser;
+}
+
+export interface AccountCredentialRecord {
+  username: string;
+  displayName: string;
+  createdAt: number;
+  updatedAt: number;
+  passwordHash: string;
+  salt: string;
 }
 
 export interface AccountStatus {

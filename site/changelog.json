@@ -1,5 +1,10 @@
 [
   {
+    "version": "2.2.0",
+    "title": "Account workspaces, encrypted backups, more looks",
+    "summary": "Each account gets its own workspace. Conversations, projects, notebooks, versions, research and design settings now live in a separate local database…"
+  },
+  {
     "version": "2.1.0",
     "title": "Local accounts, and a studio that looks like yours",
     "summary": "Local accounts. Create a username and password for this installation, sign in, edit your display name, change your password, sign out, or delete the…"

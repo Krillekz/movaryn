@@ -29,14 +29,17 @@ It is not a generic chatbot with a game skin:
 - **Cross-game remapping.** Rewrites range and cooldown language for another game, lists every change
   and flags what does not fit.
 - **Local versions and share links.** Snapshots you can restore, and a read-only kit encoded in a link.
-- **Local accounts that survive updates.** Create a username and password for this installation; the
-  account lives in Movaryn's user-data folder, outside the install directory. Sign in after an update,
-  change the display name or password, and sign out. Passwords are scrypt-hashed and sessions are stored
-  as hashes. This is not cloud sync, not per-account workspace separation yet, and there is no email
-  recovery.
+- **Local accounts with their own workspaces.** Create a username and password for this installation;
+  the account lives in Movaryn's user-data folder, outside the install directory. Each account opens a
+  separate local workspace, and guest chats can be copied in deliberately. Passwords are scrypt-hashed
+  and sessions are stored as hashes. This is not cloud sync, and there is no email recovery.
+- **Encrypted account backups.** Back up one account and its workspace into a single file encrypted in
+  the browser with AES-GCM and a passphrase derived through PBKDF2. Restore it on another installation
+  to recreate the account and open its chats, projects, notebooks, versions and settings. The backup
+  passphrase is separate from the account password and cannot be recovered.
 - **A design system, not just a theme toggle.** Six accent palettes, plain/grid/glow atmospheres, three
-  corner styles, a serif or sans reading face and a reduced-motion switch — with live preview and
-  quick looks in Settings → Appearance.
+  corner styles, a serif or sans reading face, six curated looks and a compact sidebar — with a live
+  preview in Settings → Appearance.
 - **Layout and reply controls.** Settings → Layout & replies sets a Focus, Classic or Studio layout,
   reading width and message spacing across chat, composer and notebook, plus concise/balanced/detailed
   replies, prose/mixed/bullet formatting and optional design-choice explanations.
@@ -436,9 +439,10 @@ model quality.
 ## Limitations (stated plainly)
 
 - **Accounts are local, not cloud.** Usernames and password hashes live in the Electron user-data
-  folder or the API's data directory, so they survive updates. They do not sync conversations or sign
-  you in on another device, and there is no password recovery. Export provides a JSON escape hatch for
-  workspace data.
+  folder or the API's data directory, so they survive updates. Each account has its own browser
+  workspace database, but nothing syncs or signs you in on another device. Encrypted account backups
+  are the deliberate transfer path; the JSON export is a read-only escape hatch for one workspace.
+  There is no password or backup-passphrase recovery.
 - **The Windows builds are unsigned.** SmartScreen will warn on first launch until you sign them.
 - **Model quality is the provider's.** The system prompt is strong, but a weak model can still produce
   generic or unbuildable moves. Switching models is a setting, not a rebuild.
@@ -461,13 +465,17 @@ model quality.
 ## Privacy
 
 - Stored locally: conversations, projects, saved moves, notebooks, settings, uploaded references and
-  generated images (IndexedDB, plus `localStorage` for the sidebar preference and account session).
+  generated images (one IndexedDB database per account plus the guest database, and `localStorage` for
+  the sidebar preference and account session).
 - Stored in the app data folder: local account records (salted scrypt password hashes) and hashed
   session tokens in `accounts.json`; provider credentials stay in the server's env file.
+- Account backups are encrypted in the browser before download. The passphrase and decrypted contents
+  are not stored by Movaryn.
 - Sent to your provider: the messages you send, the project brief, recent reference images, image
   prompts, and notebook sources when you ask the notebook. Nothing else.
-- Delete a chat or project to remove its records and images; Settings → Data deletes the workspace.
-  Deleting an account removes only the local sign-in, not your conversations.
+- Delete a chat or project to remove its records and images; Settings → Data deletes the current
+  workspace only. Deleting an account removes its local sign-in and that account's workspace, leaving
+  the guest workspace and other accounts untouched.
 - No analytics, no telemetry and no cloud sync.
 
 ---

@@ -123,8 +123,7 @@ function renderEntry(entry, index) {
         <header class="log-entry-header">
           <h2>${entry.version}</h2>
           <span class="log-title">${inline(entry.title)}</span>
-          ${index === 0 ? '<span class="log-latest">Latest</span>' : ''}
-        </header>
+${index === 0 ? '          <span class="log-latest">Latest</span>\n' : ''}        </header>
 ${blocks}
         <a class="log-release-link" href="https://github.com/${repo}/releases/tag/v${entry.version}">
           Release notes on GitHub <span aria-hidden="true">→</span>

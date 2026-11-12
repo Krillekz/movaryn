@@ -1,4 +1,9 @@
-import type { AccountSession, AccountStatus, AccountUser } from '../../shared/types';
+import type {
+  AccountCredentialRecord,
+  AccountSession,
+  AccountStatus,
+  AccountUser,
+} from '../../shared/types';
 import { apiBase } from './apiBase';
 import { ApiError } from './api';
 
@@ -124,6 +129,25 @@ export async function changeLocalPassword(
     await request<AccountSession>('/api/account/password', {
       method: 'POST',
       body: JSON.stringify({ currentPassword, newPassword }),
+    }),
+  );
+}
+
+export async function exportLocalAccount(password: string): Promise<AccountCredentialRecord> {
+  const result = await request<{ account: AccountCredentialRecord }>('/api/account/backup', {
+    method: 'POST',
+    body: JSON.stringify({ password }),
+  });
+  return result.account;
+}
+
+export async function importLocalAccount(
+  account: AccountCredentialRecord,
+): Promise<AccountSession> {
+  return remember(
+    await request<AccountSession>('/api/account/restore', {
+      method: 'POST',
+      body: JSON.stringify({ account }),
     }),
   );
 }

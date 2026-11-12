@@ -4,15 +4,14 @@ A living document. Scope and order can change, and nothing here is a promise of 
 
 ## Now
 
-- **Account-scoped workspaces** — keep each local account's chats and projects separate.
 - **Notebook file import** — add `.txt` and `.md` sources without copying and pasting.
 - **Export a notebook** — download its sources, notes and transcript as one readable document.
+- **Workspace housekeeping** — make it easier to see and remove the data left by deleted accounts.
 
 ## Next
 
 - **Reference library** — reusable outfit and silhouette references shared across projects.
 - **Optional cloud sync** — sign in across devices while keeping a local-only mode.
-- **Account data export** — move a local account and workspace between machines deliberately.
 - **More games and formats** — templates for battleground games beyond JJS and TSB.
 - **Localisation** — interface and prompt translations that keep constraints intact.
 
@@ -25,6 +24,8 @@ A living document. Scope and order can change, and nothing here is a promise of 
 
 ## Shipped
 
+- **2.2.0** — account-scoped workspaces, guest-workspace migration, encrypted account backup and
+  restore, six curated looks and a compact sidebar. [Update log](changelog.html#v2.2.0)
 - **2.1.0** — durable local accounts with password sign-in, profile and security controls, plus a
   design system with accent palettes, atmospheres, corners and reading options.
   [Update log](changelog.html#v2.1.0)

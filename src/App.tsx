@@ -38,10 +38,6 @@ export default function App() {
   );
 
   useEffect(() => {
-    void useApp.getState().hydrate();
-  }, []);
-
-  useEffect(() => {
     const media = window.matchMedia('(prefers-color-scheme: light)');
     const apply = () => {
       const resolved = theme === 'system' ? (media.matches ? 'light' : 'dark') : theme;
@@ -69,16 +65,19 @@ export default function App() {
 
   useEffect(() => {
     let cancelled = false;
-    void loadAccountStatus()
-      .then((status) => {
+    void (async () => {
+      try {
+        const status = await loadAccountStatus();
         if (cancelled) return;
         useApp.getState().setAccount(status.user);
         useApp.getState().setHasLocalAccounts(status.hasAccounts);
         useApp.getState().setAccountState('ready');
-      })
-      .catch(() => {
-        if (!cancelled) useApp.getState().setAccountState('offline');
-      });
+      } catch {
+        if (cancelled) return;
+        useApp.getState().setAccountState('offline');
+      }
+      if (!cancelled) await useApp.getState().hydrate();
+    })();
     return () => {
       cancelled = true;
     };

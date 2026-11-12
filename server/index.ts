@@ -14,8 +14,10 @@ import {
   authenticateAccount,
   changeAccountPassword,
   deleteAccount,
+  exportAccountCredentials,
   getAccountStatus,
   loginAccount,
+  importAccount,
   logoutAccount,
   registerAccount,
   updateAccountProfile,
@@ -247,6 +249,19 @@ app.patch('/api/account', authRateLimit, async (req: Request, res: Response) => 
   const user = await updateAccountProfile(token, { displayName: req.body?.displayName });
   res.setHeader('Cache-Control', 'no-store');
   res.json({ user });
+});
+
+app.post('/api/account/backup', authRateLimit, async (req: Request, res: Response) => {
+  const { token } = await requireAccount(req);
+  const account = await exportAccountCredentials(token, { password: req.body?.password });
+  res.setHeader('Cache-Control', 'no-store');
+  res.json({ account });
+});
+
+app.post('/api/account/restore', authRateLimit, async (req: Request, res: Response) => {
+  const session = await importAccount({ account: req.body?.account });
+  res.setHeader('Cache-Control', 'no-store');
+  res.status(201).json(session);
 });
 
 app.post('/api/account/password', authRateLimit, async (req: Request, res: Response) => {

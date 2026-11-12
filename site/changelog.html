@@ -65,11 +65,11 @@
     <main id="main">
       <section class="log-hero">
         <div class="shell">
-          <p class="eyebrow"><span class="dot"></span> 24 releases</p>
+          <p class="eyebrow"><span class="dot"></span> 25 releases</p>
           <h1>Update log</h1>
           <p>
             What changed in every Movaryn build, newest first. The newest release is
-            <strong>2.1.0</strong> — Local accounts, and a studio that looks like yours.
+            <strong>2.2.0</strong> — Account workspaces, encrypted backups, more looks.
           </p>
         </div>
       </section>
@@ -78,6 +78,12 @@
         <aside class="log-index">
           <p>All releases</p>
           <ol>
+        <li>
+          <a href="#v2.2.0">
+            2.2.0
+            <small>Account workspaces, encrypted backups, more looks</small>
+          </a>
+        </li>
         <li>
           <a href="#v2.1.0">
             2.1.0
@@ -226,11 +232,35 @@
         </aside>
 
         <section class="log-entries" aria-label="Release notes">
+      <article class="log-entry" id="v2.2.0">
+        <header class="log-entry-header">
+          <h2>2.2.0</h2>
+          <span class="log-title">Account workspaces, encrypted backups, more looks</span>
+          <span class="log-latest">Latest</span>
+        </header>
+        <ul>
+          <li><strong>Each account gets its own workspace.</strong> Conversations, projects, notebooks, versions, research and design settings now live in a separate local database per account. Guest work stays in the guest workspace, so signing in no longer mixes one person's chats with another's on the same installation.</li>
+          <li><strong>Bring existing work with you.</strong> When an account's workspace is empty, the account dialog offers to copy the guest workspace into it. The copy is deliberate and the guest workspace is left untouched.</li>
+          <li><strong>Encrypted account backups.</strong> Sign in, open Account → Backup &amp; restore, and create one file holding the account credential and its workspace. The file is encrypted in the browser with AES-GCM using a passphrase strengthened with PBKDF2; the passphrase is separate from the account password and has no recovery path.</li>
+          <li><strong>Restore on another installation.</strong> Restore a backup from the signed-out account dialog. Movaryn recreates the local account, signs it in and opens the backed-up workspace. Existing accounts with the same username are reported instead of overwritten.</li>
+          <li><strong>More curated looks.</strong> Signature, Arcade, Quiet, Atlas, Ember and Mint combine theme, accent, atmosphere, corners and reading face in one click. A new <strong>Compact sidebar</strong> setting narrows the conversation rail without collapsing it.</li>
+          <li><strong>Clearer data boundaries.</strong> Settings → Data now says it deletes the current workspace only, and the export is labelled as this workspace's data. The account and privacy copy describes per-account workspaces, local-only storage and the encrypted backup path.</li>
+        </ul>
+        <p>### Notes</p>
+        <ul>
+          <li>Workspaces are still local-first. Accounts do not sync between devices; encrypted backups are the supported way to move one deliberately.</li>
+          <li>Deleting an account removes its local sign-in and its workspace database. The guest workspace and other accounts are untouched. Create an encrypted backup first if you want to keep a copy.</li>
+          <li>The account backup contains a password hash, not the password itself, but the encrypted file is only as strong as the backup passphrase. Keep it somewhere safe.</li>
+        </ul>
+        <a class="log-release-link" href="https://github.com/Krillekz/movaryn/releases/tag/v2.2.0">
+          Release notes on GitHub <span aria-hidden="true">→</span>
+        </a>
+      </article>
+
       <article class="log-entry" id="v2.1.0">
         <header class="log-entry-header">
           <h2>2.1.0</h2>
           <span class="log-title">Local accounts, and a studio that looks like yours</span>
-          <span class="log-latest">Latest</span>
         </header>
         <ul>
           <li><strong>Local accounts.</strong> Create a username and password for this installation, sign in, edit your display name, change your password, sign out, or delete the account. Passwords are stored only as salted scrypt hashes and sessions as SHA-256 token hashes, in <code>accounts.json</code> inside Movaryn's user-data folder — outside the install directory, so the same credentials keep working after updates.</li>
@@ -242,7 +272,7 @@
         </ul>
         <p>### Notes</p>
         <ul>
-          <li>A local account is an identity layer in this release: it does <strong>not</strong> sync work between devices and does <strong>not</strong> partition one local workspace from another yet. Account-scoped workspaces are next.</li>
+          <li>A local account is an identity layer in this release: it does <strong>not</strong> sync work between devices and does <strong>not</strong> partition one local workspace from another. Account-scoped workspaces arrived in 2.2.0.</li>
           <li>There is no email recovery. If the password is lost, the account can be deleted and recreated, but the old password cannot be recovered.</li>
           <li>Account files stay on this machine. No analytics, no telemetry and no cloud upload.</li>
         </ul>
@@ -255,7 +285,6 @@
         <header class="log-entry-header">
           <h2>2.0.0</h2>
           <span class="log-title">Your layout, your reply style, and a notebook for your sources</span>
-          
         </header>
         <ul>
           <li><strong>New Settings → Layout &amp; replies tab.</strong> Choose <strong>Focus</strong> (narrow, compact), <strong>Classic</strong> (standard, comfortable) or <strong>Studio</strong> (wide, spacious), or set reading width and message spacing yourself. The change applies to chat, the composer and the notebook, and is remembered on this device.</li>
@@ -279,7 +308,6 @@
         <header class="log-entry-header">
           <h2>1.9.0</h2>
           <span class="log-title">Sources under the reply, and comparisons that stick</span>
-          
         </header>
         <ul>
           <li><strong>Brief sources under the latest reply.</strong> A collapsible card lists the project's saved facts, each with its source and whether it came from the brief or from research. It is labelled project-level and says plainly that a reply may not use every fact. Research facts stay marked unverified, and <strong>Review brief</strong> opens the Brief tab.</li>
@@ -301,7 +329,6 @@
         <header class="log-entry-header">
           <h2>1.8.0</h2>
           <span class="log-title">A local research cache and a kit comparison</span>
-          
         </header>
         <ul>
           <li><strong>Local research cache.</strong> A successful sourced lookup is kept on this device by character, series and game. Reopening that brief offers <strong>Use cached lookup</strong> first; pressing Research again refreshes it from the provider. Uncertain lookups are not cached, nothing is uploaded, and clearing local data removes the cache.</li>
@@ -322,7 +349,6 @@
         <header class="log-entry-header">
           <h2>1.7.0</h2>
           <span class="log-title">Character research, a kit sandbox, remapping and local history</span>
-          
         </header>
         <ul>
           <li><strong>Character brief</strong> per project: series, which version, abilities to keep and avoid, and a stated <strong>Follow canon / Original kit / Mixed</strong> mode. The brief is sent with every chat in the project, so a restart or a new chat keeps the same understanding of the character.</li>
@@ -350,7 +376,6 @@
         <header class="log-entry-header">
           <h2>1.6.0</h2>
           <span class="log-title">A command palette, release notes in the app and a roadmap</span>
-          
         </header>
         <ul>
           <li><strong>Command palette</strong> on Ctrl/⌘ K, plus a search button in the chat header. It searches chats, projects and saved moves, and runs actions: new chat, new project, the idea library, concept art, any Settings tab, theme, sidebar, data export, What's New and the roadmap. Arrow keys move, Enter opens, Esc closes.</li>
@@ -377,7 +402,6 @@
         <header class="log-entry-header">
           <h2>1.5.0</h2>
           <span class="log-title">An idea library, a kit check and house rules</span>
-          
         </header>
         <ul>
           <li><strong>Idea library</strong> with three tabs: 12 moveset sparks, 8 constraint packs and 10 art presets. Search it, roll a random spark, send a constraint straight into the composer, or apply an art preset to the concept-art brief. Open it from the welcome screen, the composer's lightbulb button or the art dialog.</li>
@@ -397,7 +421,6 @@
         <header class="log-entry-header">
           <h2>1.4.6</h2>
           <span class="log-title">Prompts you edit are kept</span>
-          
         </header>
         <ul>
           <li>Prompt-only text is remembered per project, separately for concept art and the character card. Close the dialog, switch chats or restart the app and your edited prompt is still there.</li>
@@ -411,7 +434,6 @@
         <header class="log-entry-header">
           <h2>1.4.5</h2>
           <span class="log-title">Copy the card's art prompt</span>
-          
         </header>
         <ul>
           <li>The character card has <strong>Generate art</strong> and <strong>Prompt only</strong> tabs. Prompt only builds the card's art prompt from the saved character brief, ready to edit and paste into any image generator.</li>
@@ -425,7 +447,6 @@
         <header class="log-entry-header">
           <h2>1.4.4</h2>
           <span class="log-title">Find the art you saved</span>
-          
         </header>
         <ul>
           <li>Concept art in a project has a filter now, matching saved moves: search the prompts, narrow by aspect ratio with chips, and get a clear empty state when nothing matches.</li>
@@ -439,7 +460,6 @@
         <header class="log-entry-header">
           <h2>1.4.3</h2>
           <span class="log-title">Read the prompt behind saved art</span>
-          
         </header>
         <ul>
           <li>Every concept art tile in a project now has a collapsed Prompt note that expands to the full text, so saved artwork can be understood and reproduced without copying it blind.</li>
@@ -453,7 +473,6 @@
         <header class="log-entry-header">
           <h2>1.4.2</h2>
           <span class="log-title">Copy a prompt from saved art</span>
-          
         </header>
         <ul>
           <li>Concept art tiles in a project now have a copy action beside download, so saved artwork can be reproduced elsewhere. Tiles without a saved prompt show no button.</li>
@@ -467,7 +486,6 @@
         <header class="log-entry-header">
           <h2>1.4.1</h2>
           <span class="log-title">Copy the prompt from an old image</span>
-          
         </header>
         <ul>
           <li>Image messages in a chat now copy the prompt rebuilt from the saved brief, aspect ratio included, instead of relying on the provider's echo (which can be empty).</li>
@@ -482,7 +500,6 @@
         <header class="log-entry-header">
           <h2>1.4.0</h2>
           <span class="log-title">Credits, and prompts you can take elsewhere</span>
-          
         </header>
         <ul>
           <li>Settings has a Credits tab naming Raevik, who Movaryn is designed and built by.</li>
@@ -498,7 +515,6 @@
         <header class="log-entry-header">
           <h2>1.3.1</h2>
           <span class="log-title">The whole theme, not half of it</span>
-          
         </header>
         <ul>
           <li>The character/theme header above a moveset no longer cuts a long theme off with an ellipsis. It wraps to as many lines as it needs, so the full sentence stays readable.</li>
@@ -512,7 +528,6 @@
         <header class="log-entry-header">
           <h2>1.3.0</h2>
           <span class="log-title">Random ideas and character cards</span>
-          
         </header>
         <ul>
           <li>A Random button in the concept art dialog rolls a complete character brief — subject, outfit, pose, setting, lighting, palette and style — and generates it in one press. Every field comes from a visible bank, so you can read, edit and reuse the prompt instead of guessing what a model invented.</li>
@@ -527,7 +542,6 @@
         <header class="log-entry-header">
           <h2>1.2.0</h2>
           <span class="log-title">Movesets that come back in</span>
-          
         </header>
         <ul>
           <li>Import a moveset from the project workspace as JSON or CSV. JSON accepts Movaryn's own export, the older project-shaped export and a bare move array; CSV copes with quoted commas, embedded newlines and header variants, and also works without a header row.</li>
@@ -542,7 +556,6 @@
         <header class="log-entry-header">
           <h2>1.1.0</h2>
           <span class="log-title">Movesets that leave the app</span>
-          
         </header>
         <ul>
           <li>Export a project's moveset as a Markdown design sheet, a CSV table for spreadsheets or engine import, or a JSON backup that keeps the brief fields. Available from the project workspace.</li>
@@ -558,7 +571,6 @@
         <header class="log-entry-header">
           <h2>1.0.5</h2>
           <span class="log-title">Image generation stops failing on stale settings</span>
-          
         </header>
         <ul>
           <li>An image model left in settings from an OpenAI-style setup (such as <code>gpt-image-1</code>) no longer overrides the configured Cloudflare model, which made Workers AI answer <code>No route for that URI</code>.</li>
@@ -574,7 +586,6 @@
         <header class="log-entry-header">
           <h2>1.0.4</h2>
           <span class="log-title">Crop follows the subject</span>
-          
         </header>
         <ul>
           <li>Cropping now follows the image content instead of taking a fixed centre slice: brightness-gradient profiles find where the subject sits, rows keep a small margin above the subject and trim surplus from the bottom, and the subject is centred horizontally.</li>
@@ -589,7 +600,6 @@
         <header class="log-entry-header">
           <h2>1.0.3</h2>
           <span class="log-title">Aspect-accurate concept art</span>
-          
         </header>
         <ul>
           <li>Cloudflare images are center-cropped to the aspect ratio chosen in the brief, so a portrait or wide brief no longer shows a square inside a taller frame. JPEG output only; other formats pass through.</li>
@@ -605,7 +615,6 @@
         <header class="log-entry-header">
           <h2>1.0.2</h2>
           <span class="log-title">Free image generation</span>
-          
         </header>
         <ul>
           <li>Cloudflare Workers AI is now an image backend. Set <code>IMAGE_PROVIDER=cloudflare</code> with <code>IMAGE_ACCOUNT_ID</code> and an API token, or just set the account id and it is detected. The free plan's daily allowance makes concept art usable without paying an image provider.</li>
@@ -622,7 +631,6 @@
         <header class="log-entry-header">
           <h2>1.0.1</h2>
           <span class="log-title">Provider honesty</span>
-          
         </header>
         <ul>
           <li>Image generation now requires <code>IMAGE_MODEL</code>. A chat-only provider (such as OpenRouter's free tier) reports concept art as unconfigured instead of offering a button that can only fail.</li>
@@ -638,7 +646,6 @@
         <header class="log-entry-header">
           <h2>1.0.0</h2>
           <span class="log-title">Initial release</span>
-          
         </header>
         <h3>The workshop</h3>
         <ul>

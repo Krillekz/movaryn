@@ -80,10 +80,69 @@ const READING_FONTS: { value: ReadingFont; label: string; detail: string; classN
   { value: 'serif', label: 'Serif', detail: 'Warmer long-form reading', className: 'font-serif' },
 ];
 
-const LOOKS: { label: string; accent: AccentId; ambience: AmbienceId; corners: CornerStyle }[] = [
-  { label: 'Signature', accent: 'violet', ambience: 'glow', corners: 'soft' },
-  { label: 'Arcade', accent: 'rose', ambience: 'grid', corners: 'sharp' },
-  { label: 'Quiet', accent: 'mono', ambience: 'plain', corners: 'round' },
+const LOOKS: {
+  label: string;
+  detail: string;
+  theme: ThemePreference;
+  accent: AccentId;
+  ambience: AmbienceId;
+  corners: CornerStyle;
+  readingFont: ReadingFont;
+}[] = [
+  {
+    label: 'Signature',
+    detail: 'Violet glow',
+    theme: 'dark',
+    accent: 'violet',
+    ambience: 'glow',
+    corners: 'soft',
+    readingFont: 'sans',
+  },
+  {
+    label: 'Arcade',
+    detail: 'Rose grid, sharp',
+    theme: 'dark',
+    accent: 'rose',
+    ambience: 'grid',
+    corners: 'sharp',
+    readingFont: 'sans',
+  },
+  {
+    label: 'Quiet',
+    detail: 'Mono serif',
+    theme: 'light',
+    accent: 'mono',
+    ambience: 'plain',
+    corners: 'round',
+    readingFont: 'serif',
+  },
+  {
+    label: 'Atlas',
+    detail: 'Sky grid',
+    theme: 'dark',
+    accent: 'sky',
+    ambience: 'grid',
+    corners: 'soft',
+    readingFont: 'sans',
+  },
+  {
+    label: 'Ember',
+    detail: 'Amber glow, serif',
+    theme: 'dark',
+    accent: 'amber',
+    ambience: 'glow',
+    corners: 'round',
+    readingFont: 'serif',
+  },
+  {
+    label: 'Mint',
+    detail: 'Emerald daylight',
+    theme: 'light',
+    accent: 'emerald',
+    ambience: 'plain',
+    corners: 'soft',
+    readingFont: 'sans',
+  },
 ];
 
 const ENV_SAMPLE = `AI_BASE_URL=https://api.openai.com/v1
@@ -245,8 +304,9 @@ export function SettingsDialog() {
                 <h3 className="text-[12px] font-semibold text-ink">What an account does not do</h3>
                 <p className="mt-1.5 text-[11.5px] leading-relaxed text-ink-muted">
                   It does not upload conversations, projects, notebooks or provider keys, and it does not
-                  share your workspace with another device. Accounts do not partition the local workspace
-                  yet. This release is an identity layer over the local-first app, not a cloud account.
+                  sync your workspace between devices. Each account keeps a separate local workspace;
+                  guest work stays in the guest workspace until you copy it. Encrypted account backups
+                  are the supported way to move a workspace to another installation.
                 </p>
               </section>
             </div>
@@ -760,25 +820,42 @@ export function SettingsDialog() {
               <section>
                 <div className="flex items-center justify-between gap-2">
                   <h3 className="text-[12.5px] font-semibold text-ink">Quick looks</h3>
-                  <span className="text-[10px] text-ink-faint">Accent + atmosphere + corners</span>
+                  <span className="text-[10px] text-ink-faint">Theme + accent + finish</span>
                 </div>
-                <div className="mt-2 grid grid-cols-3 gap-2">
-                  {LOOKS.map((look) => (
-                    <button
-                      key={look.label}
-                      type="button"
-                      className="rounded-lg border border-line bg-panel px-2 py-2 text-[11.5px] text-ink-muted transition-colors hover:border-line-strong hover:text-ink"
-                      onClick={() =>
-                        updateSettings({
-                          accent: look.accent,
-                          ambience: look.ambience,
-                          corners: look.corners,
-                        })
-                      }
-                    >
-                      {look.label}
-                    </button>
-                  ))}
+                <div className="mt-2 grid grid-cols-2 gap-2 sm:grid-cols-3">
+                  {LOOKS.map((look) => {
+                    const active =
+                      settings.theme === look.theme &&
+                      settings.accent === look.accent &&
+                      settings.ambience === look.ambience &&
+                      settings.corners === look.corners &&
+                      settings.readingFont === look.readingFont;
+                    return (
+                      <button
+                        key={look.label}
+                        type="button"
+                        className={cx(
+                          'rounded-lg border px-2.5 py-2 text-left transition-colors',
+                          active
+                            ? 'border-accent bg-accent-soft text-ink'
+                            : 'border-line bg-panel text-ink-muted hover:border-line-strong hover:text-ink',
+                        )}
+                        aria-pressed={active}
+                        onClick={() =>
+                          updateSettings({
+                            theme: look.theme,
+                            accent: look.accent,
+                            ambience: look.ambience,
+                            corners: look.corners,
+                            readingFont: look.readingFont,
+                          })
+                        }
+                      >
+                        <span className="block text-[11.5px] font-medium">{look.label}</span>
+                        <span className="mt-0.5 block text-[10px] text-ink-faint">{look.detail}</span>
+                      </button>
+                    );
+                  })}
                 </div>
               </section>
 
@@ -892,20 +969,37 @@ export function SettingsDialog() {
                 </div>
               </section>
 
-              <section className="flex items-start justify-between gap-4 rounded-xl border border-line bg-panel px-3.5 py-3">
-                <div>
-                  <p className="text-[12px] font-medium text-ink">Reduce motion</p>
-                  <p className="mt-1 text-[11px] leading-relaxed text-ink-muted">
-                    Turn off fade and caret animations across the interface.
-                  </p>
+              <section className="grid gap-2.5 sm:grid-cols-2">
+                <div className="flex items-start justify-between gap-4 rounded-xl border border-line bg-panel px-3.5 py-3">
+                  <div>
+                    <p className="text-[12px] font-medium text-ink">Compact sidebar</p>
+                    <p className="mt-1 text-[11px] leading-relaxed text-ink-muted">
+                      Narrow the conversation rail and keep more room for the page.
+                    </p>
+                  </div>
+                  <input
+                    type="checkbox"
+                    checked={settings.sidebarCompact}
+                    onChange={(event) => updateSettings({ sidebarCompact: event.target.checked })}
+                    className="mt-0.5 h-4 w-4 shrink-0 accent-[var(--accent)]"
+                    aria-label="Compact sidebar"
+                  />
                 </div>
-                <input
-                  type="checkbox"
-                  checked={settings.reduceMotion}
-                  onChange={(event) => updateSettings({ reduceMotion: event.target.checked })}
-                  className="mt-0.5 h-4 w-4 shrink-0 accent-[var(--accent)]"
-                  aria-label="Reduce motion"
-                />
+                <div className="flex items-start justify-between gap-4 rounded-xl border border-line bg-panel px-3.5 py-3">
+                  <div>
+                    <p className="text-[12px] font-medium text-ink">Reduce motion</p>
+                    <p className="mt-1 text-[11px] leading-relaxed text-ink-muted">
+                      Turn off fade and caret animations across the interface.
+                    </p>
+                  </div>
+                  <input
+                    type="checkbox"
+                    checked={settings.reduceMotion}
+                    onChange={(event) => updateSettings({ reduceMotion: event.target.checked })}
+                    className="mt-0.5 h-4 w-4 shrink-0 accent-[var(--accent)]"
+                    aria-label="Reduce motion"
+                  />
+                </div>
               </section>
 
               <section>
@@ -932,7 +1026,7 @@ export function SettingsDialog() {
               </section>
 
               <p className="text-[11px] leading-relaxed text-ink-faint">
-                Design settings are stored with your local workspace and do not leave this device.
+                Design settings belong to the current account workspace and do not leave this device.
               </p>
             </div>
           ) : null}
@@ -947,8 +1041,8 @@ export function SettingsDialog() {
                     IndexedDB.
                   </li>
                   <li>
-                    Accounts are local sign-ins. They do not sync conversations, projects or notebooks
-                    between devices.
+                    Each account has its own local workspace. Accounts do not sync conversations,
+                    projects or notebooks between devices; encrypted account backups move them.
                   </li>
                   <li>Deleting a chat or project removes its record and its images.</li>
                 </ul>
@@ -969,22 +1063,22 @@ export function SettingsDialog() {
               </section>
               <div className="flex flex-wrap gap-2">
                 <button type="button" className="btn btn-secondary" onClick={exportAll}>
-                  Export all data
+                  Export this workspace
                 </button>
                 <button
                   type="button"
                   className="btn btn-danger"
                   onClick={() =>
                     requestConfirm({
-                      title: 'Delete all local data?',
-                      body: 'Every conversation, project, saved move and generated image on this device will be removed. This cannot be undone.',
-                      confirmLabel: 'Delete everything',
+                      title: 'Delete this workspace?',
+                      body: 'Every conversation, project, saved move and generated image in the current workspace will be removed. Other accounts and the guest workspace are untouched. This cannot be undone.',
+                      confirmLabel: 'Delete workspace',
                       danger: true,
                       onConfirm: () => void resetAllData(),
                     })
                   }
                 >
-                  Delete everything
+                  Delete workspace
                 </button>
               </div>
             </div>

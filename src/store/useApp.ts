@@ -20,6 +20,9 @@ import {
   deleteNotebookRecord,
   deleteProjectRecord,
   loadState,
+  type LoadedState,
+  flushPersistence,
+  switchWorkspaceDb,
   queueConversation,
   queueNotebook,
   queueProject,
@@ -49,6 +52,7 @@ export const DEFAULT_SETTINGS: Settings = {
   corners: 'soft',
   readingFont: 'sans',
   reduceMotion: false,
+  sidebarCompact: false,
 };
 
 export interface Toast {
@@ -119,6 +123,7 @@ export interface AppState {
   account: AccountUser | null;
   accountState: 'loading' | 'ready' | 'offline';
   hasLocalAccounts: boolean;
+  workspaceOwner: string | null;
   provider: ProviderStatus | null;
   providerError: string | null;
   streaming: { conversationId: string; messageId: string } | null;
@@ -143,6 +148,7 @@ export interface AppState {
   setAccount: (account: AccountUser | null) => void;
   setAccountState: (state: AppState['accountState']) => void;
   setHasLocalAccounts: (value: boolean) => void;
+  switchWorkspace: (ownerId: string | null, force?: boolean) => Promise<void>;
   openAccount: () => void;
   closeAccount: () => void;
 
@@ -223,6 +229,55 @@ function sortByUpdated<T extends { id: string; updatedAt: number }>(record: Reco
     .map((item) => item.id);
 }
 
+function workspaceState(loaded: LoadedState, ownerId: string | null): Partial<AppState> {
+  const conversations: Record<string, Conversation> = {};
+  for (const conversation of loaded.conversations) {
+    conversations[conversation.id] = {
+      ...conversation,
+      messages: (conversation.messages ?? []).map((message) =>
+        message.status === 'streaming'
+          ? { ...message, status: 'complete' as const, stopped: true }
+          : message,
+      ),
+    };
+  }
+  const projects: Record<string, Project> = {};
+  for (const project of loaded.projects) projects[project.id] = project;
+  const notebooks: Record<string, Notebook> = {};
+  for (const notebook of loaded.notebooks ?? []) {
+    notebooks[notebook.id] = {
+      ...notebook,
+      sources: notebook.sources ?? [],
+      messages: (notebook.messages ?? []).map((message) =>
+        message.status === 'streaming'
+          ? { ...message, status: 'complete' as const }
+          : message,
+      ),
+      notes: notebook.notes ?? [],
+    };
+  }
+  for (const conversation of Object.values(conversations)) {
+    if (conversation.projectId && !projects[conversation.projectId]) {
+      conversation.projectId = undefined;
+    }
+  }
+  const order = sortByUpdated(conversations);
+  const settings: Settings = { ...DEFAULT_SETTINGS, ...(loaded.settings ?? {}) };
+  return {
+    conversations,
+    order,
+    projects,
+    projectOrder: sortByUpdated(projects),
+    notebooks,
+    notebookOrder: sortByUpdated(notebooks),
+    activeNotebookId: sortByUpdated(notebooks)[0] ?? null,
+    settings: { ...settings, contextWindow: clamp(Number(settings.contextWindow) || 24, 4, 60) },
+    activeId: order[0] ?? null,
+    hydrated: true,
+    workspaceOwner: ownerId,
+  };
+}
+
 let hydratePromise: Promise<void> | null = null;
 
 export const useApp = create<AppState>()((set, get) => ({
@@ -239,6 +294,7 @@ export const useApp = create<AppState>()((set, get) => ({
   account: null,
   accountState: 'loading',
   hasLocalAccounts: false,
+  workspaceOwner: null,
   provider: null,
   providerError: null,
   streaming: null,
@@ -265,77 +321,46 @@ export const useApp = create<AppState>()((set, get) => ({
   hydrate: async () => {
     if (get().hydrated) return;
     if (hydratePromise) return hydratePromise;
-
-    hydratePromise = (async () => {
-      try {
-        const loaded = await loadState();
-      const conversations: Record<string, Conversation> = {};
-      for (const conversation of loaded.conversations) {
-        conversations[conversation.id] = {
-          ...conversation,
-          messages: (conversation.messages ?? []).map((message) =>
-            message.status === 'streaming'
-              ? { ...message, status: 'complete' as const, stopped: true }
-              : message,
-          ),
-        };
-      }
-      const projects: Record<string, Project> = {};
-      for (const project of loaded.projects) {
-        projects[project.id] = project;
-      }
-      const notebooks: Record<string, Notebook> = {};
-      for (const notebook of loaded.notebooks ?? []) {
-        notebooks[notebook.id] = {
-          ...notebook,
-          sources: notebook.sources ?? [],
-          messages: (notebook.messages ?? []).map((message) =>
-            message.status === 'streaming'
-              ? { ...message, status: 'complete' as const }
-              : message,
-          ),
-          notes: notebook.notes ?? [],
-        };
-      }
-      // Drop dangling project links from deleted projects.
-      for (const conversation of Object.values(conversations)) {
-        if (conversation.projectId && !projects[conversation.projectId]) {
-          conversation.projectId = undefined;
-        }
-      }
-
-      const order = sortByUpdated(conversations);
-      const settings: Settings = {
-        ...DEFAULT_SETTINGS,
-        ...(loaded.settings ?? {}),
-      };
-
-      set({
-        conversations,
-        order,
-        projects,
-        projectOrder: sortByUpdated(projects),
-        notebooks,
-        notebookOrder: sortByUpdated(notebooks),
-        activeNotebookId: sortByUpdated(notebooks)[0] ?? null,
-        settings: { ...settings, contextWindow: clamp(Number(settings.contextWindow) || 24, 4, 60) },
-        activeId: order[0] ?? null,
-        hydrated: true,
+    const ownerId = get().account?.id ?? null;
+    hydratePromise = get()
+      .switchWorkspace(ownerId)
+      .finally(() => {
+        hydratePromise = null;
       });
-
-        if (!storageAvailable) {
-          get().pushToast('Local storage is unavailable — this session will not be saved.', 'danger');
-        }
-      } catch {
-        set({ hydrated: true });
-        get().pushToast(
-          'Your saved workspace could not be opened. Starting a clean session.',
-          'danger',
-        );
-      }
-    })();
-
     return hydratePromise;
+  },
+
+  switchWorkspace: async (ownerId, force = false) => {
+    if (!force && get().workspaceOwner === ownerId && get().hydrated) return;
+    hydratePromise = null;
+    await flushPersistence();
+    await switchWorkspaceDb(ownerId);
+    set({
+      conversations: {},
+      order: [],
+      activeId: null,
+      projects: {},
+      projectOrder: [],
+      notebooks: {},
+      notebookOrder: [],
+      activeNotebookId: null,
+      streaming: null,
+      hydrated: false,
+      workspaceOwner: ownerId,
+    });
+    try {
+      const loaded = await loadState();
+      set(workspaceState(loaded, ownerId));
+      if (!storageAvailable) {
+        get().pushToast('Local storage is unavailable — this session will not be saved.', 'danger');
+      }
+    } catch {
+      set({ hydrated: true });
+      get().pushToast(
+        'This workspace could not be opened. Starting a clean session.',
+        'danger',
+      );
+    }
   },
 
   setProvider: (provider, error = null) => set({ provider, providerError: error }),

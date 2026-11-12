@@ -2,7 +2,12 @@ import crypto from 'node:crypto';
 import fs from 'node:fs';
 import fsp from 'node:fs/promises';
 import path from 'node:path';
-import type { AccountSession, AccountStatus, AccountUser } from '../shared/types';
+import type {
+  AccountCredentialRecord,
+  AccountSession,
+  AccountStatus,
+  AccountUser,
+} from '../shared/types';
 import { config } from './config';
 import { AppError } from './errors';
 
@@ -370,6 +375,75 @@ export async function changeAccountPassword(
     account.updatedAt = Date.now();
     // Rotate every session so a stolen token does not survive a password change.
     file.sessions = [];
+    const session = newSession(file, account.id);
+    await save(file);
+    return session;
+  });
+}
+
+export async function exportAccountCredentials(
+  token: string,
+  input: { password?: unknown },
+): Promise<AccountCredentialRecord> {
+  if (typeof input.password !== 'string' || !input.password) invalid('Password is required.');
+  const file = await load();
+  const account = findAccountByToken(file, token);
+  if (!account) throw new AppError('Sign in again to back up this account.', 401, 'unauthorized');
+  if (!(await verifyPassword(input.password, account))) {
+    throw new AppError('The password is not correct.', 401, 'invalid_credentials');
+  }
+  return {
+    username: account.username,
+    displayName: account.displayName,
+    createdAt: account.createdAt,
+    updatedAt: account.updatedAt,
+    passwordHash: account.passwordHash,
+    salt: account.salt,
+  };
+}
+
+/** Recreate an account on another installation from an encrypted backup. */
+export async function importAccount(input: { account?: unknown }): Promise<AccountSession> {
+  const raw = input.account;
+  if (!raw || typeof raw !== 'object' || Array.isArray(raw)) invalid('Backup account data is missing.');
+  const record = raw as Record<string, unknown>;
+  const username = normalUsername(record.username);
+  const cleanDisplayName = displayName(record.displayName, username);
+  if (typeof record.passwordHash !== 'string' || Buffer.from(record.passwordHash, 'base64').length !== 64) {
+    invalid('Backup password hash is invalid.');
+  }
+  if (typeof record.salt !== 'string' || record.salt.length < 8 || record.salt.length > 128) {
+    invalid('Backup password salt is invalid.');
+  }
+  const created = typeof record.createdAt === 'number' && Number.isFinite(record.createdAt)
+    ? Math.max(1, Math.min(Date.now(), record.createdAt))
+    : Date.now();
+  const updated = typeof record.updatedAt === 'number' && Number.isFinite(record.updatedAt)
+    ? Math.max(created, Math.min(Date.now(), record.updatedAt))
+    : created;
+
+  return mutate(async () => {
+    const file = await load();
+    if (file.accounts.length >= MAX_ACCOUNTS) {
+      throw new AppError('This installation already has the maximum of 20 accounts.', 409, 'accounts_full');
+    }
+    if (file.accounts.some((account) => account.username === username)) {
+      throw new AppError(
+        'That username already exists on this installation. Delete or rename it before restoring.',
+        409,
+        'username_taken',
+      );
+    }
+    const account: StoredAccount = {
+      id: `usr_${crypto.randomBytes(10).toString('hex')}`,
+      username,
+      displayName: cleanDisplayName,
+      createdAt: created,
+      updatedAt: updated,
+      passwordHash: record.passwordHash as string,
+      salt: record.salt as string,
+    };
+    file.accounts.push(account);
     const session = newSession(file, account.id);
     await save(file);
     return session;
