@@ -65,11 +65,11 @@
     <main id="main">
       <section class="log-hero">
         <div class="shell">
-          <p class="eyebrow"><span class="dot"></span> 28 releases</p>
+          <p class="eyebrow"><span class="dot"></span> 29 releases</p>
           <h1>Update log</h1>
           <p>
             What changed in every Movaryn build, newest first. The newest release is
-            <strong>2.2.3</strong> — Warn when a backup is from a newer Movaryn.
+            <strong>2.2.4</strong> — Open the latest release from the backup warning.
           </p>
         </div>
       </section>
@@ -78,6 +78,12 @@
         <aside class="log-index">
           <p>All releases</p>
           <ol>
+        <li>
+          <a href="#v2.2.4">
+            2.2.4
+            <small>Open the latest release from the backup warning</small>
+          </a>
+        </li>
         <li>
           <a href="#v2.2.3">
             2.2.3
@@ -250,11 +256,31 @@
         </aside>
 
         <section class="log-entries" aria-label="Release notes">
+      <article class="log-entry" id="v2.2.4">
+        <header class="log-entry-header">
+          <h2>2.2.4</h2>
+          <span class="log-title">Open the latest release from the backup warning</span>
+          <span class="log-latest">Latest</span>
+        </header>
+        <ul>
+          <li><strong>The newer-backup warning now has an action.</strong> A new <strong>Open the latest release</strong> link sits inside the warning and opens the project's latest GitHub release in the default browser.</li>
+          <li><strong>No automatic download or install.</strong> The link only opens the release page; the user still chooses whether to download, and restore remains available in the current build.</li>
+          <li><strong>Consistent external links.</strong> The warning uses the same external-link handling as the update log and roadmap, so the desktop app sends it to the system browser instead of opening it in-app.</li>
+        </ul>
+        <p>### Notes</p>
+        <ul>
+          <li>The link follows GitHub's <code>releases/latest</code> redirect, so it always points at the newest published release rather than a hard-coded version.</li>
+          <li>There is still no network request until the link is pressed or the existing username check runs.</li>
+        </ul>
+        <a class="log-release-link" href="https://github.com/Krillekz/movaryn/releases/tag/v2.2.4">
+          Release notes on GitHub <span aria-hidden="true">→</span>
+        </a>
+      </article>
+
       <article class="log-entry" id="v2.2.3">
         <header class="log-entry-header">
           <h2>2.2.3</h2>
           <span class="log-title">Warn when a backup is from a newer Movaryn</span>
-          <span class="log-latest">Latest</span>
         </header>
         <ul>
           <li><strong>Version-aware restore preview.</strong> The preview compares the Movaryn version that created the backup with the version currently running and shows a warning when the backup is newer.</li>

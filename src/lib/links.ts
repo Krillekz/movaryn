@@ -2,6 +2,7 @@
 export const SITE_URL = 'https://krillekz.github.io/movaryn/';
 export const CHANGELOG_URL = `${SITE_URL}changelog.html`;
 export const ROADMAP_URL = `${SITE_URL}roadmap.html`;
+export const LATEST_RELEASE_URL = 'https://github.com/Krillekz/movaryn/releases/latest';
 
 /**
  * Opens a public page in a new tab. Kept as a helper so the command palette

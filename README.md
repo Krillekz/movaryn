@@ -36,9 +36,9 @@ It is not a generic chatbot with a game skin:
 - **Encrypted account backups.** Back up one account and its workspace into a single file encrypted in
   the browser with AES-GCM and a passphrase derived through PBKDF2. Restoring first previews the account
   name, checks that the username is unused by every local account, shows its chat, project, notebook
-  and version counts, and warns when the backup was created by a newer Movaryn version; only then does
-  it create the account and switch to the workspace. The backup passphrase is separate from the account
-  password and cannot be recovered.
+  and version counts, and warns when the backup was created by a newer Movaryn version, with a link to
+  the latest release; only then does it create the account and switch to the workspace. The backup
+  passphrase is separate from the account password and cannot be recovered.
 - **A design system, not just a theme toggle.** Six accent palettes, plain/grid/glow atmospheres, three
   corner styles, a serif or sans reading face, six curated looks and a compact sidebar — with a live
   preview in Settings → Appearance.

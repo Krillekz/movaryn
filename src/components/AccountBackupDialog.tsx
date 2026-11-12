@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { ArrowLeft, Download, Eye, Loader2, Upload } from 'lucide-react';
+import { ArrowLeft, Download, ExternalLink, Eye, Loader2, Upload } from 'lucide-react';
 import {
   exportLocalAccount,
   importLocalAccount,
@@ -9,6 +9,7 @@ import { decryptBackup, encryptBackup, type BackupDocument } from '../lib/backup
 import { exportWorkspaceSnapshot, importWorkspaceSnapshot } from '../lib/db';
 import { useApp } from '../store/useApp';
 import { APP_VERSION } from '../lib/appVersion';
+import { LATEST_RELEASE_URL, openExternal } from '../lib/links';
 import { downloadJson, slugify } from '../lib/utils';
 import { Modal } from './ui/Modal';
 
@@ -331,11 +332,21 @@ export function AccountBackupDialog({ open, initialMode, onClose }: AccountBacku
             </p>
 
             {backupIsNewer ? (
-              <p className="rounded-lg border border-warn/30 bg-warn/10 px-3 py-2 text-[11.5px] leading-relaxed text-warn">
-                This backup was created by Movaryn {pendingBackup.appVersion}, which is newer than this
-                installation ({APP_VERSION}). Update Movaryn before restoring if possible; newer fields
-                may otherwise be ignored.
-              </p>
+              <div className="rounded-lg border border-warn/30 bg-warn/10 px-3 py-2 text-[11.5px] leading-relaxed text-warn">
+                <p>
+                  This backup was created by Movaryn {pendingBackup.appVersion}, which is newer than this
+                  installation ({APP_VERSION}). Update Movaryn before restoring if possible; newer fields
+                  may otherwise be ignored.
+                </p>
+                <button
+                  type="button"
+                  className="mt-1 inline-flex items-center gap-1 font-medium underline decoration-warn/50 underline-offset-2 hover:decoration-warn"
+                  onClick={() => openExternal(LATEST_RELEASE_URL)}
+                >
+                  Open the latest release
+                  <ExternalLink size={11} />
+                </button>
+              </div>
             ) : null}
 
             {usernameStatus === 'checking' ? (

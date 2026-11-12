@@ -1,5 +1,10 @@
 [
   {
+    "version": "2.2.4",
+    "title": "Open the latest release from the backup warning",
+    "summary": "The newer-backup warning now has an action. A new Open the latest release link sits inside the warning and opens the project's latest GitHub release…"
+  },
+  {
     "version": "2.2.3",
     "title": "Warn when a backup is from a newer Movaryn",
     "summary": "Version-aware restore preview. The preview compares the Movaryn version that created the backup with the version currently running and shows a warnin…"

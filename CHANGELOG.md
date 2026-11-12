@@ -1,5 +1,20 @@
 # Update log
 
+## 2.2.4 — Open the latest release from the backup warning
+
+- **The newer-backup warning now has an action.** A new **Open the latest release** link sits inside the
+  warning and opens the project's latest GitHub release in the default browser.
+- **No automatic download or install.** The link only opens the release page; the user still chooses
+  whether to download, and restore remains available in the current build.
+- **Consistent external links.** The warning uses the same external-link handling as the update log and
+  roadmap, so the desktop app sends it to the system browser instead of opening it in-app.
+
+### Notes
+
+- The link follows GitHub's `releases/latest` redirect, so it always points at the newest published
+  release rather than a hard-coded version.
+- There is still no network request until the link is pressed or the existing username check runs.
+
 ## 2.2.3 — Warn when a backup is from a newer Movaryn
 
 - **Version-aware restore preview.** The preview compares the Movaryn version that created the backup
