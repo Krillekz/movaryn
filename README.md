@@ -34,9 +34,10 @@ It is not a generic chatbot with a game skin:
   separate local workspace, and guest chats can be copied in deliberately. Passwords are scrypt-hashed
   and sessions are stored as hashes. This is not cloud sync, and there is no email recovery.
 - **Encrypted account backups.** Back up one account and its workspace into a single file encrypted in
-  the browser with AES-GCM and a passphrase derived through PBKDF2. Restore it on another installation
-  to recreate the account and open its chats, projects, notebooks, versions and settings. The backup
-  passphrase is separate from the account password and cannot be recovered.
+  the browser with AES-GCM and a passphrase derived through PBKDF2. Restoring first previews the account
+  name and its chat, project, notebook and version counts; only then does it create the account and
+  switch to the workspace. The backup passphrase is separate from the account password and cannot be
+  recovered.
 - **A design system, not just a theme toggle.** Six accent palettes, plain/grid/glow atmospheres, three
   corner styles, a serif or sans reading face, six curated looks and a compact sidebar — with a live
   preview in Settings → Appearance.

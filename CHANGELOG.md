@@ -1,5 +1,27 @@
 # Update log
 
+## 2.2.1 — Preview an account restore before switching
+
+- **Restoring a backup is now two steps.** Enter the file and passphrase, then review a preview of the
+  account and workspace before anything changes. The current account and workspace stay open until you
+  press **Restore and switch**.
+- **The preview shows what is inside.** Display name and username, backup date and Movaryn version, and
+  counts for chats, projects, notebooks and saved versions. It also reports research facts and whether
+  workspace settings are included.
+- **Clearer recovery controls.** A same-username warning disables the restore button when the signed-in
+  account already uses that name, and **Choose another file** returns to the file form and clears the
+  selected file and passphrase.
+- **Safe failure handling.** Duplicate usernames and invalid backup data still stop before the account
+  is created, and failures after creation are surfaced as a toast because the dialog closes during the
+  workspace switch.
+
+### Notes
+
+- The preview can compare the username against the currently signed-in account only. Conflicts with
+  another local account are still rejected by the server before any switch.
+- Backups remain local files encrypted with the backup passphrase. There is no cloud storage and no
+  passphrase recovery.
+
 ## 2.2.0 — Account workspaces, encrypted backups, more looks
 
 - **Each account gets its own workspace.** Conversations, projects, notebooks, versions, research and

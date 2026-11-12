@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
-import { Download, Loader2, Upload } from 'lucide-react';
+import { ArrowLeft, Download, Eye, Loader2, Upload } from 'lucide-react';
 import { exportLocalAccount, importLocalAccount } from '../lib/account';
-import { decryptBackup, encryptBackup } from '../lib/backup';
+import { decryptBackup, encryptBackup, type BackupDocument } from '../lib/backup';
 import { exportWorkspaceSnapshot, importWorkspaceSnapshot } from '../lib/db';
 import { useApp } from '../store/useApp';
 import { downloadJson, slugify } from '../lib/utils';
@@ -26,6 +26,7 @@ export function AccountBackupDialog({ open, initialMode, onClose }: AccountBacku
   const [passphrase, setPassphrase] = useState('');
   const [confirm, setConfirm] = useState('');
   const [file, setFile] = useState<File | null>(null);
+  const [pendingBackup, setPendingBackup] = useState<BackupDocument | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
@@ -37,6 +38,7 @@ export function AccountBackupDialog({ open, initialMode, onClose }: AccountBacku
     setPassphrase('');
     setConfirm('');
     setFile(null);
+    setPendingBackup(null);
     setError(null);
     if (fileRef.current) fileRef.current.value = '';
   }, [open, initialMode, account]);
@@ -68,7 +70,7 @@ export function AccountBackupDialog({ open, initialMode, onClose }: AccountBacku
     }
   };
 
-  const restoreBackup = async () => {
+  const previewBackup = async () => {
     if (busy || !file) return;
     setError(null);
     if (!passphrase) {
@@ -76,7 +78,6 @@ export function AccountBackupDialog({ open, initialMode, onClose }: AccountBacku
       return;
     }
     setBusy(true);
-    let accountCreated = false;
     try {
       let raw: unknown;
       try {
@@ -84,7 +85,21 @@ export function AccountBackupDialog({ open, initialMode, onClose }: AccountBacku
       } catch {
         throw new Error('That file is not valid JSON.');
       }
-      const backup = await decryptBackup(raw, passphrase);
+      setPendingBackup(await decryptBackup(raw, passphrase));
+    } catch (caught) {
+      setError(caught instanceof Error ? caught.message : 'The backup could not be opened.');
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const restoreBackup = async () => {
+    const backup = pendingBackup;
+    if (busy || !backup) return;
+    setError(null);
+    setBusy(true);
+    let accountCreated = false;
+    try {
       const session = await importLocalAccount(backup.account);
       accountCreated = true;
       setAccount(session.user);
@@ -109,6 +124,31 @@ export function AccountBackupDialog({ open, initialMode, onClose }: AccountBacku
     }
   };
 
+  const backToFile = () => {
+    setPendingBackup(null);
+    setFile(null);
+    setPassphrase('');
+    setError(null);
+    if (fileRef.current) fileRef.current.value = '';
+  };
+
+  const backupAccount = pendingBackup?.account;
+  const backupWorkspace = pendingBackup?.workspace;
+  const backupInitial = (backupAccount?.displayName || backupAccount?.username || '?')
+    .trim()
+    .charAt(0)
+    .toUpperCase();
+  const backupDate = pendingBackup ? new Date(pendingBackup.exportedAt).toLocaleDateString() : '';
+  const sameUsername = Boolean(account && backupAccount?.username === account.username);
+  const backupStats = backupWorkspace
+    ? [
+        { label: 'Chats', value: backupWorkspace.conversations.length },
+        { label: 'Projects', value: backupWorkspace.projects.length },
+        { label: 'Notebooks', value: backupWorkspace.notebooks.length },
+        { label: 'Saved versions', value: backupWorkspace.versions.length },
+      ]
+    : [];
+
   return (
     <Modal
       open={open}
@@ -129,6 +169,7 @@ export function AccountBackupDialog({ open, initialMode, onClose }: AccountBacku
               }`}
               onClick={() => {
                 setMode('export');
+                setPendingBackup(null);
                 setError(null);
               }}
             >
@@ -143,6 +184,7 @@ export function AccountBackupDialog({ open, initialMode, onClose }: AccountBacku
                 : 'border-line bg-panel text-ink-muted hover:text-ink'
             } ${account ? '' : 'col-span-2'}`}
             onClick={() => {
+              if (mode !== 'import') setPendingBackup(null);
               setMode('import');
               setError(null);
             }}
@@ -212,18 +254,88 @@ export function AccountBackupDialog({ open, initialMode, onClose }: AccountBacku
               Create encrypted backup
             </button>
           </form>
+        ) : pendingBackup && backupAccount && backupWorkspace ? (
+          <div className="flex flex-col gap-3">
+            <div className="rounded-xl border border-accent/35 bg-accent-soft px-4 py-3.5">
+              <div className="flex items-start gap-3">
+                <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-accent-soft text-[15px] font-semibold text-accent">
+                  {backupInitial}
+                </span>
+                <div className="min-w-0">
+                  <p className="truncate text-[14px] font-semibold text-ink">
+                    {backupAccount.displayName || backupAccount.username}
+                  </p>
+                  <p className="truncate text-[11.5px] text-ink-muted">@{backupAccount.username}</p>
+                  <p className="mt-0.5 text-[10.5px] text-ink-faint">
+                    Backup from {backupDate} · Movaryn {pendingBackup.appVersion || 'earlier version'}
+                  </p>
+                </div>
+                <span className="ml-auto shrink-0 rounded-full border border-accent/35 px-2 py-0.5 text-[10px] text-accent">
+                  Preview
+                </span>
+              </div>
+
+              <dl className="mt-3 grid grid-cols-2 gap-2">
+                {backupStats.map((stat) => (
+                  <div key={stat.label} className="rounded-lg border border-line/70 bg-panel/70 px-3 py-2">
+                    <dt className="text-[10px] uppercase tracking-wide text-ink-faint">{stat.label}</dt>
+                    <dd className="mt-0.5 text-[15px] font-semibold text-ink">{stat.value}</dd>
+                  </div>
+                ))}
+              </dl>
+              <p className="mt-2 text-[10.5px] text-ink-faint">
+                {backupWorkspace.research.length} research fact
+                {backupWorkspace.research.length === 1 ? '' : 's'} · Settings{' '}
+                {backupWorkspace.settings ? 'included' : 'use defaults'}
+              </p>
+            </div>
+
+            <p className="rounded-xl border border-line bg-panel px-3 py-2.5 text-[11.5px] leading-relaxed text-ink-muted">
+              Review only — nothing has been created or switched yet. Restoring creates a new local
+              account with this name and opens its workspace; the current workspace stays open until the
+              new account finishes loading.
+            </p>
+
+            {sameUsername ? (
+              <p className="rounded-lg border border-warn/30 bg-warn/10 px-3 py-2 text-[11.5px] leading-relaxed text-warn">
+                This installation already has @{backupAccount.username}. Delete or rename that account
+                before restoring; nothing will change until then.
+              </p>
+            ) : null}
+            {error ? <p className="text-[11.5px] text-danger">{error}</p> : null}
+
+            <div className="flex flex-wrap gap-2">
+              <button
+                type="button"
+                className="btn btn-secondary h-9 text-[12px]"
+                onClick={backToFile}
+                disabled={busy}
+              >
+                <ArrowLeft size={14} />
+                Choose another file
+              </button>
+              <button
+                type="button"
+                className="btn btn-primary h-9 text-[12px]"
+                onClick={() => void restoreBackup()}
+                disabled={busy || sameUsername}
+              >
+                {busy ? <Loader2 size={14} className="animate-spin" /> : <Upload size={14} />}
+                Restore and switch
+              </button>
+            </div>
+          </div>
         ) : (
           <form
             className="flex flex-col gap-3"
             onSubmit={(event) => {
               event.preventDefault();
-              void restoreBackup();
+              void previewBackup();
             }}
           >
             <p className="rounded-xl border border-line bg-panel px-3 py-2.5 text-[11.5px] leading-relaxed text-ink-muted">
-              Restoring creates a local account from the file and opens the workspace inside it. If the
-              username already exists on this installation, choose another installation or rename the
-              existing account first.
+              Unlock the file and review the account and workspace inside before anything changes. If the
+              username already exists on this installation, restore stops before switching.
             </p>
             <div>
               <label className="field-label" htmlFor="backup-file">
@@ -234,7 +346,11 @@ export function AccountBackupDialog({ open, initialMode, onClose }: AccountBacku
                 id="backup-file"
                 type="file"
                 accept=".json,application/json"
-                onChange={(event) => setFile(event.target.files?.[0] ?? null)}
+                onChange={(event) => {
+                  setFile(event.target.files?.[0] ?? null);
+                  setPendingBackup(null);
+                  setError(null);
+                }}
                 className="field file:mr-3 file:rounded-md file:border-0 file:bg-panel-3 file:px-2.5 file:py-1 file:text-[11px] file:text-ink-muted"
               />
             </div>
@@ -246,15 +362,19 @@ export function AccountBackupDialog({ open, initialMode, onClose }: AccountBacku
                 id="restore-passphrase"
                 type="password"
                 value={passphrase}
-                onChange={(event) => setPassphrase(event.target.value)}
+                onChange={(event) => {
+                  setPassphrase(event.target.value);
+                  setPendingBackup(null);
+                  setError(null);
+                }}
                 autoComplete="off"
                 className="field"
               />
             </div>
             {error ? <p className="text-[11.5px] text-danger">{error}</p> : null}
             <button type="submit" className="btn btn-primary mt-1" disabled={busy || !file}>
-              {busy ? <Loader2 size={14} className="animate-spin" /> : <Upload size={14} />}
-              Restore and open workspace
+              {busy ? <Loader2 size={14} className="animate-spin" /> : <Eye size={14} />}
+              Preview backup
             </button>
           </form>
         )}

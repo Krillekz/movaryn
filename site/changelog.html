@@ -65,11 +65,11 @@
     <main id="main">
       <section class="log-hero">
         <div class="shell">
-          <p class="eyebrow"><span class="dot"></span> 25 releases</p>
+          <p class="eyebrow"><span class="dot"></span> 26 releases</p>
           <h1>Update log</h1>
           <p>
             What changed in every Movaryn build, newest first. The newest release is
-            <strong>2.2.0</strong> — Account workspaces, encrypted backups, more looks.
+            <strong>2.2.1</strong> — Preview an account restore before switching.
           </p>
         </div>
       </section>
@@ -78,6 +78,12 @@
         <aside class="log-index">
           <p>All releases</p>
           <ol>
+        <li>
+          <a href="#v2.2.1">
+            2.2.1
+            <small>Preview an account restore before switching</small>
+          </a>
+        </li>
         <li>
           <a href="#v2.2.0">
             2.2.0
@@ -232,11 +238,32 @@
         </aside>
 
         <section class="log-entries" aria-label="Release notes">
+      <article class="log-entry" id="v2.2.1">
+        <header class="log-entry-header">
+          <h2>2.2.1</h2>
+          <span class="log-title">Preview an account restore before switching</span>
+          <span class="log-latest">Latest</span>
+        </header>
+        <ul>
+          <li><strong>Restoring a backup is now two steps.</strong> Enter the file and passphrase, then review a preview of the account and workspace before anything changes. The current account and workspace stay open until you press <strong>Restore and switch</strong>.</li>
+          <li><strong>The preview shows what is inside.</strong> Display name and username, backup date and Movaryn version, and counts for chats, projects, notebooks and saved versions. It also reports research facts and whether workspace settings are included.</li>
+          <li><strong>Clearer recovery controls.</strong> A same-username warning disables the restore button when the signed-in account already uses that name, and <strong>Choose another file</strong> returns to the file form and clears the selected file and passphrase.</li>
+          <li><strong>Safe failure handling.</strong> Duplicate usernames and invalid backup data still stop before the account is created, and failures after creation are surfaced as a toast because the dialog closes during the workspace switch.</li>
+        </ul>
+        <p>### Notes</p>
+        <ul>
+          <li>The preview can compare the username against the currently signed-in account only. Conflicts with another local account are still rejected by the server before any switch.</li>
+          <li>Backups remain local files encrypted with the backup passphrase. There is no cloud storage and no passphrase recovery.</li>
+        </ul>
+        <a class="log-release-link" href="https://github.com/Krillekz/movaryn/releases/tag/v2.2.1">
+          Release notes on GitHub <span aria-hidden="true">→</span>
+        </a>
+      </article>
+
       <article class="log-entry" id="v2.2.0">
         <header class="log-entry-header">
           <h2>2.2.0</h2>
           <span class="log-title">Account workspaces, encrypted backups, more looks</span>
-          <span class="log-latest">Latest</span>
         </header>
         <ul>
           <li><strong>Each account gets its own workspace.</strong> Conversations, projects, notebooks, versions, research and design settings now live in a separate local database per account. Guest work stays in the guest workspace, so signing in no longer mixes one person's chats with another's on the same installation.</li>

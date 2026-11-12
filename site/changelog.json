@@ -1,5 +1,10 @@
 [
   {
+    "version": "2.2.1",
+    "title": "Preview an account restore before switching",
+    "summary": "Restoring a backup is now two steps. Enter the file and passphrase, then review a preview of the account and workspace before anything changes. The c…"
+  },
+  {
     "version": "2.2.0",
     "title": "Account workspaces, encrypted backups, more looks",
     "summary": "Each account gets its own workspace. Conversations, projects, notebooks, versions, research and design settings now live in a separate local database…"
