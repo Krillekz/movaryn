@@ -18,6 +18,7 @@ import {
   getAccountStatus,
   loginAccount,
   importAccount,
+  isUsernameAvailable,
   logoutAccount,
   registerAccount,
   updateAccountProfile,
@@ -262,6 +263,12 @@ app.post('/api/account/restore', authRateLimit, async (req: Request, res: Respon
   const session = await importAccount({ account: req.body?.account });
   res.setHeader('Cache-Control', 'no-store');
   res.status(201).json(session);
+});
+
+app.post('/api/account/restore-check', authRateLimit, async (req: Request, res: Response) => {
+  const available = await isUsernameAvailable({ username: req.body?.username });
+  res.setHeader('Cache-Control', 'no-store');
+  res.json({ available });
 });
 
 app.post('/api/account/password', authRateLimit, async (req: Request, res: Response) => {

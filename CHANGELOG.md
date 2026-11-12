@@ -1,5 +1,23 @@
 # Update log
 
+## 2.2.2 — Check the restore username against every account
+
+- **The restore preview now checks the whole installation.** After unlocking a backup, Movaryn asks
+  the local account service whether the backup's username is already in use by any account, not just
+  the one currently signed in.
+- **Clear preview states.** The dialog shows **Checking**, **Available** or **Already taken**. A taken
+  username disables **Restore and switch** before anything is created; an available name enables it.
+- **Offline is explicit.** If the account service cannot answer, the preview says the username could
+  not be checked and leaves server-side validation in place instead of pretending the name is free.
+- **Minimal disclosure.** The new check returns only a boolean for the requested username; it does not
+  expose the installation's account list.
+
+### Notes
+
+- The check is still subject to the local account-service rate limit, and an offline service cannot
+  complete a restore anyway.
+- The preview remains read-only: checking a username creates no account, workspace or session.
+
 ## 2.2.1 — Preview an account restore before switching
 
 - **Restoring a backup is now two steps.** Enter the file and passphrase, then review a preview of the

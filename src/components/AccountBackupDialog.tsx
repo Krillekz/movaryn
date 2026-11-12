@@ -1,6 +1,10 @@
 import { useEffect, useRef, useState } from 'react';
 import { ArrowLeft, Download, Eye, Loader2, Upload } from 'lucide-react';
-import { exportLocalAccount, importLocalAccount } from '../lib/account';
+import {
+  exportLocalAccount,
+  importLocalAccount,
+  isLocalUsernameAvailable,
+} from '../lib/account';
 import { decryptBackup, encryptBackup, type BackupDocument } from '../lib/backup';
 import { exportWorkspaceSnapshot, importWorkspaceSnapshot } from '../lib/db';
 import { useApp } from '../store/useApp';
@@ -27,6 +31,9 @@ export function AccountBackupDialog({ open, initialMode, onClose }: AccountBacku
   const [confirm, setConfirm] = useState('');
   const [file, setFile] = useState<File | null>(null);
   const [pendingBackup, setPendingBackup] = useState<BackupDocument | null>(null);
+  const [usernameStatus, setUsernameStatus] = useState<
+    'checking' | 'available' | 'taken' | 'unknown'
+  >('checking');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
@@ -39,6 +46,7 @@ export function AccountBackupDialog({ open, initialMode, onClose }: AccountBacku
     setConfirm('');
     setFile(null);
     setPendingBackup(null);
+    setUsernameStatus('checking');
     setError(null);
     if (fileRef.current) fileRef.current.value = '';
   }, [open, initialMode, account]);
@@ -85,7 +93,15 @@ export function AccountBackupDialog({ open, initialMode, onClose }: AccountBacku
       } catch {
         throw new Error('That file is not valid JSON.');
       }
-      setPendingBackup(await decryptBackup(raw, passphrase));
+      const backup = await decryptBackup(raw, passphrase);
+      setPendingBackup(backup);
+      setUsernameStatus('checking');
+      try {
+        const available = await isLocalUsernameAvailable(backup.account.username);
+        setUsernameStatus(available ? 'available' : 'taken');
+      } catch {
+        setUsernameStatus('unknown');
+      }
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : 'The backup could not be opened.');
     } finally {
@@ -126,6 +142,7 @@ export function AccountBackupDialog({ open, initialMode, onClose }: AccountBacku
 
   const backToFile = () => {
     setPendingBackup(null);
+    setUsernameStatus('checking');
     setFile(null);
     setPassphrase('');
     setError(null);
@@ -139,7 +156,6 @@ export function AccountBackupDialog({ open, initialMode, onClose }: AccountBacku
     .charAt(0)
     .toUpperCase();
   const backupDate = pendingBackup ? new Date(pendingBackup.exportedAt).toLocaleDateString() : '';
-  const sameUsername = Boolean(account && backupAccount?.username === account.username);
   const backupStats = backupWorkspace
     ? [
         { label: 'Chats', value: backupWorkspace.conversations.length },
@@ -296,10 +312,27 @@ export function AccountBackupDialog({ open, initialMode, onClose }: AccountBacku
               new account finishes loading.
             </p>
 
-            {sameUsername ? (
+            {usernameStatus === 'checking' ? (
+              <p className="flex items-center gap-2 rounded-lg border border-line bg-panel px-3 py-2 text-[11.5px] text-ink-muted">
+                <Loader2 size={13} className="animate-spin" />
+                Checking @{backupAccount.username} against every local account…
+              </p>
+            ) : null}
+            {usernameStatus === 'available' ? (
+              <p className="rounded-lg border border-ok/30 bg-ok/10 px-3 py-2 text-[11.5px] leading-relaxed text-ok">
+                @{backupAccount.username} is available on this installation.
+              </p>
+            ) : null}
+            {usernameStatus === 'taken' ? (
               <p className="rounded-lg border border-warn/30 bg-warn/10 px-3 py-2 text-[11.5px] leading-relaxed text-warn">
                 This installation already has @{backupAccount.username}. Delete or rename that account
                 before restoring; nothing will change until then.
+              </p>
+            ) : null}
+            {usernameStatus === 'unknown' ? (
+              <p className="rounded-lg border border-warn/30 bg-warn/10 px-3 py-2 text-[11.5px] leading-relaxed text-warn">
+                The username could not be checked while the account service is unavailable. Restore will
+                still verify it on the server before creating anything.
               </p>
             ) : null}
             {error ? <p className="text-[11.5px] text-danger">{error}</p> : null}
@@ -318,10 +351,18 @@ export function AccountBackupDialog({ open, initialMode, onClose }: AccountBacku
                 type="button"
                 className="btn btn-primary h-9 text-[12px]"
                 onClick={() => void restoreBackup()}
-                disabled={busy || sameUsername}
+                disabled={busy || usernameStatus === 'checking' || usernameStatus === 'taken'}
               >
-                {busy ? <Loader2 size={14} className="animate-spin" /> : <Upload size={14} />}
-                Restore and switch
+                {busy || usernameStatus === 'checking' ? (
+                  <Loader2 size={14} className="animate-spin" />
+                ) : (
+                  <Upload size={14} />
+                )}
+                {usernameStatus === 'checking'
+                  ? 'Checking username…'
+                  : busy
+                    ? 'Restoring…'
+                    : 'Restore and switch'}
               </button>
             </div>
           </div>

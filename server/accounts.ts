@@ -402,6 +402,12 @@ export async function exportAccountCredentials(
   };
 }
 
+export async function isUsernameAvailable(input: { username?: unknown }): Promise<boolean> {
+  const username = normalUsername(input.username);
+  const file = await load();
+  return !file.accounts.some((account) => account.username === username);
+}
+
 /** Recreate an account on another installation from an encrypted backup. */
 export async function importAccount(input: { account?: unknown }): Promise<AccountSession> {
   const raw = input.account;

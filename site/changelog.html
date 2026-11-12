@@ -65,11 +65,11 @@
     <main id="main">
       <section class="log-hero">
         <div class="shell">
-          <p class="eyebrow"><span class="dot"></span> 26 releases</p>
+          <p class="eyebrow"><span class="dot"></span> 27 releases</p>
           <h1>Update log</h1>
           <p>
             What changed in every Movaryn build, newest first. The newest release is
-            <strong>2.2.1</strong> — Preview an account restore before switching.
+            <strong>2.2.2</strong> — Check the restore username against every account.
           </p>
         </div>
       </section>
@@ -78,6 +78,12 @@
         <aside class="log-index">
           <p>All releases</p>
           <ol>
+        <li>
+          <a href="#v2.2.2">
+            2.2.2
+            <small>Check the restore username against every account</small>
+          </a>
+        </li>
         <li>
           <a href="#v2.2.1">
             2.2.1
@@ -238,11 +244,32 @@
         </aside>
 
         <section class="log-entries" aria-label="Release notes">
+      <article class="log-entry" id="v2.2.2">
+        <header class="log-entry-header">
+          <h2>2.2.2</h2>
+          <span class="log-title">Check the restore username against every account</span>
+          <span class="log-latest">Latest</span>
+        </header>
+        <ul>
+          <li><strong>The restore preview now checks the whole installation.</strong> After unlocking a backup, Movaryn asks the local account service whether the backup's username is already in use by any account, not just the one currently signed in.</li>
+          <li><strong>Clear preview states.</strong> The dialog shows <strong>Checking</strong>, <strong>Available</strong> or <strong>Already taken</strong>. A taken username disables <strong>Restore and switch</strong> before anything is created; an available name enables it.</li>
+          <li><strong>Offline is explicit.</strong> If the account service cannot answer, the preview says the username could not be checked and leaves server-side validation in place instead of pretending the name is free.</li>
+          <li><strong>Minimal disclosure.</strong> The new check returns only a boolean for the requested username; it does not expose the installation's account list.</li>
+        </ul>
+        <p>### Notes</p>
+        <ul>
+          <li>The check is still subject to the local account-service rate limit, and an offline service cannot complete a restore anyway.</li>
+          <li>The preview remains read-only: checking a username creates no account, workspace or session.</li>
+        </ul>
+        <a class="log-release-link" href="https://github.com/Krillekz/movaryn/releases/tag/v2.2.2">
+          Release notes on GitHub <span aria-hidden="true">→</span>
+        </a>
+      </article>
+
       <article class="log-entry" id="v2.2.1">
         <header class="log-entry-header">
           <h2>2.2.1</h2>
           <span class="log-title">Preview an account restore before switching</span>
-          <span class="log-latest">Latest</span>
         </header>
         <ul>
           <li><strong>Restoring a backup is now two steps.</strong> Enter the file and passphrase, then review a preview of the account and workspace before anything changes. The current account and workspace stay open until you press <strong>Restore and switch</strong>.</li>

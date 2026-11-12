@@ -1,5 +1,10 @@
 [
   {
+    "version": "2.2.2",
+    "title": "Check the restore username against every account",
+    "summary": "The restore preview now checks the whole installation. After unlocking a backup, Movaryn asks the local account service whether the backup's username…"
+  },
+  {
     "version": "2.2.1",
     "title": "Preview an account restore before switching",
     "summary": "Restoring a backup is now two steps. Enter the file and passphrase, then review a preview of the account and workspace before anything changes. The c…"

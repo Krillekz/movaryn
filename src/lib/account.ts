@@ -141,6 +141,14 @@ export async function exportLocalAccount(password: string): Promise<AccountCrede
   return result.account;
 }
 
+export async function isLocalUsernameAvailable(username: string): Promise<boolean> {
+  const result = await request<{ available: boolean }>('/api/account/restore-check', {
+    method: 'POST',
+    body: JSON.stringify({ username }),
+  });
+  return result.available;
+}
+
 export async function importLocalAccount(
   account: AccountCredentialRecord,
 ): Promise<AccountSession> {
