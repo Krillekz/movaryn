@@ -3,6 +3,7 @@ import {
   Check,
   CheckCircle2,
   Database,
+  ExternalLink,
   Heart,
   Info,
   LayoutPanelLeft,
@@ -30,9 +31,10 @@ import { ASPECT_RATIOS } from '../../shared/types';
 import { fetchHealth } from '../lib/api';
 import { apiBase, isBrowserBuild, setApiBase } from '../lib/apiBase';
 import { useApp, type SettingsTabId } from '../store/useApp';
-import { APP_VERSION } from '../lib/appVersion';
+import { APP_VERSION, compareVersions } from '../lib/appVersion';
 import { exportAllData } from '../lib/exportData';
-import { CHANGELOG_URL, ROADMAP_URL } from '../lib/links';
+import { CHANGELOG_URL, LATEST_RELEASE_URL, ROADMAP_URL, openExternal } from '../lib/links';
+import { fetchLatestRelease, type LatestRelease } from '../lib/updates';
 import { cx } from '../lib/utils';
 import { Modal } from './ui/Modal';
 
@@ -174,6 +176,12 @@ export function SettingsDialog() {
   const tab = useApp((state) => state.ui.settingsTab);
   const setTab = useApp((state) => state.setSettingsTab);
   const [rechecking, setRechecking] = useState(false);
+  const [checkingUpdate, setCheckingUpdate] = useState(false);
+  const [updateResult, setUpdateResult] = useState<{
+    status: 'current' | 'available' | 'ahead' | 'unknown';
+    release?: LatestRelease;
+    message?: string;
+  } | null>(null);
 
   const recheck = async () => {
     setRechecking(true);
@@ -197,6 +205,36 @@ export function SettingsDialog() {
   const exportAll = () => {
     exportAllData();
     pushToast('Export downloaded.', 'success');
+  };
+
+  const checkForUpdates = async () => {
+    if (checkingUpdate) return;
+    setCheckingUpdate(true);
+    setUpdateResult(null);
+    try {
+      const release = await fetchLatestRelease();
+      const comparison = compareVersions(release.version, APP_VERSION);
+      if (comparison === null) {
+        setUpdateResult({
+          status: 'unknown',
+          release,
+          message: 'The release version could not be compared with this build.',
+        });
+      } else if (comparison > 0) {
+        setUpdateResult({ status: 'available', release });
+      } else if (comparison < 0) {
+        setUpdateResult({ status: 'ahead', release });
+      } else {
+        setUpdateResult({ status: 'current', release });
+      }
+    } catch (error) {
+      setUpdateResult({
+        status: 'unknown',
+        message: error instanceof Error ? error.message : 'The update check failed.',
+      });
+    } finally {
+      setCheckingUpdate(false);
+    }
   };
 
   return (
@@ -1131,6 +1169,19 @@ export function SettingsDialog() {
                   <button
                     type="button"
                     className="btn btn-secondary h-8 text-[12px]"
+                    onClick={() => void checkForUpdates()}
+                    disabled={checkingUpdate}
+                  >
+                    {checkingUpdate ? (
+                      <Loader2 size={13} className="animate-spin" />
+                    ) : (
+                      <RefreshCw size={13} />
+                    )}
+                    {checkingUpdate ? 'Checking…' : 'Check for updates'}
+                  </button>
+                  <button
+                    type="button"
+                    className="btn btn-secondary h-8 text-[12px]"
                     onClick={() => {
                       close();
                       useApp.getState().openWhatsNew();
@@ -1155,6 +1206,63 @@ export function SettingsDialog() {
                     Update log
                   </a>
                 </div>
+
+                {updateResult ? (
+                  <div
+                    aria-live="polite"
+                    className={cx(
+                      'mt-2.5 rounded-lg border px-3 py-2.5 text-[11px] leading-relaxed',
+                      updateResult.status === 'available'
+                        ? 'border-accent/35 bg-accent-soft text-ink'
+                        : updateResult.status === 'current'
+                          ? 'border-ok/30 bg-ok/10 text-ok'
+                          : updateResult.status === 'ahead'
+                            ? 'border-line bg-panel text-ink-muted'
+                            : 'border-warn/30 bg-warn/10 text-warn',
+                    )}
+                  >
+                    {updateResult.status === 'available' && updateResult.release ? (
+                      <>
+                        <p className="font-medium">
+                          Movaryn {updateResult.release.version} is available.
+                        </p>
+                        <p className="mt-0.5 text-ink-muted">
+                          You are running {APP_VERSION}. Download the latest installer from GitHub.
+                        </p>
+                        <button
+                          type="button"
+                          className="mt-1.5 inline-flex items-center gap-1 font-medium text-accent underline decoration-accent/40 underline-offset-2 hover:decoration-accent"
+                          onClick={() => openExternal(updateResult.release?.url ?? LATEST_RELEASE_URL)}
+                        >
+                          Open release
+                          <ExternalLink size={11} />
+                        </button>
+                      </>
+                    ) : updateResult.status === 'current' ? (
+                      <p>
+                        You&apos;re up to date with the latest public release
+                        {updateResult.release ? ` (${updateResult.release.version})` : ''}.
+                      </p>
+                    ) : updateResult.status === 'ahead' ? (
+                      <p>
+                        This build ({APP_VERSION}) is newer than the latest public release
+                        {updateResult.release ? ` (${updateResult.release.version})` : ''}.
+                      </p>
+                    ) : (
+                      <>
+                        <p>{updateResult.message ?? 'The update check could not be completed.'}</p>
+                        <button
+                          type="button"
+                          className="mt-1.5 inline-flex items-center gap-1 font-medium underline decoration-warn/50 underline-offset-2 hover:decoration-warn"
+                          onClick={() => openExternal(LATEST_RELEASE_URL)}
+                        >
+                          Open the latest release
+                          <ExternalLink size={11} />
+                        </button>
+                      </>
+                    )}
+                  </div>
+                ) : null}
               </section>
               <section className="rounded-xl border border-line bg-panel px-3.5 py-3">
                 <h3 className="text-[12px] font-semibold text-ink">Keyboard</h3>

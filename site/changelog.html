@@ -65,11 +65,11 @@
     <main id="main">
       <section class="log-hero">
         <div class="shell">
-          <p class="eyebrow"><span class="dot"></span> 29 releases</p>
+          <p class="eyebrow"><span class="dot"></span> 30 releases</p>
           <h1>Update log</h1>
           <p>
             What changed in every Movaryn build, newest first. The newest release is
-            <strong>2.2.4</strong> — Open the latest release from the backup warning.
+            <strong>2.2.5</strong> — Check for updates from About.
           </p>
         </div>
       </section>
@@ -78,6 +78,12 @@
         <aside class="log-index">
           <p>All releases</p>
           <ol>
+        <li>
+          <a href="#v2.2.5">
+            2.2.5
+            <small>Check for updates from About</small>
+          </a>
+        </li>
         <li>
           <a href="#v2.2.4">
             2.2.4
@@ -256,11 +262,32 @@
         </aside>
 
         <section class="log-entries" aria-label="Release notes">
+      <article class="log-entry" id="v2.2.5">
+        <header class="log-entry-header">
+          <h2>2.2.5</h2>
+          <span class="log-title">Check for updates from About</span>
+          <span class="log-latest">Latest</span>
+        </header>
+        <ul>
+          <li><strong>A manual update check.</strong> Settings → About now has a <strong>Check for updates</strong> action. It reads the latest published GitHub release and compares its version with the running build.</li>
+          <li><strong>Clear outcomes.</strong> The tab shows whether this build is up to date, a newer release is available, this build is ahead of the latest public release, or the check could not be completed.</li>
+          <li><strong>One action when an update exists.</strong> An available release shows <strong>Open release</strong>, which opens the GitHub release page in the system browser; nothing downloads or installs automatically.</li>
+          <li><strong>Offline and rate-limit handling.</strong> A failed check explains that GitHub could not be reached or was rate-limited and offers <strong>Open the latest release</strong> as a manual fallback.</li>
+        </ul>
+        <p>### Notes</p>
+        <ul>
+          <li>The check runs only when the button is pressed. No account or workspace data is sent; the only request is to GitHub's public latest-release endpoint.</li>
+          <li>GitHub's unauthenticated API can rate-limit repeated checks. The dialog reports that rather than claiming the app is current.</li>
+        </ul>
+        <a class="log-release-link" href="https://github.com/Krillekz/movaryn/releases/tag/v2.2.5">
+          Release notes on GitHub <span aria-hidden="true">→</span>
+        </a>
+      </article>
+
       <article class="log-entry" id="v2.2.4">
         <header class="log-entry-header">
           <h2>2.2.4</h2>
           <span class="log-title">Open the latest release from the backup warning</span>
-          <span class="log-latest">Latest</span>
         </header>
         <ul>
           <li><strong>The newer-backup warning now has an action.</strong> A new <strong>Open the latest release</strong> link sits inside the warning and opens the project's latest GitHub release in the default browser.</li>

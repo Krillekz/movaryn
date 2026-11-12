@@ -1,5 +1,23 @@
 # Update log
 
+## 2.2.5 — Check for updates from About
+
+- **A manual update check.** Settings → About now has a **Check for updates** action. It reads the
+  latest published GitHub release and compares its version with the running build.
+- **Clear outcomes.** The tab shows whether this build is up to date, a newer release is available,
+  this build is ahead of the latest public release, or the check could not be completed.
+- **One action when an update exists.** An available release shows **Open release**, which opens the
+  GitHub release page in the system browser; nothing downloads or installs automatically.
+- **Offline and rate-limit handling.** A failed check explains that GitHub could not be reached or was
+  rate-limited and offers **Open the latest release** as a manual fallback.
+
+### Notes
+
+- The check runs only when the button is pressed. No account or workspace data is sent; the only request
+  is to GitHub's public latest-release endpoint.
+- GitHub's unauthenticated API can rate-limit repeated checks. The dialog reports that rather than
+  claiming the app is current.
+
 ## 2.2.4 — Open the latest release from the backup warning
 
 - **The newer-backup warning now has an action.** A new **Open the latest release** link sits inside the

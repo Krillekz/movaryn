@@ -52,8 +52,9 @@ It is not a generic chatbot with a game skin:
   brief.
 - **A command palette.** Ctrl/⌘ K searches chats, projects and saved moves, and runs the app's
   actions, from a new chat to any Settings tab.
-- **Notes and a roadmap.** What's New opens inside the app once per version, and the public roadmap
-  lists what is in progress, planned and already shipped.
+- **Notes and a roadmap.** What's New opens inside the app once per version, the public roadmap lists
+  what is in progress, planned and already shipped, and Settings → About can check GitHub for a newer
+  release on demand.
 - **Images are separate outputs** with their own brief, prompt and revisions. Nothing is generated
   automatically after a moveset.
 

@@ -8,7 +8,7 @@ import {
 import { decryptBackup, encryptBackup, type BackupDocument } from '../lib/backup';
 import { exportWorkspaceSnapshot, importWorkspaceSnapshot } from '../lib/db';
 import { useApp } from '../store/useApp';
-import { APP_VERSION } from '../lib/appVersion';
+import { APP_VERSION, isNewerVersion } from '../lib/appVersion';
 import { LATEST_RELEASE_URL, openExternal } from '../lib/links';
 import { downloadJson, slugify } from '../lib/utils';
 import { Modal } from './ui/Modal';
@@ -17,20 +17,6 @@ interface AccountBackupDialogProps {
   open: boolean;
   initialMode: 'export' | 'import';
   onClose: () => void;
-}
-
-function isNewerVersion(candidate: string, current: string): boolean {
-  const parse = (value: string): number[] | null => {
-    const match = /^(\d+)\.(\d+)\.(\d+)/.exec(value);
-    return match ? [Number(match[1]), Number(match[2]), Number(match[3])] : null;
-  };
-  const next = parse(candidate);
-  const running = parse(current);
-  if (!next || !running) return false;
-  for (let index = 0; index < 3; index += 1) {
-    if (next[index] !== running[index]) return next[index] > running[index];
-  }
-  return false;
 }
 
 export function AccountBackupDialog({ open, initialMode, onClose }: AccountBackupDialogProps) {

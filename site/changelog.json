@@ -1,5 +1,10 @@
 [
   {
+    "version": "2.2.5",
+    "title": "Check for updates from About",
+    "summary": "A manual update check. Settings → About now has a Check for updates action. It reads the latest published GitHub release and compares its version wit…"
+  },
+  {
     "version": "2.2.4",
     "title": "Open the latest release from the backup warning",
     "summary": "The newer-backup warning now has an action. A new Open the latest release link sits inside the warning and opens the project's latest GitHub release…"
