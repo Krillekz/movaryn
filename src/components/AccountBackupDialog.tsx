@@ -8,6 +8,7 @@ import {
 import { decryptBackup, encryptBackup, type BackupDocument } from '../lib/backup';
 import { exportWorkspaceSnapshot, importWorkspaceSnapshot } from '../lib/db';
 import { useApp } from '../store/useApp';
+import { APP_VERSION } from '../lib/appVersion';
 import { downloadJson, slugify } from '../lib/utils';
 import { Modal } from './ui/Modal';
 
@@ -15,6 +16,20 @@ interface AccountBackupDialogProps {
   open: boolean;
   initialMode: 'export' | 'import';
   onClose: () => void;
+}
+
+function isNewerVersion(candidate: string, current: string): boolean {
+  const parse = (value: string): number[] | null => {
+    const match = /^(\d+)\.(\d+)\.(\d+)/.exec(value);
+    return match ? [Number(match[1]), Number(match[2]), Number(match[3])] : null;
+  };
+  const next = parse(candidate);
+  const running = parse(current);
+  if (!next || !running) return false;
+  for (let index = 0; index < 3; index += 1) {
+    if (next[index] !== running[index]) return next[index] > running[index];
+  }
+  return false;
 }
 
 export function AccountBackupDialog({ open, initialMode, onClose }: AccountBackupDialogProps) {
@@ -156,6 +171,9 @@ export function AccountBackupDialog({ open, initialMode, onClose }: AccountBacku
     .charAt(0)
     .toUpperCase();
   const backupDate = pendingBackup ? new Date(pendingBackup.exportedAt).toLocaleDateString() : '';
+  const backupIsNewer = pendingBackup
+    ? isNewerVersion(pendingBackup.appVersion, APP_VERSION)
+    : false;
   const backupStats = backupWorkspace
     ? [
         { label: 'Chats', value: backupWorkspace.conversations.length },
@@ -311,6 +329,14 @@ export function AccountBackupDialog({ open, initialMode, onClose }: AccountBacku
               account with this name and opens its workspace; the current workspace stays open until the
               new account finishes loading.
             </p>
+
+            {backupIsNewer ? (
+              <p className="rounded-lg border border-warn/30 bg-warn/10 px-3 py-2 text-[11.5px] leading-relaxed text-warn">
+                This backup was created by Movaryn {pendingBackup.appVersion}, which is newer than this
+                installation ({APP_VERSION}). Update Movaryn before restoring if possible; newer fields
+                may otherwise be ignored.
+              </p>
+            ) : null}
 
             {usernameStatus === 'checking' ? (
               <p className="flex items-center gap-2 rounded-lg border border-line bg-panel px-3 py-2 text-[11.5px] text-ink-muted">

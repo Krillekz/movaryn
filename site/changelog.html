@@ -65,11 +65,11 @@
     <main id="main">
       <section class="log-hero">
         <div class="shell">
-          <p class="eyebrow"><span class="dot"></span> 27 releases</p>
+          <p class="eyebrow"><span class="dot"></span> 28 releases</p>
           <h1>Update log</h1>
           <p>
             What changed in every Movaryn build, newest first. The newest release is
-            <strong>2.2.2</strong> — Check the restore username against every account.
+            <strong>2.2.3</strong> — Warn when a backup is from a newer Movaryn.
           </p>
         </div>
       </section>
@@ -78,6 +78,12 @@
         <aside class="log-index">
           <p>All releases</p>
           <ol>
+        <li>
+          <a href="#v2.2.3">
+            2.2.3
+            <small>Warn when a backup is from a newer Movaryn</small>
+          </a>
+        </li>
         <li>
           <a href="#v2.2.2">
             2.2.2
@@ -244,11 +250,31 @@
         </aside>
 
         <section class="log-entries" aria-label="Release notes">
+      <article class="log-entry" id="v2.2.3">
+        <header class="log-entry-header">
+          <h2>2.2.3</h2>
+          <span class="log-title">Warn when a backup is from a newer Movaryn</span>
+          <span class="log-latest">Latest</span>
+        </header>
+        <ul>
+          <li><strong>Version-aware restore preview.</strong> The preview compares the Movaryn version that created the backup with the version currently running and shows a warning when the backup is newer.</li>
+          <li><strong>The warning is honest but not a block.</strong> Restore stays available, because the backup may still be usable, but the preview recommends updating first and says newer fields may otherwise be ignored.</li>
+          <li><strong>No false alarms for older or unreadable versions.</strong> Older backups restore without a warning, and a version that cannot be parsed is treated as unknown rather than newer.</li>
+        </ul>
+        <p>### Notes</p>
+        <ul>
+          <li>The comparison is a numeric major.minor.patch check. Development builds report their real build version, so a local build can legitimately be older than the backup it is inspecting.</li>
+          <li>Encrypted backups remain local files; this release adds no network request beyond the existing account-service username check.</li>
+        </ul>
+        <a class="log-release-link" href="https://github.com/Krillekz/movaryn/releases/tag/v2.2.3">
+          Release notes on GitHub <span aria-hidden="true">→</span>
+        </a>
+      </article>
+
       <article class="log-entry" id="v2.2.2">
         <header class="log-entry-header">
           <h2>2.2.2</h2>
           <span class="log-title">Check the restore username against every account</span>
-          <span class="log-latest">Latest</span>
         </header>
         <ul>
           <li><strong>The restore preview now checks the whole installation.</strong> After unlocking a backup, Movaryn asks the local account service whether the backup's username is already in use by any account, not just the one currently signed in.</li>

@@ -1,5 +1,21 @@
 # Update log
 
+## 2.2.3 — Warn when a backup is from a newer Movaryn
+
+- **Version-aware restore preview.** The preview compares the Movaryn version that created the backup
+  with the version currently running and shows a warning when the backup is newer.
+- **The warning is honest but not a block.** Restore stays available, because the backup may still be
+  usable, but the preview recommends updating first and says newer fields may otherwise be ignored.
+- **No false alarms for older or unreadable versions.** Older backups restore without a warning, and a
+  version that cannot be parsed is treated as unknown rather than newer.
+
+### Notes
+
+- The comparison is a numeric major.minor.patch check. Development builds report their real build
+  version, so a local build can legitimately be older than the backup it is inspecting.
+- Encrypted backups remain local files; this release adds no network request beyond the existing
+  account-service username check.
+
 ## 2.2.2 — Check the restore username against every account
 
 - **The restore preview now checks the whole installation.** After unlocking a backup, Movaryn asks

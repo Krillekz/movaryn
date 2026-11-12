@@ -1,5 +1,10 @@
 [
   {
+    "version": "2.2.3",
+    "title": "Warn when a backup is from a newer Movaryn",
+    "summary": "Version-aware restore preview. The preview compares the Movaryn version that created the backup with the version currently running and shows a warnin…"
+  },
+  {
     "version": "2.2.2",
     "title": "Check the restore username against every account",
     "summary": "The restore preview now checks the whole installation. After unlocking a backup, Movaryn asks the local account service whether the backup's username…"
