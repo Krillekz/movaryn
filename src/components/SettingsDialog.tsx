@@ -37,6 +37,7 @@ import { CHANGELOG_URL, LATEST_RELEASE_URL, ROADMAP_URL, openExternal } from '..
 import { fetchLatestRelease, type LatestRelease } from '../lib/updates';
 import { cx } from '../lib/utils';
 import { Modal } from './ui/Modal';
+import { WorkspaceHousekeeping } from './WorkspaceHousekeeping';
 
 const TABS: { id: SettingsTabId; label: string; icon: typeof Plug }[] = [
   { id: 'account', label: 'Account', icon: UserRound },
@@ -1085,6 +1086,7 @@ export function SettingsDialog() {
                   <li>Deleting a chat or project removes its record and its images.</li>
                 </ul>
               </section>
+              <WorkspaceHousekeeping />
               <section className="rounded-xl border border-line bg-panel px-3.5 py-3">
                 <h3 className="text-[12.5px] font-semibold text-ink">Sent to your provider</h3>
                 <ul className="mt-2 space-y-1.5 text-[11.5px] leading-relaxed text-ink-muted">

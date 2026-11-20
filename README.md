@@ -32,7 +32,9 @@ It is not a generic chatbot with a game skin:
 - **Local accounts with their own workspaces.** Create a username and password for this installation;
   the account lives in Movaryn's user-data folder, outside the install directory. Each account opens a
   separate local workspace, and guest chats can be copied in deliberately. Passwords are scrypt-hashed
-  and sessions are stored as hashes. This is not cloud sync, and there is no email recovery.
+  and sessions are stored as hashes. Settings → Data & privacy can scan for workspaces left behind by
+  deleted accounts, show what they hold and remove them. This is not cloud sync, and there is no email
+  recovery.
 - **Encrypted account backups.** Back up one account and its workspace into a single file encrypted in
   the browser with AES-GCM and a passphrase derived through PBKDF2. Restoring first previews the account
   name, checks that the username is unused by every local account, shows its chat, project, notebook
@@ -45,9 +47,10 @@ It is not a generic chatbot with a game skin:
 - **Layout and reply controls.** Settings → Layout & replies sets a Focus, Classic or Studio layout,
   reading width and message spacing across chat, composer and notebook, plus concise/balanced/detailed
   replies, prose/mixed/bullet formatting and optional design-choice explanations.
-- **A notebook for your sources.** Paste sources into local notebooks, ask grounded questions that cite
-  them, and generate a briefing, FAQ, timeline or study guide as a saved note. Sources leave the device
-  only when you ask. Open it from the sidebar, palette or `Ctrl/⌘ + Shift + N`.
+- **A notebook for your sources.** Paste sources or import `.txt`/`.md` files into local notebooks, ask
+  grounded questions that cite them, and generate a briefing, FAQ, timeline or study guide as a saved
+  note. Export the whole notebook — sources, notes and transcript — as one Markdown document. Sources
+  leave the device only when you ask. Open it from the sidebar, palette or `Ctrl/⌘ + Shift + N`.
 - **House rules.** Preferences set in Settings → Prompts travel with every chat, next to the project
   brief.
 - **A command palette.** Ctrl/⌘ K searches chats, projects and saved moves, and runs the app's
@@ -280,6 +283,7 @@ system: a project is a brief plus its outputs.
 │  │  ├─ Composer.tsx          auto-grow input, attachments, paste, drag & drop, stop
 │  │  ├─ ImageBriefDialog.tsx  structured image brief + prompt preview
 │  │  ├─ SettingsDialog.tsx    provider status, models, theme, data, about
+│  │  ├─ WorkspaceHousekeeping.tsx  scan and remove orphaned account workspaces
 │  │  ├─ ProjectDrawer.tsx     project brief, moves, art, references, chats
 │  │  └─ Welcome.tsx           starter cards
 │  ├─ store/useApp.ts          conversations, projects, settings, UI state (Zustand)

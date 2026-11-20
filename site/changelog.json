@@ -1,5 +1,10 @@
 [
   {
+    "version": "2.3.0",
+    "title": "Import sources, export notebooks, clean up old workspaces",
+    "summary": "Notebook file import. Add .txt, .md and .markdown files directly from the Sources header, one or several at a time, instead of copying and pasting. F…"
+  },
+  {
     "version": "2.2.6",
     "title": "Read the release notes before updating",
     "summary": "Release notes in the update card. When a newer release is available, Settings → About now shows a short plain-text excerpt of what changed instead of…"

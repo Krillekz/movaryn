@@ -107,16 +107,41 @@ export function activeWorkspaceOwner(): string | null {
   return currentOwnerId;
 }
 
+export interface AccountWorkspaceDatabase {
+  ownerId: string;
+  name: string;
+}
+
+/** Lists every account workspace database this browser profile can see. */
+export async function listAccountWorkspaceDatabases(): Promise<{
+  supported: boolean;
+  workspaces: AccountWorkspaceDatabase[];
+}> {
+  if (typeof indexedDB === 'undefined' || typeof indexedDB.databases !== 'function') {
+    return { supported: false, workspaces: [] };
+  }
+  try {
+    const databases = await indexedDB.databases();
+    const workspaces = databases
+      .map((database) => database.name ?? '')
+      .filter((name) => name.startsWith(ACCOUNT_DB_PREFIX) && name.length > ACCOUNT_DB_PREFIX.length)
+      .map((name) => ({ ownerId: name.slice(ACCOUNT_DB_PREFIX.length), name }));
+    return { supported: true, workspaces };
+  } catch {
+    return { supported: false, workspaces: [] };
+  }
+}
+
 /** Remove an account's database after its sign-in has been deleted. */
-export async function deleteWorkspaceDb(ownerId: string): Promise<void> {
+export async function deleteWorkspaceDb(ownerId: string): Promise<boolean> {
   const name = workspaceDbName(ownerId);
   if (name === currentDbName) await switchWorkspaceDb(null);
-  if (typeof indexedDB === 'undefined') return;
-  await new Promise<void>((resolve) => {
+  if (typeof indexedDB === 'undefined') return false;
+  return new Promise<boolean>((resolve) => {
     const request = indexedDB.deleteDatabase(name);
-    request.onsuccess = () => resolve();
-    request.onerror = () => resolve();
-    request.onblocked = () => resolve();
+    request.onsuccess = () => resolve(true);
+    request.onerror = () => resolve(false);
+    request.onblocked = () => resolve(false);
   });
 }
 

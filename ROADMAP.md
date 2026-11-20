@@ -4,9 +4,8 @@ A living document. Scope and order can change, and nothing here is a promise of 
 
 ## Now
 
-- **Notebook file import** — add `.txt` and `.md` sources without copying and pasting.
-- **Export a notebook** — download its sources, notes and transcript as one readable document.
-- **Workspace housekeeping** — make it easier to see and remove the data left by deleted accounts.
+Nothing is in progress right now. 2.3.0 completed the previous Now column; the next planned items are
+listed under Next.
 
 ## Next
 
@@ -24,6 +23,10 @@ A living document. Scope and order can change, and nothing here is a promise of 
 
 ## Shipped
 
+- **2.3.0** — notebook import from `.txt`/`.md` files, one-file notebook export, and workspace
+  housekeeping for data left by deleted accounts. [Update log](changelog.html#v2.3.0)
+- **2.2.5–2.2.6** — a manual update check in About, with the latest release notes shown before opening
+  the download page. [Update log](changelog.html#v2.2.6)
 - **2.2.0** — account-scoped workspaces, guest-workspace migration, encrypted account backup and
   restore, six curated looks and a compact sidebar. [Update log](changelog.html#v2.2.0)
 - **2.1.0** — durable local accounts with password sign-in, profile and security controls, plus a

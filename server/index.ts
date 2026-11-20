@@ -19,6 +19,7 @@ import {
   loginAccount,
   importAccount,
   isUsernameAvailable,
+  listAccountWorkspaceOwners,
   logoutAccount,
   registerAccount,
   updateAccountProfile,
@@ -269,6 +270,12 @@ app.post('/api/account/restore-check', authRateLimit, async (req: Request, res: 
   const available = await isUsernameAvailable({ username: req.body?.username });
   res.setHeader('Cache-Control', 'no-store');
   res.json({ available });
+});
+
+app.get('/api/account/workspace-owners', authRateLimit, async (_req: Request, res: Response) => {
+  const owners = await listAccountWorkspaceOwners();
+  res.setHeader('Cache-Control', 'no-store');
+  res.json({ owners });
 });
 
 app.post('/api/account/password', authRateLimit, async (req: Request, res: Response) => {

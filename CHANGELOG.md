@@ -1,5 +1,31 @@
 # Update log
 
+## 2.3.0 — Import sources, export notebooks, clean up old workspaces
+
+- **Notebook file import.** Add `.txt`, `.md` and `.markdown` files directly from the Sources header,
+  one or several at a time, instead of copying and pasting. Files stay on the device, use the filename
+  as the source title, and are checked against the existing 20,000-character source limit. Files that
+  are too long, empty or unreadable are skipped with a clear reason.
+- **One-file notebook export.** The download action beside the notebook title creates a single readable
+  Markdown document containing the sources with their reference URLs, all studio notes and the full
+  question-and-answer transcript. It includes the notebook title, export version and timestamps.
+- **Workspace housekeeping.** Settings → Data & privacy can now compare the account workspaces stored in
+  IndexedDB with the local accounts that still exist. Workspaces left behind by an interrupted deletion
+  or a changed accounts file are listed with their chat, project and notebook counts, and can be removed
+  one at a time or together.
+- **Live accounts are protected.** A workspace is only offered for removal when the account service
+  confirms that no local sign-in owns it. The active workspace is excluded as a second safeguard, and a
+  deletion blocked by another open tab is reported instead of being counted as successful.
+
+### Notes
+
+- Import and export never call a provider. Notebook files are read locally, and the exported Markdown
+  is downloaded straight from the app.
+- Housekeeping asks the local account service for account IDs only — no usernames, password hashes or
+  session tokens — and performs no network request outside the local Movaryn API.
+- Workspace removal is permanent. The confirmation states how many chats, projects and notebooks will
+  be deleted before anything is removed.
+
 ## 2.2.6 — Read the release notes before updating
 
 - **Release notes in the update card.** When a newer release is available, Settings → About now shows

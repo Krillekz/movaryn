@@ -1,15 +1,18 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import {
   BookOpen,
+  Download,
   FileText,
   GraduationCap,
   History,
   Link2,
   ListChecks,
+  Loader2,
   Plus,
   Send,
   Square,
   Trash2,
+  Upload,
 } from 'lucide-react';
 import type { NotebookNoteKind } from '../../shared/types';
 import { useApp } from '../store/useApp';
@@ -19,6 +22,8 @@ import {
   generateNotebookNote,
   stopNotebook,
 } from '../lib/notebookEngine';
+import { readNotebookFiles } from '../lib/notebookImport';
+import { exportNotebook } from '../lib/notebookExport';
 import { cx, formatTime } from '../lib/utils';
 import { Markdown } from './Markdown';
 import { Modal } from './ui/Modal';
@@ -46,6 +51,7 @@ export function NotebookDialog() {
   const removeNotebookSource = useApp((state) => state.removeNotebookSource);
   const removeNotebookNote = useApp((state) => state.removeNotebookNote);
   const requestConfirm = useApp((state) => state.requestConfirm);
+  const pushToast = useApp((state) => state.pushToast);
 
   const notebook = activeNotebookId ? notebooks[activeNotebookId] : undefined;
   const list = useMemo(
@@ -59,7 +65,9 @@ export function NotebookDialog() {
   const [sourceUrl, setSourceUrl] = useState('');
   const [sourceText, setSourceText] = useState('');
   const [question, setQuestion] = useState('');
+  const [importing, setImporting] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const busy = Boolean(notebook?.messages.some((message) => message.status === 'streaming'));
   const lastMessage = notebook?.messages[notebook.messages.length - 1];
@@ -98,6 +106,28 @@ export function NotebookDialog() {
     setSourceUrl('');
     setSourceText('');
     setSourceOpen(false);
+  };
+
+  const importFiles = async (files: FileList | null) => {
+    if (!notebook || !files || files.length === 0) return;
+    setImporting(true);
+    try {
+      const result = await readNotebookFiles(Array.from(files));
+      for (const source of result.sources) addNotebookSource(notebook.id, source);
+      if (result.sources.length > 0) setSourceOpen(false);
+      const imported = `${result.sources.length} source${result.sources.length === 1 ? '' : 's'} imported.`;
+      const skipped = `${result.skipped.length} skipped: ${result.skipped
+        .slice(0, 2)
+        .map((item) => `${item.name} (${item.reason})`)
+        .join(', ')}${result.skipped.length > 2 ? ', …' : ''}.`;
+      if (result.sources.length > 0) pushToast(imported, 'success');
+      if (result.skipped.length > 0) pushToast(skipped, result.sources.length > 0 ? 'default' : 'danger');
+      if (result.sources.length === 0 && result.skipped.length === 0) pushToast('No files were selected.');
+    } catch {
+      pushToast('Those files could not be imported.', 'danger');
+    } finally {
+      setImporting(false);
+    }
   };
 
   const submit = () => {
@@ -141,6 +171,17 @@ export function NotebookDialog() {
               >
                 <Plus size={15} />
               </button>
+              {notebook ? (
+                <button
+                  type="button"
+                  className="icon-btn h-8 w-8 shrink-0"
+                  onClick={() => exportNotebook(notebook)}
+                  title="Export notebook"
+                  aria-label="Export notebook as Markdown"
+                >
+                  <Download size={14} />
+                </button>
+              ) : null}
               {notebook ? (
                 <button
                   type="button"
@@ -191,15 +232,40 @@ export function NotebookDialog() {
               <h3 className="text-[11px] font-semibold uppercase tracking-[0.14em] text-ink-faint">
                 Sources
               </h3>
-              <button
-                type="button"
-                className="icon-btn h-6 w-6"
-                onClick={() => setSourceOpen((value) => !value)}
-                title="Add a source"
-                aria-label="Add a source"
-              >
-                <Plus size={14} />
-              </button>
+              <div className="flex items-center gap-0.5">
+                {notebook ? (
+                  <button
+                    type="button"
+                    className="icon-btn h-6 w-6"
+                    onClick={() => fileInputRef.current?.click()}
+                    title="Import a .txt or .md file"
+                    aria-label="Import a .txt or .md source"
+                    disabled={importing}
+                  >
+                    {importing ? <Loader2 size={13} className="animate-spin" /> : <Upload size={13} />}
+                  </button>
+                ) : null}
+                <button
+                  type="button"
+                  className="icon-btn h-6 w-6"
+                  onClick={() => setSourceOpen((value) => !value)}
+                  title="Add a source"
+                  aria-label="Add a source"
+                >
+                  <Plus size={14} />
+                </button>
+              </div>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept=".txt,.md,.markdown,text/plain,text/markdown"
+                multiple
+                className="hidden"
+                onChange={(event) => {
+                  void importFiles(event.target.files);
+                  event.target.value = '';
+                }}
+              />
             </div>
 
             {notebook && notebook.sources.length > 0 ? (
@@ -266,7 +332,9 @@ export function NotebookDialog() {
                   />
                 </div>
                 <div className="mt-2 flex items-center justify-between gap-2">
-                  <span className="text-[10px] text-ink-faint">{sourceText.length}/20000</span>
+                  <span className="text-[10px] text-ink-faint">
+                    {sourceText.length}/20000 · import .txt or .md from the source header
+                  </span>
                   <button
                     type="button"
                     className="btn btn-primary h-7 text-[11.5px]"

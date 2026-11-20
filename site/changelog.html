@@ -65,11 +65,11 @@
     <main id="main">
       <section class="log-hero">
         <div class="shell">
-          <p class="eyebrow"><span class="dot"></span> 31 releases</p>
+          <p class="eyebrow"><span class="dot"></span> 32 releases</p>
           <h1>Update log</h1>
           <p>
             What changed in every Movaryn build, newest first. The newest release is
-            <strong>2.2.6</strong> — Read the release notes before updating.
+            <strong>2.3.0</strong> — Import sources, export notebooks, clean up old workspaces.
           </p>
         </div>
       </section>
@@ -78,6 +78,12 @@
         <aside class="log-index">
           <p>All releases</p>
           <ol>
+        <li>
+          <a href="#v2.3.0">
+            2.3.0
+            <small>Import sources, export notebooks, clean up old workspaces</small>
+          </a>
+        </li>
         <li>
           <a href="#v2.2.6">
             2.2.6
@@ -268,11 +274,33 @@
         </aside>
 
         <section class="log-entries" aria-label="Release notes">
+      <article class="log-entry" id="v2.3.0">
+        <header class="log-entry-header">
+          <h2>2.3.0</h2>
+          <span class="log-title">Import sources, export notebooks, clean up old workspaces</span>
+          <span class="log-latest">Latest</span>
+        </header>
+        <ul>
+          <li><strong>Notebook file import.</strong> Add <code>.txt</code>, <code>.md</code> and <code>.markdown</code> files directly from the Sources header, one or several at a time, instead of copying and pasting. Files stay on the device, use the filename as the source title, and are checked against the existing 20,000-character source limit. Files that are too long, empty or unreadable are skipped with a clear reason.</li>
+          <li><strong>One-file notebook export.</strong> The download action beside the notebook title creates a single readable Markdown document containing the sources with their reference URLs, all studio notes and the full question-and-answer transcript. It includes the notebook title, export version and timestamps.</li>
+          <li><strong>Workspace housekeeping.</strong> Settings → Data &amp; privacy can now compare the account workspaces stored in IndexedDB with the local accounts that still exist. Workspaces left behind by an interrupted deletion or a changed accounts file are listed with their chat, project and notebook counts, and can be removed one at a time or together.</li>
+          <li><strong>Live accounts are protected.</strong> A workspace is only offered for removal when the account service confirms that no local sign-in owns it. The active workspace is excluded as a second safeguard, and a deletion blocked by another open tab is reported instead of being counted as successful.</li>
+        </ul>
+        <p>### Notes</p>
+        <ul>
+          <li>Import and export never call a provider. Notebook files are read locally, and the exported Markdown is downloaded straight from the app.</li>
+          <li>Housekeeping asks the local account service for account IDs only — no usernames, password hashes or session tokens — and performs no network request outside the local Movaryn API.</li>
+          <li>Workspace removal is permanent. The confirmation states how many chats, projects and notebooks will be deleted before anything is removed.</li>
+        </ul>
+        <a class="log-release-link" href="https://github.com/Krillekz/movaryn/releases/tag/v2.3.0">
+          Release notes on GitHub <span aria-hidden="true">→</span>
+        </a>
+      </article>
+
       <article class="log-entry" id="v2.2.6">
         <header class="log-entry-header">
           <h2>2.2.6</h2>
           <span class="log-title">Read the release notes before updating</span>
-          <span class="log-latest">Latest</span>
         </header>
         <ul>
           <li><strong>Release notes in the update card.</strong> When a newer release is available, Settings → About now shows a short plain-text excerpt of what changed instead of only a version number.</li>

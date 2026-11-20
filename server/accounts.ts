@@ -402,6 +402,15 @@ export async function exportAccountCredentials(
   };
 }
 
+/**
+ * Account ids only. The renderer uses these to tell live workspaces apart from
+ * databases left behind when a local account was removed outside Movaryn.
+ */
+export async function listAccountWorkspaceOwners(): Promise<string[]> {
+  const file = await load();
+  return file.accounts.map((account) => account.id);
+}
+
 export async function isUsernameAvailable(input: { username?: unknown }): Promise<boolean> {
   const username = normalUsername(input.username);
   const file = await load();

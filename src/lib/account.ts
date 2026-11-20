@@ -141,6 +141,13 @@ export async function exportLocalAccount(password: string): Promise<AccountCrede
   return result.account;
 }
 
+export async function listAccountWorkspaceOwners(): Promise<string[]> {
+  const result = await request<{ owners?: unknown }>('/api/account/workspace-owners');
+  return Array.isArray(result.owners)
+    ? result.owners.filter((owner): owner is string => typeof owner === 'string' && owner.length > 0)
+    : [];
+}
+
 export async function isLocalUsernameAvailable(username: string): Promise<boolean> {
   const result = await request<{ available: boolean }>('/api/account/restore-check', {
     method: 'POST',
